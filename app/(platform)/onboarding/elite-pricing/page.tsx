@@ -47,8 +47,8 @@ function regionPricing(region: string | null) {
   const table: Record<string, { label: string; price: string; discount: string; currencyLabel: string; isSpecial?: boolean }> = {
     "usa": { label: "USA", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
     "other": { label: "Other", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
-    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 199/mo", currencyLabel: "BRL" },
-    "puc-angels": { label: "PUC angels (Participants)", price: "BRL 299/mo", discount: "BRL 159/mo", currencyLabel: "BRL", isSpecial: true },
+    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 49,90/mo", currencyLabel: "BRL" },
+    "puc-angels": { label: "PUC angels (Participants)", price: "BRL 299/mo", discount: "BRL 39,90/mo", currencyLabel: "BRL", isSpecial: true },
     "europe": { label: "Europe", price: "EUR 199/mo", discount: "EUR 99/mo", currencyLabel: "EUR" },
     "india": { label: "India", price: "INR 8000/mo", discount: "INR 4000/mo", currencyLabel: "INR" },
     "australia": { label: "Australia", price: "AUD 199/mo", discount: "AUD 99/mo", currencyLabel: "AUD" },
@@ -203,20 +203,20 @@ function PricingContent() {
         <h3 className="font-semibold mb-3">What you get</h3>
         <ul className="list-disc pl-5 text-sm space-y-1">
           <li>100 Engagements per 1 post per 1 working day</li>
-          <li>10 comments</li>
-          <li>20 saves</li>
+          {/* <li>10 comments</li>
+          <li>20 saves</li> */}
           <li>1 Account manager talking to you via WhatsApp</li>
           <li>Access to dashboard (including keeping your SSI Linkedin points in a graphic to check your growth)</li>
-          <li>Targeted Location & Market Profile</li>
+          {/* <li>Targeted Location & Market Profile</li> */}
         </ul>
         {pricing.isSpecial && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 italic">
             30% of your fee will be donated to PUC angels so they can help build a better world through education in Brazil.
           </div>
         )}
-        <p className="text-sm text-ic-subtext mt-3">
+        {/* <p className="text-sm text-ic-subtext mt-3">
           Prices vary by market. See details at <a className="text-ic-accent underline" href="https://www.viralmind.me/#plans" target="_blank">ViralMind Plans</a>.
-        </p>
+        </p> */}
         <p className="text-sm text-ic-subtext mt-2 italic">
           &gt; If you want more interactions or more posts per day talk to us about special plans.
         </p>

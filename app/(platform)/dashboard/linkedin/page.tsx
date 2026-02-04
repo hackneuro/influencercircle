@@ -67,17 +67,17 @@ function LinkedinDashboardContent() {
             Turn on Exec-Radar
           </button>
           {activePopup === 'radar' && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg z-50 text-center shadow-xl animate-in fade-in zoom-in duration-200">
-              <button 
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg z-50 text-center shadow-xl animate-in fade-in zoom-in duration-200">
+                <button 
                   onClick={(e) => { e.stopPropagation(); setActivePopup(null); }}
                   className="absolute -top-2 -right-2 bg-white text-slate-900 rounded-full w-5 h-5 flex items-center justify-center font-bold border border-slate-200 shadow-sm hover:bg-slate-100"
                 >
                   ×
                 </button>
-              monitor target profiles that are important to your market/ executive carreer and engage smartly with post  to increase followers and your name as an influencer in the target market/ location
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
-            </div>
-          )}
+                Create content feature is coming soon!
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
+              </div>
+            )}
         </div>
         <div className="flex-1 flex justify-center md:justify-end items-center">
           <UnlogLinkedinButton />

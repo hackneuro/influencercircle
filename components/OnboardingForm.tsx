@@ -488,7 +488,7 @@ export default function OnboardingForm() {
       // if (!connections.whatsapp) newErrors.whatsapp_connection = "Please login to your WhatsApp account";
     }
     if (s === 4) {
-      if (plan === "elite" && !region) newErrors.region = "Please select your target region";
+      if (!region) newErrors.region = "Please select your target region";
       if (!data.disclaimer_accepted) newErrors.disclaimerStatus = "You must accept the contact authorization";
     }
     setErrors(newErrors);
@@ -1361,19 +1361,18 @@ export default function OnboardingForm() {
                 className={`relative card p-6 text-left border-2 transition-all ${plan === "member" ? "border-blue-600 bg-blue-50/30" : "border-slate-100"}`}>
                 {plan === "member" && <CheckCircle className="absolute top-4 right-4 h-5 w-5 text-blue-600" />}
                 <h4 className="font-bold text-slate-900 text-lg">Member Plan</h4>
-                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Boost your organic reach with 50 likes per post, 1 post every working day.</p>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Boost your organic reach with 30 engagements per post, 1 post every working day.</p>
               </button>
-              
+
               <button type="button" onClick={() => setPlan("elite")}
                 className={`relative card p-6 text-left border-2 transition-all ${plan === "elite" ? "border-blue-600 bg-blue-50/30" : "border-slate-100"}`}>
                 {plan === "elite" && <CheckCircle className="absolute top-4 right-4 h-5 w-5 text-blue-600" />}
                 <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">Elite Tier <CreditCard className="h-4 w-4 text-blue-600 text-sm" /></h4>
-                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Full acceleration: 100+ likes, comments, saves, and personal WhatsApp Manager.</p>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Full acceleration: 50 engagements, {/* comments, saves, */} and personal WhatsApp Manager.</p>
               </button>
             </div>
 
-            {plan === "elite" && (
-              <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
                 <label className="text-sm font-semibold text-slate-700 mb-2 block">Choose your target market region</label>
                 <select className={inputClass("region") + " w-full"} value={region}
                   onChange={(e) => {
@@ -1396,6 +1395,16 @@ export default function OnboardingForm() {
                   <option value="other">Other</option>
                 </select>
                 <InputError name="region" />
+              </div>
+
+            {plan === "elite" && (
+              <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                <h4 className="font-bold text-blue-900 mb-2">Elite Plan Benefits</h4>
+                <ul className="list-disc list-inside text-sm text-blue-800 space-y-1">
+                  <li>Priority support via WhatsApp</li>
+                  <li>Advanced analytics and reporting</li>
+                  <li>Dedicated account manager</li>
+                </ul>
               </div>
             )}
 

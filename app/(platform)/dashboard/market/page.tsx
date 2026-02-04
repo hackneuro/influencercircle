@@ -123,6 +123,12 @@ export default function MarketPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg">
+                <p className="font-semibold">Funcionalidade não disponível para sua região.</p>
+            </div>
+            {/* Temporarily disabled per region lock */}
+            {false && (
+                <>
             {/* Header section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
@@ -436,9 +442,11 @@ export default function MarketPage() {
                     </button>
                 </div>
             )}
+                </>
+            )}
 
             {/* Selection Bar */}
-            {selectedProfiles.length > 0 && (
+            {false && selectedProfiles.length > 0 && (
                 <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-1px_rgba(0,0,0,0.1)] p-4 z-50 animate-in slide-in-from-bottom-full duration-300">
                     <div className="max-w-7xl mx-auto flex flex-col xl:flex-row items-center justify-between gap-6">
                         <div className="flex flex-col md:flex-row items-center gap-6 flex-1">

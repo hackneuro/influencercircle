@@ -202,7 +202,7 @@ function PricingContent() {
       <section className="card p-6">
         <h3 className="font-semibold mb-3">What you get</h3>
         <ul className="list-disc pl-5 text-sm space-y-1">
-          <li>100 Engagements per 1 post per 1 working day</li>
+          <li>50 Engagements per 1 post per 1 working day</li>
           {/* <li>10 comments</li>
           <li>20 saves</li> */}
           <li>1 Account manager talking to you via WhatsApp</li>

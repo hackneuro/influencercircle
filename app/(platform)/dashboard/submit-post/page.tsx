@@ -332,15 +332,25 @@ export default function SubmitPostPage() {
         )}
       </section>
 
-      {/* Free Plan Section */}
-      <section className="card p-6 space-y-4 border-l-4 border-l-blue-500">
+      {/* Daily Submission Section */}
+      <section className={`card p-6 space-y-4 border-l-4 ${isElite ? "border-l-amber-500 bg-amber-50/10" : "border-l-blue-500"}`}>
         <div>
           <h2 className="text-lg font-semibold flex items-center gap-2">
-            Daily Free Engagement
-            <span className="text-xs font-normal px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Free Plan</span>
+            {isElite ? (
+              <>
+                <span className="text-amber-600">👑</span> Elite Daily Engagement
+              </>
+            ) : "Daily Free Engagement"}
+            
+            <span className={`text-xs font-normal px-2 py-0.5 rounded-full ${isElite ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-blue-100 text-blue-700"}`}>
+              {isElite ? "Elite Plan" : "Free Plan"}
+            </span>
           </h2>
           <p className="text-sm text-slate-600 mt-1">
-            Submit one post per day for free engagement. This limit resets every day at midnight (UTC-3).
+            {isElite 
+              ? "As an Elite member, submit your daily post here for prioritized engagement."
+              : "Submit one post per day for free engagement. This limit resets every day at midnight (UTC-3)."
+            }
           </p>
         </div>
 

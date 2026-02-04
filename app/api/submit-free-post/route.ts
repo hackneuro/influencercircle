@@ -33,6 +33,20 @@ export async function POST(req: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Get User Plan
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError) {
+      console.error("Error fetching user plan:", profileError);
+    }
+
+    const userPlan = profile?.plan || 'free';
+    const isElite = userPlan.toLowerCase() === 'elite';
+
     // Check Daily Limit (Reset at midnight UTC-3 / Sao Paulo)
     const now = new Date();
     // Shift to UTC-3
@@ -81,8 +95,8 @@ export async function POST(req: Request) {
         await resend.emails.send({
           from: process.env.RESEND_FROM_EMAIL || "no-reply@influencercircle.net",
           to: adminEmail,
-          subject: "New Free Post Submission",
-          text: `User ${user.email} submitted a new free post for engagement.\n\nPost URL: ${postUrl}\n\nTime: ${new Date().toLocaleString()}`
+          subject: `New ${isElite ? 'Elite' : 'Free'} Post Submission`,
+          text: `User ${user.email} (${userPlan} plan) submitted a new post for engagement.\n\nPost URL: ${postUrl}\n\nTime: ${new Date().toLocaleString()}`
         });
       } catch (emailError) {
         console.error("Failed to send admin email:", emailError);

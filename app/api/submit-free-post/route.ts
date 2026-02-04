@@ -44,7 +44,9 @@ export async function POST(req: Request) {
       console.error("Error fetching user plan:", profileError);
     }
 
-    const userPlan = profile?.plan || 'free';
+    // Robust plan detection
+    const rawPlan = profile?.plan;
+    const userPlan = rawPlan ? String(rawPlan).trim() : 'free';
     const isElite = userPlan.toLowerCase() === 'elite';
 
     // Check Daily Limit (Reset at midnight UTC-3 / Sao Paulo)
@@ -96,7 +98,7 @@ export async function POST(req: Request) {
           from: process.env.RESEND_FROM_EMAIL || "no-reply@influencercircle.net",
           to: adminEmail,
           subject: `New ${isElite ? 'Elite' : 'Free'} Post Submission`,
-          text: `User ${user.email} (${userPlan} plan) submitted a new post for engagement.\n\nPost URL: ${postUrl}\n\nTime: ${new Date().toLocaleString()}`
+          text: `User ${user.email} (Plan: "${userPlan}") submitted a new post for engagement.\n\nPost URL: ${postUrl}\n\nTime: ${new Date().toLocaleString()}`
         });
       } catch (emailError) {
         console.error("Failed to send admin email:", emailError);

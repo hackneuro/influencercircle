@@ -1,0 +1,906 @@
+﻿
+> influencercircle@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+node.exe : ÔÜá The 
+"middleware" file 
+convention is 
+deprecated. Please 
+use "proxy" instead. 
+Learn more: https://ne
+xtjs.org/docs/messages
+/middleware-to-proxy
+No linha:1 caractere:1
++ & "C:\Program Files\
+nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (ÔÜá The "m   
+ iddle...leware-to    
+-proxy:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack 
+build failed with 7 
+errors:
+./components/marketing
+/AboutUs.jsx:2:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m 
+[33mReact[39m 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+[31m[1m>[22m[39m[
+90m 2 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m 
+[33mAboutUs[39m({ 
+onNavigate }) {
+ [90m 5 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/AboutUs.jsx 
+[Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/AboutUs.jsx 
+[Client Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/BrandPortal.jsx:3:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m [33m
+React[39m[33m,[39m 
+{ useState } 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+ [90m 2 |[39m 
+[36mimport[39m { [3
+3mBriefcase[39m[33m,
+[39m [33mCheck[39m
+[33m,[39m [33mArrowL
+eft[39m[33m,[39m 
+[33mBuilding[39m } 
+[36mfrom[39m [32m'l
+ucide-react'[39m[33m
+;[39m
+[31m[1m>[22m[39m[
+90m 3 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mBrandPortal[39m({ 
+onBack }) {
+ [90m 6 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/BrandPortal.jsx 
+[Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/BrandPortal.jsx 
+[Client Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/CreatorPortal.jsx:3:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m [33m
+React[39m[33m,[39m 
+{ useState } 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+ [90m 2 |[39m 
+[36mimport[39m { [3
+3mShield[39m[33m,[3
+9m [33mCheck[39m[33
+m,[39m [33mX[39m[3
+3m,[39m [33mArrowLef
+t[39m[33m,[39m [33
+mAlertTriangle[39m[3
+3m,[39m [33mTrophy[
+39m[33m,[39m [33mCa
+mera[39m[33m,[39m 
+[33mStar[39m[33m,[3
+9m [33mTrendingUp[39
+m[33m,[39m [33mSear
+ch[39m[33m,[39m [3
+3mTarget[39m[33m,[3
+9m 
+[33mBuilding2[39m } 
+[36mfrom[39m [32m'l
+ucide-react'[39m[33m
+;[39m
+[31m[1m>[22m[39m[
+90m 3 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mCreatorPortal[39m({
+ onBack }) {
+ [90m 6 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/CreatorPortal.jsx
+ [Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/CreatorPortal.jsx
+ [Client Component 
+SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/Executives.jsx:3:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m 
+[33mReact[39m 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+ [90m 2 |[39m 
+[36mimport[39m { [3
+3mExternalLink[39m } 
+[36mfrom[39m [32m'l
+ucide-react'[39m[33m
+;[39m
+[31m[1m>[22m[39m[
+90m 3 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mExecutives[39m() {
+ [90m 6 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/Executives.jsx 
+[Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/Executives.jsx 
+[Client Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/Hero.jsx:3:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m [33m
+React[39m[33m,[39m 
+{ useState[33m,[39m 
+useEffect } 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+ [90m 2 |[39m 
+[36mimport[39m { [3
+3mCheckCircle[39m[33
+m,[39m 
+[33mPlay[39m } 
+[36mfrom[39m [32m'l
+ucide-react'[39m[33m
+;[39m
+[31m[1m>[22m[39m[
+90m 3 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m 
+[33mHero[39m() {
+ [90m 6 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/Hero.jsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/Hero.jsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/HowItWorks.jsx:2:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m 
+[33mReact[39m 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+[31m[1m>[22m[39m[
+90m 2 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mHowItWorks[39m({ 
+onNavigate }) {
+ [90m 5 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/HowItWorks.jsx 
+[Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/HowItWorks.jsx 
+[Client Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+./components/marketing
+/Philosophy.jsx:3:1
+Module not found: 
+Can't resolve 
+'../LanguageContext'
+[0m [90m 1 |[39m 
+[36mimport[39m 
+[33mReact[39m 
+[36mfrom[39m [32m'r
+eact'[39m[33m;[39m
+ [90m 2 |[39m 
+[36mimport[39m { [3
+3mCheckCircle[39m[33
+m,[39m [33mXCircle[
+39m[33m,[39m [33mZa
+p[39m[33m,[39m [33
+mHeart[39m[33m,[39m
+ [33mBookOpen[39m[3
+3m,[39m [33mRocket[
+39m[33m,[39m 
+[33mMonitor[39m } 
+[36mfrom[39m [32m'l
+ucide-react'[39m[33m
+;[39m
+[31m[1m>[22m[39m[
+90m 3 |[39m 
+[36mimport[39m { 
+useLanguage } 
+[36mfrom[39m [32m'.
+./LanguageContext'[39
+m[33m;[39m
+ [90m   |[39m [31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22
+m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m 
+[36mexport[39m 
+[36mdefault[39m 
+[36mfunction[39m [3
+3mPhilosophy[39m() {
+ [90m 6 |[39m     
+[36mconst[39m { t } 
+[33m=[39m useLanguag
+e()[33m;[39m[0m
+
+
+
+Import traces:
+  Client Component 
+Browser:
+    ./components/marke
+ting/Philosophy.jsx 
+[Client Component 
+Browser]
+    ./app/(marketing)/
+page.tsx [Client 
+Component Browser]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+  Client Component 
+SSR:
+    ./components/marke
+ting/Philosophy.jsx 
+[Client Component SSR]
+    ./app/(marketing)/
+page.tsx [Client 
+Component SSR]
+    ./app/(marketing)/
+page.tsx [Server 
+Component]
+
+https://nextjs.org/doc
+s/messages/module-not-
+found
+
+
+    at <unknown> (./co
+mponents/marketing/Abo
+utUs.jsx:2:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/Bra
+ndPortal.jsx:3:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/Cre
+atorPortal.jsx:3:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/Exe
+cutives.jsx:3:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/Her
+o.jsx:3:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/How
+ItWorks.jsx:2:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)
+    at <unknown> (./co
+mponents/marketing/Phi
+losophy.jsx:3:1)
+    at <unknown> (http
+s://nextjs.org/docs/me
+ssages/module-not-foun
+d)

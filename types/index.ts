@@ -1,0 +1,43 @@
+export type Profile = {
+  id: string;
+  username?: string;
+  name: string;
+  whatsapp: string;
+  email: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  linkedin_url?: string;
+  instagram_url?: string;
+  objective?: string;
+  market_objective?: string;
+  location_objective?: string;
+  average_content_price?: number;
+  about_yourself?: string;
+  plan?: "member" | "elite" | "advisor";
+  advisor_sub_choices?: string[];
+  influencer_channels?: string[];
+  student_level?: string[];
+  company_type?: string[];
+  investor_type?: string[];
+  executive_experience?: string[];
+  user_types?: string[];
+  region?: string;
+  disclaimer_accepted?: boolean;
+  is_visible?: boolean;
+  campaign_preference?: string;
+  social_cause_preference?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SsiHistory = {
+  id?: string;
+  user_id: string;
+  date: string;
+  total_ssi: number;
+  brand_score: number;
+  people_score: number;
+  insight_score: number;
+  relation_score: number;
+};

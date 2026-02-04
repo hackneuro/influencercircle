@@ -1,0 +1,38 @@
+{
+  "name": "influencercircle",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/auth-helpers-nextjs": "latest",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.91.1",
+    "@tailwindcss/postcss": "^4.1.18",
+    "autoprefixer": "latest",
+    "clsx": "latest",
+    "dotenv": "^17.2.3",
+    "framer-motion": "^12.27.5",
+    "lucide-react": "latest",
+    "next": "latest",
+    "postcss": "latest",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "resend": "latest",
+    "stripe": "^20.2.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tsx": "^4.21.0",
+    "typescript": "latest"
+  }
+}

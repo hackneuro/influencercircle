@@ -12,9 +12,9 @@ export default function Header() {
     const onNavigate = (view) => setCurrentView(view);
 
     const languages = [
-        { code: 'pt-br', flag: '🇧🇷', label: 'Português' },
-        { code: 'en', flag: '🇺🇸', label: 'English' },
-        { code: 'es-la', flag: '🇪🇸', label: 'Español' }
+        { code: 'pt-br', countryCode: 'br', label: 'Português' },
+        { code: 'en', countryCode: 'us', label: 'English' },
+        { code: 'es-la', countryCode: 'es', label: 'Español' }
     ];
 
     return (
@@ -81,9 +81,16 @@ export default function Header() {
                                 key={lang.code}
                                 onClick={() => setLanguage(lang.code)}
                                 title={lang.label}
-                                className={`text-2xl transition-all duration-300 hover:scale-125 ${language === lang.code ? 'scale-110 opacity-100' : 'opacity-50 hover:opacity-100'}`}
+                                className={`transition-all duration-300 hover:scale-125 ${language === lang.code ? 'scale-110 opacity-100 ring-2 ring-white/50 rounded-sm' : 'opacity-50 hover:opacity-100'}`}
                             >
-                                {lang.flag}
+                                <img
+                                    src={`https://flagcdn.com/w40/${lang.countryCode}.png`}
+                                    srcSet={`https://flagcdn.com/w80/${lang.countryCode}.png 2x`}
+                                    width="24"
+                                    height="16"
+                                    alt={lang.label}
+                                    className="block object-cover rounded-sm"
+                                />
                             </button>
                         ))}
                     </div>

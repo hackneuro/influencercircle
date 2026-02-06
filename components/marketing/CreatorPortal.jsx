@@ -113,6 +113,7 @@ export default function CreatorPortal({ onBack }) {
                     </div>
                 </div>
 
+                {/* 
                 <div className="p-8 md:p-12">
                     <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold mb-4">
                         {t('creatorPortal.step1')}
@@ -122,34 +123,28 @@ export default function CreatorPortal({ onBack }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-text-main">{t('creatorPortal.labels.name')}</label>
-                                {/* Added name="Full Name" */}
                                 <input name="Full Name" required type="text" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="John Doe" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-text-main">{t('creatorPortal.labels.email')}</label>
-                                {/* Added name="Email" */}
                                 <input name="Email" required type="email" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="john@example.com" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-text-main">{t('creatorPortal.labels.phone')}</label>
-                                {/* Added name="Phone" */}
                                 <input name="Phone" required type="tel" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="+1 (555) 000-0000" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-text-main">{t('creatorPortal.labels.linkedin')}</label>
-                                {/* Added name="LinkedIn Profile" */}
                                 <input name="LinkedIn Profile" required type="url" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="linkedin.com/in/..." />
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-text-main">{t('creatorPortal.labels.instagram')}</label>
-                            {/* Added name="Instagram Profile" */}
                             <input name="Instagram Profile" required type="url" className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="instagram.com/..." />
                             <p className="text-xs text-text-muted">{t('creatorPortal.labels.instagramHint')}</p>
                         </div>
 
-                        {/* The Guideline Gate */}
                         <div className="mt-8 p-6 bg-red-50 border border-red-100 rounded-xl space-y-4">
                             <div className="flex items-start gap-3">
                                 <Shield className="text-red-500 shrink-0 mt-1" />
@@ -188,6 +183,7 @@ export default function CreatorPortal({ onBack }) {
                         </p>
                     </form>
                 </div>
+                */}
             </div>
         </section>
     );

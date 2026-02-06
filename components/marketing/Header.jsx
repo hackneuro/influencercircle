@@ -65,12 +65,12 @@ export default function Header() {
                             >
                                 PLATFORM / APP
                             </Link>
-                            <button
-                                onClick={() => onNavigate('creator')}
+                            <Link
+                                href="/app"
                                 className="btn-primary py-2.5 px-6 text-sm shadow-lg shadow-blue-500/20"
                             >
                                 {t('header.joinCreator')}
-                            </button>
+                            </Link>
                         </div>
                     </div>
 
@@ -81,7 +81,7 @@ export default function Header() {
                                 key={lang.code}
                                 onClick={() => setLanguage(lang.code)}
                                 title={lang.label}
-                                className={`text-2xl transition-all duration-300 hover:scale-125 ${language === lang.code ? 'scale-110 filter brightness-0 invert opacity-100' : 'filter brightness-0 invert opacity-50 hover:opacity-100'}`}
+                                className={`text-2xl transition-all duration-300 hover:scale-125 ${language === lang.code ? 'scale-110 opacity-100' : 'opacity-50 hover:opacity-100'}`}
                             >
                                 {lang.flag}
                             </button>
@@ -130,12 +130,13 @@ export default function Header() {
                             >
                                 PLATFORM / APP
                             </Link>
-                            <button
-                                onClick={() => { onNavigate('creator'); setIsMenuOpen(false); }}
+                            <Link
+                                href="/app"
+                                onClick={() => setIsMenuOpen(false)}
                                 className="btn-primary w-full text-center"
                             >
                                 {t('header.joinCreator')}
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 )}

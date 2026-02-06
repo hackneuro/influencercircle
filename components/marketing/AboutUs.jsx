@@ -83,12 +83,12 @@ export default function AboutUs({ onNavigate }) {
                     <p className="mb-8 text-gray-300 max-w-2xl mx-auto">
                         {t('creatorPortal.intro')}
                     </p>
-                    <button
-                        onClick={() => onNavigate('creator')}
-                        className="btn-primary py-4 px-10 text-lg shadow-xl shadow-blue-500/20"
+                    <Link
+                        href="/app"
+                        className="btn-primary py-4 px-10 text-lg shadow-xl shadow-blue-500/20 inline-block"
                     >
                         {t('about.cta')}
-                    </button>
+                    </Link>
                 </section>
 
                 <footer className="pt-8 border-t text-center text-sm text-gray-400">

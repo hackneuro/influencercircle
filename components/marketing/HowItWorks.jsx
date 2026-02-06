@@ -107,12 +107,12 @@ export default function HowItWorks({ onNavigate }) {
                 </section>
 
                 <section className="text-center">
-                    <button
-                        onClick={() => onNavigate('creator')}
-                        className="btn-primary py-4 px-10 text-lg shadow-xl shadow-blue-500/20"
+                    <Link
+                        href="/app"
+                        className="btn-primary py-4 px-10 text-lg shadow-xl shadow-blue-500/20 inline-block"
                     >
                         {t('howItWorks.cta')}
-                    </button>
+                    </Link>
                 </section>
 
                 <footer className="pt-8 border-t text-center text-sm text-gray-400">

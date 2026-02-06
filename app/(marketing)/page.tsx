@@ -45,7 +45,7 @@ export default function MarketingPage() {
                     <>
                         <Hero />
                         <Philosophy />
-                        <Executives />
+                        {/* <Executives /> */}
                     </>
                 );
         }

@@ -49,8 +49,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Influencer Grid - HIDDEN FOR NOW */}
-      {false && (
+      {/* Influencer Grid - HIDDEN FOR NOW
       <section>
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Executives/ Influencers already in the Circle</h2>
@@ -58,7 +57,6 @@ export default function HomePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {displayedInfluencers.map(inf => (
           <Link href="/onboarding" key={inf.id} className="group relative bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col">
-            {/* Image Container */}
             <div className="relative aspect-square overflow-hidden shrink-0">
               <img
                 src={inf.image}
@@ -66,7 +64,6 @@ export default function HomePage() {
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               
-              {/* Top Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 {inf.verified && (
                   <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-slate-900 border border-slate-200/50 shadow-sm flex items-center gap-1 w-fit">
@@ -82,7 +79,6 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* PUC Angels Badge - Bottom & Transparent */}
               {inf.isPucAngel && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full px-4 flex justify-center z-10">
                   <span className="bg-black/30 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white border border-white/20 shadow-sm flex items-center gap-1 w-fit">
@@ -93,7 +89,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Info section */}
             <div className="p-5 space-y-4 flex-1 flex flex-col">
               <div className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm text-center">
                 View Profile
@@ -110,9 +105,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Platform Stats */}
               <div className="space-y-2">
-                {/* LinkedIn */}
                 <div className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
                   <div className="flex items-center gap-2">
                     <div className="bg-[#0077b5]/10 p-1.5 rounded-md">
@@ -131,26 +124,6 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Instagram */}
-                {/* <div className="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-[#E1306C]/10 p-1.5 rounded-md">
-                      <Instagram className="h-3.5 w-3.5 text-[#E1306C]" />
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Instagram</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 text-xs font-bold text-slate-900">
-                      <Users className="h-3 w-3 text-slate-400" />
-                      {inf.stats.instagram.followers}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs font-bold text-slate-900">
-                      <Heart className="h-3 w-3 text-red-400" />
-                      {inf.stats.instagram.engagement}
-                    </div>
-                  </div>
-                </div> */}
               </div>
 
               <div className="flex items-center gap-1 text-slate-400 text-xs font-medium pt-1">
@@ -170,7 +143,7 @@ export default function HomePage() {
         ))}
         </div>
       </section>
-      )}
+      */}
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="card p-6 border-l-4 border-blue-500">

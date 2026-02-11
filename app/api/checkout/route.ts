@@ -3,11 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
 // Initialize Stripe with the secret key from environment variables
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
-});
-
 export async function POST(req: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Missing STRIPE_SECRET_KEY");
+    return NextResponse.json({ error: "Configuration Error: Missing Stripe Key" }, { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-12-15.clover" as any,
+  });
+
   try {
     const body = await req.json();
     const { mode, priceId, serviceId, postUrl, successUrl, cancelUrl, region } = body;

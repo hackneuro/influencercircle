@@ -413,7 +413,7 @@ export default function OnboardingForm() {
     }
   };
 
-  const validateStep = (s: number) => {
+  const validateStepReturnErrors = (s: number) => {
     const newErrors: Record<string, string> = {};
     if (s === 1) {
       if (data.user_types.length === 0) newErrors.user_types = "Please select at least one role";
@@ -491,8 +491,14 @@ export default function OnboardingForm() {
       if (!region) newErrors.region = "Please select your target region";
       if (!data.disclaimer_accepted) newErrors.disclaimerStatus = "You must accept the contact authorization";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
+  };
+
+  const validateStep = (s: number) => {
+      // Validation wrapper
+      const errors = validateStepReturnErrors(s);
+      setErrors(errors);
+      return Object.keys(errors).length === 0;
   };
 
   const saveCurrentProgress = async () => {
@@ -540,20 +546,46 @@ export default function OnboardingForm() {
   };
 
   const next = async () => {
+    setMessage(null); // Clear previous messages
+    
+    // Helper to get error message list
+    const getErrorList = (errs: Record<string, string>) => {
+       const uniqueMessages = Array.from(new Set(Object.values(errs)));
+       if (uniqueMessages.length === 1) return uniqueMessages[0];
+       return "Please fix: " + uniqueMessages.join(", ");
+    };
+
     if (step === 1) {
-      if (validateStep(1)) {
+      // Validate step 1 specifically
+      const currentErrors = validateStepReturnErrors(1);
+      setErrors(currentErrors);
+      
+      if (Object.keys(currentErrors).length === 0) {
         await handleSignUpStep1();
+      } else {
+        setMessage(getErrorList(currentErrors));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       return;
     }
-    if (validateStep(step)) {
+    
+    // For other steps
+    const currentErrors = validateStepReturnErrors(step);
+    setErrors(currentErrors);
+    
+    if (Object.keys(currentErrors).length === 0) {
       try {
         await saveCurrentProgress();
         setStep((s) => Math.min(s + 1, 4));
         setErrors({});
+        window.scrollTo(0, 0);
       } catch (e) {
         setMessage("Failed to save progress. Please check your connection.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    } else {
+      setMessage(getErrorList(currentErrors));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
   const prev = () => {
@@ -655,55 +687,111 @@ export default function OnboardingForm() {
 
   const connectLinkedin = async () => {
     setIsConnectingLinkedin(true);
-    setMessage(null);
+    setMessage("Initializing connection...");
+    console.log("[LinkedIn] Starting connection process...");
+    
     try {
       // 1. Save progress first to ensure data is up to date
-      await saveCurrentProgress();
+      setMessage("Saving your profile data...");
+      console.log("[LinkedIn] Step 1: Saving progress...");
+      try {
+        await saveCurrentProgress();
+        console.log("[LinkedIn] Step 1: Save success.");
+      } catch (saveError) {
+        console.error("[LinkedIn] Save failed:", saveError);
+        // We continue even if save fails, but warn the user
+        // setMessage("Warning: Could not save recent changes, proceeding to connection...");
+      }
+
+      // OPTIMIZATION: Use pre-fetched link if available
+      if (generatedLink) {
+        console.log("[LinkedIn] Using pre-fetched LinkedIn link.");
+        setMessage(null);
+        window.open(generatedLink, '_blank');
+        setShowConfirmation(true);
+        setIsConnectingLinkedin(false);
+        return;
+      }
 
       // 2. Prepare data
+      setMessage("Preparing connection data...");
       const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
+      console.log("[LinkedIn] Step 2: Preparing data for", data.email);
       
-      // 3. Call integration API
-      const response = await fetch('/api/integration/linkedin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          name: data.name,
-          phone: finalPhone,
-        }),
-      });
+      // 3. Call integration API with timeout
+      setMessage("Contacting authentication server...");
+      console.log("[LinkedIn] Step 3: Fetching API...");
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+      let response;
+      try {
+        response = await fetch('/api/integration/linkedin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: data.email,
+            name: data.name,
+            phone: finalPhone,
+          }),
+          signal: controller.signal
+        });
+      } catch (fetchError: any) {
+        console.error("[LinkedIn] Fetch error:", fetchError);
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Connection timed out. The integration server is taking too long to respond.');
+        }
+        throw fetchError;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      console.log("[LinkedIn] Step 4: Response received", response.status);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.details || 'Failed to start LinkedIn connection process.');
+        console.error("[LinkedIn] Server error response:", errorData);
+        
+        // Differentiate between 504 (Gateway Timeout) and other errors
+        if (response.status === 504) {
+             throw new Error("Server Timeout: The link generation service is not responding. Please try again later.");
+        }
+        throw new Error(errorData.error || errorData.details || `Server Error (${response.status}): Failed to start LinkedIn connection process.`);
       }
 
       const result = await response.json();
+      console.log("[LinkedIn] Step 5: Result parsed", result);
       
       if (result.ok && result.link) {
-        // 4. Save link and show video
+        // 4. Save link and show modal
         setGeneratedLink(result.link);
-        setShowVideo(true);
-        // Message removed per user request
-        
-        // Start a safety timer in case video end isn't detected or user wants to skip after some time
-        // Video is approx 1:08, so we set a timer for 70 seconds as fallback or forced completion
-        setTimeout(() => {
-           setVideoEnded(true);
-        }, 70000); 
-
+        setMessage(null);
+        window.open(result.link, '_blank');
+        setShowConfirmation(true);
       } else {
-        throw new Error('Invalid response from integration service.');
+        throw new Error('Invalid response from integration service: Missing link.');
       }
 
     } catch (error: any) {
       console.error('LinkedIn Connection Error:', error);
-      setMessage(error.message || "Failed to connect LinkedIn. Please try again.");
+      let userMessage = error.message || "Failed to connect LinkedIn. Please try again.";
+      
+      // Make error message very clear for the user
+      if (userMessage.includes("time") || userMessage.includes("Time")) {
+         userMessage = "Connection Timeout: The external system is busy. Please try again in a few moments.";
+      }
+      
+      setMessage(`Error: ${userMessage}`);
+      
+      // Also scroll to top to show error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsConnectingLinkedin(false);
+      // If we are still "loading" from saveCurrentProgress, ensure it's off
+      setLoading(false);
     }
   };
 

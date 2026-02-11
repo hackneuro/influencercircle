@@ -18,6 +18,9 @@ export async function POST(request: Request) {
 
     console.log('[LinkedIn Integration] Requesting link for:', { email, name });
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s server-side timeout
+
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
@@ -30,7 +33,10 @@ export async function POST(request: Request) {
         phone, // Phone should be formatted as needed by the API (e.g., only digits)
         channel: 'linkedin',
       }),
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -50,10 +56,10 @@ export async function POST(request: Request) {
     console.error('[LinkedIn Integration] Internal Error:', error);
     
     // Check for fetch errors (timeout, connection refused)
-    if (error.cause?.code === 'UND_ERR_CONNECT_TIMEOUT' || error.cause?.code === 'ECONNREFUSED') {
+    if (error.name === 'AbortError' || error.cause?.code === 'UND_ERR_CONNECT_TIMEOUT' || error.cause?.code === 'ECONNREFUSED') {
        return NextResponse.json(
-        { error: 'Integration service unavailable (Timeout/Connection Refused)', details: error.message },
-        { status: 503 }
+        { error: 'Integration service unavailable (Timeout)', details: 'The external link generation service timed out.' },
+        { status: 504 }
       );
     }
 

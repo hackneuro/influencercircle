@@ -3,13 +3,18 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { handleEliteSubscriptionCompleted, handleStripeCheckoutCompleted } from "@/services/orderService";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-12-15.clover",
-});
-
 const secret = process.env.STRIPE_WEBHOOK_SECRET ? process.env.STRIPE_WEBHOOK_SECRET.trim() : "";
 
 export async function POST(req: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Missing STRIPE_SECRET_KEY");
+    return NextResponse.json({ error: "Configuration Error: Missing Stripe Key" }, { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-12-15.clover" as any,
+  });
+
   try {
     const body = await req.text();
     const signature = (await headers()).get("stripe-signature") as string;

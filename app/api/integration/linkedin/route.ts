@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     console.log('[LinkedIn Integration] Requesting link for:', { email, name });
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s server-side timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s server-side timeout
 
     const response = await fetch(apiUrl, {
       method: 'POST',

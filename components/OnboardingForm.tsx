@@ -744,7 +744,7 @@ export default function OnboardingForm() {
       console.log("[LinkedIn] Step 3: Fetching API...");
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
       let response;
       try {
@@ -804,9 +804,22 @@ export default function OnboardingForm() {
       }
 
     } catch (error: any) {
-      // Close the popup if it was opened and we encountered an error
+      // Do NOT close the popup, instead show the error there so the user knows what happened
       if (popupWindow) {
-          popupWindow.close();
+          popupWindow.document.body.innerHTML = `
+            <div style="font-family: system-ui, sans-serif; text-align: center; padding: 40px; color: #333;">
+                <div style="color: #ef4444; margin-bottom: 20px;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 style="margin-bottom: 10px;">Connection Failed</h3>
+                <p style="color: #666; margin-bottom: 20px;">${error.message || "An unknown error occurred"}</p>
+                <button onclick="window.close()" style="padding: 10px 20px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer;">Close Window</button>
+            </div>
+          `;
       }
 
       console.error('LinkedIn Connection Error:', error);

@@ -690,6 +690,37 @@ export default function OnboardingForm() {
     setMessage("Initializing connection...");
     console.log("[LinkedIn] Starting connection process...");
     
+    // OPTIMIZATION: Use pre-fetched link if available
+    if (generatedLink) {
+      console.log("[LinkedIn] Using pre-fetched LinkedIn link.");
+      setMessage(null);
+      window.open(generatedLink, '_blank');
+      setShowConfirmation(true);
+      setIsConnectingLinkedin(false);
+      return;
+    }
+
+    // Open popup immediately to prevent blocking
+    const popupWindow = window.open('', '_blank');
+    if (popupWindow) {
+        popupWindow.document.write(`
+            <html>
+                <head><title>Connecting...</title></head>
+                <body style="font-family: system-ui, -apple-system, sans-serif; text-align: center; padding-top: 50px; color: #333;">
+                    <div style="margin-bottom: 20px;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                            <rect x="2" y="9" width="4" height="12"></rect>
+                            <circle cx="4" cy="4" r="2"></circle>
+                        </svg>
+                    </div>
+                    <p style="font-size: 18px; font-weight: 500;">Connecting to LinkedIn...</p>
+                    <p style="color: #666;">Please wait while we secure your connection.</p>
+                </body>
+            </html>
+        `);
+    }
+
     try {
       // 1. Save progress first to ensure data is up to date
       setMessage("Saving your profile data...");
@@ -701,16 +732,6 @@ export default function OnboardingForm() {
         console.error("[LinkedIn] Save failed:", saveError);
         // We continue even if save fails, but warn the user
         // setMessage("Warning: Could not save recent changes, proceeding to connection...");
-      }
-
-      // OPTIMIZATION: Use pre-fetched link if available
-      if (generatedLink) {
-        console.log("[LinkedIn] Using pre-fetched LinkedIn link.");
-        setMessage(null);
-        window.open(generatedLink, '_blank');
-        setShowConfirmation(true);
-        setIsConnectingLinkedin(false);
-        return;
       }
 
       // 2. Prepare data
@@ -769,13 +790,25 @@ export default function OnboardingForm() {
         // 4. Save link and show modal
         setGeneratedLink(result.link);
         setMessage(null);
-        window.open(result.link, '_blank');
+        
+        if (popupWindow) {
+            popupWindow.location.href = result.link;
+        } else {
+            // Fallback: try to open new window if original failed (might be blocked)
+            window.open(result.link, '_blank');
+        }
+        
         setShowConfirmation(true);
       } else {
         throw new Error('Invalid response from integration service: Missing link.');
       }
 
     } catch (error: any) {
+      // Close the popup if it was opened and we encountered an error
+      if (popupWindow) {
+          popupWindow.close();
+      }
+
       console.error('LinkedIn Connection Error:', error);
       let userMessage = error.message || "Failed to connect LinkedIn. Please try again.";
       

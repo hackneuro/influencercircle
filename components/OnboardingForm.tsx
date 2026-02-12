@@ -773,15 +773,21 @@ export default function OnboardingForm() {
       console.log("[LinkedIn] Step 4: Response received", response.status);
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("[LinkedIn] Server error response:", errorData);
-        
-        // Differentiate between 504 (Gateway Timeout) and other errors
-        if (response.status === 504) {
-             throw new Error("Server Timeout: The link generation service is not responding. Please try again later.");
-        }
-        throw new Error(errorData.error || errorData.details || `Server Error (${response.status}): Failed to start LinkedIn connection process.`);
-      }
+                const errorData = await response.json().catch(() => ({}));
+                console.error("[LinkedIn] Server error response:", errorData);
+                
+                // Differentiate between 504 (Gateway Timeout) and other errors
+                if (response.status === 504) {
+                     throw new Error("Server Timeout: The link generation service is not responding. Please try again later.");
+                }
+                
+                // Combine error and details for better visibility
+                const errorMsg = errorData.error || "Unknown Error";
+                const detailsMsg = errorData.details || "";
+                const combinedMsg = detailsMsg ? `${errorMsg}: ${detailsMsg}` : errorMsg;
+
+                throw new Error(combinedMsg || `Server Error (${response.status}): Failed to start LinkedIn connection process.`);
+              }
 
       const result = await response.json();
       console.log("[LinkedIn] Step 5: Result parsed", result);

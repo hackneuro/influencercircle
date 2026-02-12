@@ -47,8 +47,8 @@ function regionPricing(region: string | null) {
   const table: Record<string, { label: string; price: string; discount: string; currencyLabel: string; isSpecial?: boolean }> = {
     "usa": { label: "USA", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
     "other": { label: "Other", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
-    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 49,90/mo", currencyLabel: "BRL" },
-    "puc-angels": { label: "PUC angels (Participants)", price: "BRL 299/mo", discount: "BRL 39,90/mo", currencyLabel: "BRL", isSpecial: true },
+    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 39,90/mo", currencyLabel: "BRL" },
+    "puc-angels": { label: "PUC angels (Participants)", price: "BRL 299/mo", discount: "BRL 29,90/mo", currencyLabel: "BRL", isSpecial: true },
     "europe": { label: "Europe", price: "EUR 199/mo", discount: "EUR 99/mo", currencyLabel: "EUR" },
     "india": { label: "India", price: "INR 8000/mo", discount: "INR 4000/mo", currencyLabel: "INR" },
     "australia": { label: "Australia", price: "AUD 199/mo", discount: "AUD 99/mo", currencyLabel: "AUD" },

@@ -1510,10 +1510,6 @@ export default function OnboardingForm() {
                 {plan === "member" && <CheckCircle className="absolute top-4 right-4 h-5 w-5 text-blue-600" />}
                 <h4 className="font-bold text-slate-900 text-lg">Member Plan</h4>
                 <p className="text-sm text-slate-500 mt-2 leading-relaxed">Boost your organic reach with <strong className="text-slate-700">25 engagements per post</strong>, 1 post every working day.</p>
-                <div className="mt-4 pt-4 border-t border-slate-200/60 space-y-1.5">
-                   <p className="text-xs font-semibold text-slate-600 bg-green-50 px-2 py-1 rounded w-fit border border-green-100">Special discount for PUC angels members/associates: <strong className="text-green-700">BRL 29,90/mo (PUC)</strong></p>
-                   <p className="text-xs font-semibold text-slate-600 bg-blue-50 px-2 py-1 rounded w-fit border border-blue-100">Discount for free users: <strong className="text-blue-700">BRL 39,90/mo (Plan Brazil)</strong></p>
-                </div>
               </button>
 
               <button type="button" onClick={() => setPlan("elite")}

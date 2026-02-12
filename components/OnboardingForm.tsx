@@ -576,12 +576,18 @@ export default function OnboardingForm() {
     if (Object.keys(currentErrors).length === 0) {
       try {
         await saveCurrentProgress();
-        setStep((s) => Math.min(s + 1, 4));
-        setErrors({});
-        window.scrollTo(0, 0);
+        // Add 3s delay as requested by user to ensure system stability
+        setLoading(true);
+        setTimeout(() => {
+            setStep((s) => Math.min(s + 1, 4));
+            setErrors({});
+            setLoading(false);
+            window.scrollTo(0, 0);
+        }, 3000);
       } catch (e) {
         setMessage("Failed to save progress. Please check your connection.");
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setLoading(false);
       }
     } else {
       setMessage(getErrorList(currentErrors));
@@ -694,14 +700,16 @@ export default function OnboardingForm() {
     if (generatedLink) {
       console.log("[LinkedIn] Using pre-fetched LinkedIn link.");
       setMessage(null);
-      window.open(generatedLink, '_blank');
+      // Open as popup with dimensions
+      window.open(generatedLink, 'linkedin_login', 'width=600,height=700,status=yes,scrollbars=yes');
       setShowConfirmation(true);
       setIsConnectingLinkedin(false);
       return;
     }
 
     // Open popup immediately to prevent blocking
-    const popupWindow = window.open('', '_blank');
+    // Use dimensions to force a new window (popup) instead of a tab
+    const popupWindow = window.open('', 'linkedin_login', 'width=600,height=700,status=yes,scrollbars=yes');
     if (popupWindow) {
         popupWindow.document.write(`
             <html>
@@ -801,7 +809,7 @@ export default function OnboardingForm() {
             popupWindow.location.href = result.link;
         } else {
             // Fallback: try to open new window if original failed (might be blocked)
-            window.open(result.link, '_blank');
+            window.open(result.link, 'linkedin_login', 'width=600,height=700,status=yes,scrollbars=yes');
         }
         
         setShowConfirmation(true);

@@ -1516,7 +1516,7 @@ export default function OnboardingForm() {
                 className={`relative card p-6 text-left border-2 transition-all ${plan === "elite" ? "border-blue-600 bg-blue-50/30" : "border-slate-100"}`}>
                 {plan === "elite" && <CheckCircle className="absolute top-4 right-4 h-5 w-5 text-blue-600" />}
                 <h4 className="font-bold text-slate-900 text-lg flex items-center gap-2">Elite Tier <CreditCard className="h-4 w-4 text-blue-600 text-sm" /></h4>
-                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Full acceleration: 50 engagements per post, 1 post every working day, {/* comments, saves, */} and personal WhatsApp Manager.</p>
+                <p className="text-sm text-slate-500 mt-2 leading-relaxed">Full acceleration: 50 engagements per post, 1 post every working day, {/* comments, saves, and personal WhatsApp Manager. */}</p>
               </button>
             </div>
 
@@ -1545,7 +1545,7 @@ export default function OnboardingForm() {
                 <InputError name="region" />
               </div>
 
-            {plan === "elite" && (
+            {/* {plan === "elite" && (
               <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
                 <h4 className="font-bold text-blue-900 mb-2">Elite Plan Benefits</h4>
                 <ul className="list-disc list-inside text-sm text-blue-800 space-y-1">
@@ -1554,7 +1554,7 @@ export default function OnboardingForm() {
                   <li>Dedicated account manager</li>
                 </ul>
               </div>
-            )}
+            )} */}
 
             <div className="flex flex-col gap-4">
               <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${data.disclaimer_accepted ? 'border-blue-200 bg-blue-50/20' : 'border-slate-100'}`}>

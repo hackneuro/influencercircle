@@ -205,7 +205,7 @@ function PricingContent() {
           <li>50 Engagements per 1 post per 1 working day</li>
           {/* <li>10 comments</li>
           <li>20 saves</li> */}
-          <li>1 Account manager talking to you via WhatsApp</li>
+          {/* <li>1 Account manager talking to you via WhatsApp</li> */}
           <li>Access to dashboard (including keeping your SSI Linkedin points in a graphic to check your growth)</li>
           {/* <li>Targeted Location & Market Profile</li> */}
         </ul>

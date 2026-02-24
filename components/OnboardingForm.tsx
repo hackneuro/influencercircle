@@ -72,7 +72,7 @@ export default function OnboardingForm() {
     const promise = new Promise<string>(async (resolve, reject) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout for prefetch
+        const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout for prefetch
         
         const response = await fetch('/api/integration/linkedin', {
           method: 'POST',
@@ -844,8 +844,8 @@ export default function OnboardingForm() {
       console.log("[LinkedIn] Step 3: Fetching API...");
       
       const controller = new AbortController();
-      // Increased timeout to 90s to match backend and give time for slow link generation
-      const timeoutId = setTimeout(() => controller.abort(), 90000); 
+      // Increased timeout to 180s to match backend and give time for slow link generation
+      const timeoutId = setTimeout(() => controller.abort(), 180000); 
 
       let response;
       try {

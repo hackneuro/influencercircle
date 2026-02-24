@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export const maxDuration = 60; // Allow up to 60s execution (Vercel Pro)
+export const maxDuration = 300; // Allow up to 300s execution (Vercel Pro Limit)
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
@@ -22,9 +22,9 @@ export async function POST(request: Request) {
     console.log('[LinkedIn Integration] Requesting link for:', { email, name });
 
     const controller = new AbortController();
-    // Increased timeout to 60s as requested by user (process takes ~1min)
-    // Note: Vercel Hobby plan has 10s limit, Pro has 60s. If on Hobby, this will still timeout at 10s.
-    const timeoutId = setTimeout(() => controller.abort(), 60000); 
+    // Increased timeout to 180s (3 mins) as requested by user (process takes ~1min)
+    // Note: Vercel Hobby plan has 10s limit, Pro has 300s.
+    const timeoutId = setTimeout(() => controller.abort(), 180000); 
 
     const response = await fetch(apiUrl, {
       method: 'POST',

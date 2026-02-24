@@ -19,7 +19,9 @@ export async function POST(request: Request) {
     console.log('[LinkedIn Integration] Requesting link for:', { email, name });
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s server-side timeout
+    // Increased timeout to 60s as requested by user (process takes ~1min)
+    // Note: Vercel Hobby plan has 10s limit, Pro has 60s. If on Hobby, this will still timeout at 10s.
+    const timeoutId = setTimeout(() => controller.abort(), 60000); 
 
     const response = await fetch(apiUrl, {
       method: 'POST',

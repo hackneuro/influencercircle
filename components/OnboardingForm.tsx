@@ -65,6 +65,42 @@ export default function OnboardingForm() {
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [prefetchPromise, setPrefetchPromise] = useState<Promise<string> | null>(null);
+
+  const startPrefetch = (email: string, name: string, phone: string) => {
+    console.log("[LinkedIn Prefetch] Starting background generation...");
+    const promise = new Promise<string>(async (resolve, reject) => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout for prefetch
+        
+        const response = await fetch('/api/integration/linkedin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, phone }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+           const err = await response.json();
+           throw new Error(err.error || "Prefetch failed");
+        }
+        const data = await response.json();
+        if (data.link) {
+           console.log("[LinkedIn Prefetch] Link ready:", data.link);
+           setGeneratedLink(data.link);
+           resolve(data.link);
+        } else {
+           throw new Error("No link returned");
+        }
+      } catch (e) {
+        console.error("[LinkedIn Prefetch] Error:", e);
+        reject(e);
+      }
+    });
+    setPrefetchPromise(promise);
+  };
 
   useEffect(() => {
     let player: any = null;
@@ -577,6 +613,12 @@ export default function OnboardingForm() {
     if (Object.keys(currentErrors).length === 0) {
       try {
         await saveCurrentProgress();
+        // Start prefetch immediately after Step 1 success
+        if (step === 1 && !generatedLink && !prefetchPromise) {
+            const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
+            startPrefetch(data.email, data.name, finalPhone);
+        }
+
         // Add 10s delay as requested by user to ensure system stability
         setLoading(true);
         setLoadingMessage("Estamos conectando em um local seguro...");
@@ -710,6 +752,22 @@ export default function OnboardingForm() {
       return;
     }
 
+    // If prefetch is in progress, wait for it
+    if (prefetchPromise) {
+        setMessage("Waiting for secure link generation (almost there)...");
+        try {
+            const link = await prefetchPromise;
+            setGeneratedLink(link);
+            window.open(link, 'linkedin_login', 'width=600,height=700,status=yes,scrollbars=yes');
+            setShowConfirmation(true);
+            setIsConnectingLinkedin(false);
+            return;
+        } catch (e) {
+            console.error("Prefetch failed, falling back to new request", e);
+            // Fall through to normal request
+        }
+    }
+
     // Open popup immediately to prevent blocking
     // Use dimensions to force a new window (popup) instead of a tab
     const popupWindow = window.open('', 'linkedin_login', 'width=600,height=700,status=yes,scrollbars=yes');
@@ -755,7 +813,8 @@ export default function OnboardingForm() {
       console.log("[LinkedIn] Step 3: Fetching API...");
       
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      // Increased timeout to 90s to match backend and give time for slow link generation
+      const timeoutId = setTimeout(() => controller.abort(), 90000); 
 
       let response;
       try {

@@ -149,7 +149,7 @@ export default function OnboardingForm() {
     let handle = localPart.replace(/[^a-z0-9._-]/g, "-").replace(/-+/g, "-");
     handle = handle.replace(/^[-_.]+|[-_.]+$/g, "");
     if (!handle) {
-      handle = "user";
+      handle = `user-${Math.random().toString(36).slice(2, 7)}`;
     }
     return handle;
   };
@@ -224,6 +224,10 @@ export default function OnboardingForm() {
             whatsapp: !!profile.whatsapp
           }));
 
+          // Restore Plan and Region states
+          if (profile.plan) setPlan(profile.plan as any);
+          if (profile.region) setRegion(profile.region);
+
           setData(prev => ({
             ...prev,
             name: profile.name || prev.name,
@@ -278,11 +282,14 @@ export default function OnboardingForm() {
     };
   }, [pollingId]);
 
-  const createProfileAfterAuth = async () => {
-    const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
-    const role = data.user_types.includes("influencer") ? "influencer" : "user";
-    
-    await upsertProfileFromOnboarding({
+  const saveCurrentProgress = async () => {
+    setLoading(true);
+    try {
+      const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
+      // Ensure we have at least 'user' role if nothing selected (fallback)
+      const role = data.user_types.includes("influencer") ? "influencer" : "user";
+
+      const payload = {
         username: deriveUsernameFromEmail(data.email.trim()),
         name: data.name,
         email: data.email,
@@ -297,9 +304,9 @@ export default function OnboardingForm() {
         location_objective: data.location_objective,
         average_content_price: data.average_content_price,
         about_yourself: data.about_yourself,
-        plan: data.plan,
-        region: region, // Save region state
-        user_types: data.user_types, // Save raw user types
+        plan: plan, 
+        region: region,
+        user_types: data.user_types,
         advisor_sub_choices: data.advisor_sub_choices,
         influencer_channels: data.influencer_channels,
         student_level: data.student_level,
@@ -311,7 +318,20 @@ export default function OnboardingForm() {
         campaign_preference: data.campaign_preference,
         social_cause_preference: data.social_cause_preference,
         role: role
-      });
+      };
+
+      console.log("[Onboarding] Saving progress payload:", payload);
+
+      const savedProfile = await upsertProfileFromOnboarding(payload);
+      
+      console.log("[Onboarding] Saved profile result:", savedProfile);
+      
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const startPolling = () => {
@@ -331,7 +351,7 @@ export default function OnboardingForm() {
            setPollingId(null);
            setIsVerifying(false);
            try {
-             await createProfileAfterAuth();
+             await saveCurrentProgress();
            } catch (e) {
              console.error("Failed to create profile during polling:", e);
            }
@@ -356,7 +376,7 @@ export default function OnboardingForm() {
             setPollingId(null);
             setIsVerifying(false);
             try {
-              await createProfileAfterAuth();
+              await saveCurrentProgress();
             } catch (e) {
               console.error("Failed to create profile during polling:", e);
             }
@@ -365,6 +385,25 @@ export default function OnboardingForm() {
       }
     }, 4000);
     setPollingId(id);
+  };
+
+  const transitionToNextStep = (currentStep: number) => {
+    // Start prefetch immediately after Step 1 success
+    if (currentStep === 1 && !generatedLink && !prefetchPromise) {
+        const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
+        startPrefetch(data.email, data.name, finalPhone);
+    }
+
+    // Add 10s delay as requested by user to ensure system stability
+    setLoading(true);
+    setLoadingMessage("Estamos conectando em um local seguro...");
+    setTimeout(() => {
+        setStep((s) => Math.min(s + 1, 4));
+        setErrors({});
+        setLoading(false);
+        setLoadingMessage(null);
+        window.scrollTo(0, 0);
+    }, 10000);
   };
 
   const handleSignUpStep1 = async () => {
@@ -391,13 +430,15 @@ export default function OnboardingForm() {
              console.log("[Onboarding] Existing session check:", { email: freshUser.email, isConfirmed, confirmedAt: freshUser.email_confirmed_at });
 
              if (isConfirmed || isOAuth) {
-                await createProfileAfterAuth();
-                setStep(2);
+                await saveCurrentProgress();
+                transitionToNextStep(1);
                 return;
              } else {
                 // User has session but NOT confirmed
                 setIsVerifying(true);
                 startPolling();
+                setLoading(false);
+                setAuthLoading(false);
                 return;
              }
           }
@@ -430,21 +471,24 @@ export default function OnboardingForm() {
       if (signUpData.user && !hasSession) {
         setIsVerifying(true);
         startPolling();
+        setLoading(false);
+        setAuthLoading(false);
       } 
       // If we got a session immediately
       else if (hasSession) {
         if (isConfirmed) {
-           await createProfileAfterAuth();
-           setStep(2);
+           await saveCurrentProgress();
+           transitionToNextStep(1);
         } else {
            // Got session but not confirmed -> "Allow unconfirmed sign in" is ON
            setIsVerifying(true);
            startPolling();
+           setLoading(false);
+           setAuthLoading(false);
         }
       }
     } catch (err: any) {
       setMessage(err.message);
-    } finally {
       setLoading(false);
       setAuthLoading(false);
     }
@@ -544,6 +588,8 @@ export default function OnboardingForm() {
       const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
       const role = data.user_types.includes("influencer") ? "influencer" : "user";
 
+      console.log("[Onboarding] Saving progress:", { step, ...data, plan, region });
+
       await upsertProfileFromOnboarding({
         username: deriveUsernameFromEmail(data.email.trim()),
         name: data.name,
@@ -559,7 +605,7 @@ export default function OnboardingForm() {
         location_objective: data.location_objective,
         average_content_price: data.average_content_price,
         about_yourself: data.about_yourself,
-        plan: data.plan,
+        plan: plan, // Use plan from state
         region: region, // Save region state
         user_types: data.user_types, // Save raw user types
         advisor_sub_choices: data.advisor_sub_choices,
@@ -613,22 +659,7 @@ export default function OnboardingForm() {
     if (Object.keys(currentErrors).length === 0) {
       try {
         await saveCurrentProgress();
-        // Start prefetch immediately after Step 1 success
-        if (step === 1 && !generatedLink && !prefetchPromise) {
-            const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
-            startPrefetch(data.email, data.name, finalPhone);
-        }
-
-        // Add 10s delay as requested by user to ensure system stability
-        setLoading(true);
-        setLoadingMessage("Estamos conectando em um local seguro...");
-        setTimeout(() => {
-            setStep((s) => Math.min(s + 1, 4));
-            setErrors({});
-            setLoading(false);
-            setLoadingMessage(null);
-            window.scrollTo(0, 0);
-        }, 10000);
+        transitionToNextStep(step);
       } catch (e) {
         setMessage("Failed to save progress. Please check your connection.");
         window.scrollTo({ top: 0, behavior: 'smooth' });

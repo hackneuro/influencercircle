@@ -90,7 +90,7 @@ export default function LoginForm() {
         <form onSubmit={mode === "login" ? handleLogin : handleReset} className="space-y-4">
           {mode === "login" && (
             <div className="space-y-4">
-              <button
+              {/* <button
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={loading}
@@ -124,7 +124,7 @@ export default function LoginForm() {
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-white text-slate-500">Ou entre com e-mail</span>
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 

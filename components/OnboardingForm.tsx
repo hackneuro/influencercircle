@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ArrowRight, CheckCircle, CreditCard, AlertCircle, Linkedin, Instagram, Phone, Briefcase, Mail, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle, CreditCard, AlertCircle, Linkedin, Instagram, Phone, Briefcase, Mail, Loader2, Lock } from "lucide-react";
 import type { Profile } from "@/types";
 import { useRouter } from "next/navigation";
 import { upsertProfileFromOnboarding, getMyProfile } from "@/services/profileService";
@@ -14,6 +14,7 @@ export default function OnboardingForm() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [plan, setPlan] = useState<FormData["plan"]>("member");
   const [region, setRegion] = useState<string>("");
   const [countryCode, setCountryCode] = useState("+1");
@@ -576,14 +577,16 @@ export default function OnboardingForm() {
     if (Object.keys(currentErrors).length === 0) {
       try {
         await saveCurrentProgress();
-        // Add 3s delay as requested by user to ensure system stability
+        // Add 10s delay as requested by user to ensure system stability
         setLoading(true);
+        setLoadingMessage("Estamos conectando em um local seguro...");
         setTimeout(() => {
             setStep((s) => Math.min(s + 1, 4));
             setErrors({});
             setLoading(false);
+            setLoadingMessage(null);
             window.scrollTo(0, 0);
-        }, 3000);
+        }, 10000);
       } catch (e) {
         setMessage("Failed to save progress. Please check your connection.");
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1591,6 +1594,12 @@ export default function OnboardingForm() {
           </button>
         )}
       </div>
+
+      {loadingMessage && (
+        <p className="mt-4 text-center text-sm font-medium text-blue-600 bg-blue-50 p-3 rounded-lg flex items-center justify-center gap-2 animate-pulse">
+            <Lock className="h-4 w-4" /> {loadingMessage}
+        </p>
+      )}
 
       {isVerifying && (
         <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">

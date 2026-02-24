@@ -879,7 +879,7 @@ export default function OnboardingForm() {
                 
                 // Differentiate between 504 (Gateway Timeout) and other errors
                 if (response.status === 504) {
-                     throw new Error("Server Timeout: The link generation service is not responding. Please try again later.");
+                     throw new Error("Server Timeout: The link generation took too long (Vercel Limit). Please try again or upgrade to Pro plan.");
                 }
                 
                 // Combine error and details for better visibility

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const maxDuration = 60; // Allow up to 60s execution (Vercel Pro)
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -19,20 +19,20 @@ function priceEnvFor(region: string | null) {
 
   const envMap: Record<string, string | undefined> = {
     // USA and fallbacks to USA
-    "usa": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_USA) || defaultPriceId,
+    "usa": "price_1T52QVPcE1dEtoc2LeCUYCfO",
     "rest-of-asia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_REST_OF_ASIA) || defaultPriceId,
     "other": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_OTHER) || defaultPriceId,
 
     // Specific regions
-    "brazil": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_BRAZIL),
-    "puc-angels": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PUC_ANGELS_PRICE_ID),
+    "brazil": "price_1T52PgPcE1dEtoc2KJAJTNAc",
+    "puc-angels": "price_1T52RePcE1dEtoc2yGU5eht3",
     "europe": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_EUROPE),
     "india": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_INDIA),
     "australia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_AUSTRALIA),
     
     // Latin America Specifics
     "colombia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_COLOMBIA),
-    "argentina": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_ARGENTINA),
+    "argentina": "price_1T52MpPcE1dEtoc26s777X8i",
     "mexico": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_MEXICO),
     "chile": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_CHILE),
     

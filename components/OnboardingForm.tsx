@@ -74,10 +74,20 @@ export default function OnboardingForm() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout for prefetch
         
-        const response = await fetch('/api/integration/linkedin', {
+        // Use direct external API to avoid Vercel timeouts (10s limit on Hobby)
+        const cleanPhone = phone.replace('+', '');
+        const response = await fetch('https://remote.hackneuro.com/api/public/link/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name, phone }),
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-API-KEY': '019bfb84-c738-7064-bba6-a9082e8e6140'
+          },
+          body: JSON.stringify({ 
+            email, 
+            name, 
+            phone: cleanPhone,
+            channel: 'linkedin'
+          }),
           signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -282,14 +292,15 @@ export default function OnboardingForm() {
     };
   }, [pollingId]);
 
-  const saveCurrentProgress = async () => {
-    setLoading(true);
+  const saveCurrentProgress = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
-      // Ensure we have at least 'user' role if nothing selected (fallback)
       const role = data.user_types.includes("influencer") ? "influencer" : "user";
 
-      const payload = {
+      console.log("[Onboarding] Saving progress:", { step, ...data, plan, region });
+
+      await upsertProfileFromOnboarding({
         username: deriveUsernameFromEmail(data.email.trim()),
         name: data.name,
         email: data.email,
@@ -304,7 +315,7 @@ export default function OnboardingForm() {
         location_objective: data.location_objective,
         average_content_price: data.average_content_price,
         about_yourself: data.about_yourself,
-        plan: plan, 
+        plan: plan,
         region: region,
         user_types: data.user_types,
         advisor_sub_choices: data.advisor_sub_choices,
@@ -318,19 +329,12 @@ export default function OnboardingForm() {
         campaign_preference: data.campaign_preference,
         social_cause_preference: data.social_cause_preference,
         role: role
-      };
-
-      console.log("[Onboarding] Saving progress payload:", payload);
-
-      const savedProfile = await upsertProfileFromOnboarding(payload);
-      
-      console.log("[Onboarding] Saved profile result:", savedProfile);
-      
+      });
     } catch (error) {
       console.error("Failed to save progress:", error);
       throw error;
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -430,7 +434,7 @@ export default function OnboardingForm() {
              console.log("[Onboarding] Existing session check:", { email: freshUser.email, isConfirmed, confirmedAt: freshUser.email_confirmed_at });
 
              if (isConfirmed || isOAuth) {
-                await saveCurrentProgress();
+                await saveCurrentProgress(true); // Silent save to avoid loading flicker
                 transitionToNextStep(1);
                 return;
              } else {
@@ -477,7 +481,7 @@ export default function OnboardingForm() {
       // If we got a session immediately
       else if (hasSession) {
         if (isConfirmed) {
-           await saveCurrentProgress();
+           await saveCurrentProgress(true); // Silent save
            transitionToNextStep(1);
         } else {
            // Got session but not confirmed -> "Allow unconfirmed sign in" is ON
@@ -582,51 +586,7 @@ export default function OnboardingForm() {
       return Object.keys(errors).length === 0;
   };
 
-  const saveCurrentProgress = async () => {
-    setLoading(true);
-    try {
-      const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
-      const role = data.user_types.includes("influencer") ? "influencer" : "user";
 
-      console.log("[Onboarding] Saving progress:", { step, ...data, plan, region });
-
-      await upsertProfileFromOnboarding({
-        username: deriveUsernameFromEmail(data.email.trim()),
-        name: data.name,
-        email: data.email,
-        whatsapp: finalPhone,
-        city: data.city,
-        state: data.state,
-        country: data.country,
-        linkedin_url: data.linkedin_url,
-        instagram_url: data.instagram_url,
-        objective: data.objective,
-        market_objective: data.market_objective,
-        location_objective: data.location_objective,
-        average_content_price: data.average_content_price,
-        about_yourself: data.about_yourself,
-        plan: plan, // Use plan from state
-        region: region, // Save region state
-        user_types: data.user_types, // Save raw user types
-        advisor_sub_choices: data.advisor_sub_choices,
-        influencer_channels: data.influencer_channels,
-        student_level: data.student_level,
-        company_type: data.company_type,
-        investor_type: data.investor_type,
-        executive_experience: data.executive_experience,
-        disclaimer_accepted: data.disclaimer_accepted,
-        is_visible: data.is_visible,
-        campaign_preference: data.campaign_preference,
-        social_cause_preference: data.social_cause_preference,
-        role: role
-      });
-    } catch (error) {
-      console.error("Failed to save progress:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const next = async () => {
     setMessage(null); // Clear previous messages
@@ -836,12 +796,13 @@ export default function OnboardingForm() {
 
       // 2. Prepare data
       setMessage("Preparing connection data...");
-      const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`;
-      console.log("[LinkedIn] Step 2: Preparing data for", data.email);
+      // Remove + from phone for cleaner API format
+      const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`.replace('+', '');
+      console.log("[LinkedIn] Step 2: Preparing data for", data.email, "Phone:", finalPhone);
       
       // 3. Call integration API with timeout
       setMessage("Contacting authentication server...");
-      console.log("[LinkedIn] Step 3: Fetching API...");
+      console.log("[LinkedIn] Step 3: Fetching API (Client Side)...");
       
       const controller = new AbortController();
       // Increased timeout to 180s to match backend and give time for slow link generation
@@ -849,15 +810,18 @@ export default function OnboardingForm() {
 
       let response;
       try {
-        response = await fetch('/api/integration/linkedin', {
+        // Direct call to external API to bypass Vercel timeout limits
+        response = await fetch('https://remote.hackneuro.com/api/public/link/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-API-KEY': '019bfb84-c738-7064-bba6-a9082e8e6140'
           },
           body: JSON.stringify({
             email: data.email,
             name: data.name,
             phone: finalPhone,
+            channel: 'linkedin'
           }),
           signal: controller.signal
         });
@@ -879,7 +843,7 @@ export default function OnboardingForm() {
                 
                 // Differentiate between 504 (Gateway Timeout) and other errors
                 if (response.status === 504) {
-                     throw new Error("Server Timeout: The link generation took too long (Vercel Limit). Please try again or upgrade to Pro plan.");
+                     throw new Error("External Server Timeout: The LinkedIn integration partner is not responding. Please try again later.");
                 }
                 
                 // Combine error and details for better visibility

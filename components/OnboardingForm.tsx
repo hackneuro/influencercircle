@@ -777,9 +777,17 @@ export default function OnboardingForm() {
 
       // 2. Prepare data
       setMessage("Preparing connection data...");
+      
+      // Safety check for phone data
+      const cleanPhonePart = phonePart ? phonePart.replace(/\D/g, "") : "";
       // Remove + from phone for cleaner API format
-      const finalPhone = `${countryCode}${phonePart.replace(/\D/g, "")}`.replace('+', '');
+      const finalPhone = `${countryCode}${cleanPhonePart}`.replace('+', '');
+      
       console.log("[LinkedIn] Step 2: Preparing data for", data.email, "Phone:", finalPhone);
+
+      if (!data.email || !data.name || !finalPhone) {
+          throw new Error(`Missing required fields: ${!data.email ? 'Email' : ''} ${!data.name ? 'Name' : ''} ${!finalPhone ? 'Phone' : ''}`);
+      }
       
       // 3. Call integration API with timeout
       setMessage("Contacting authentication server...");
@@ -920,10 +928,22 @@ export default function OnboardingForm() {
 
       <div className="min-h-[300px]">
         {message && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+          <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2 border ${
+            message.toLowerCase().includes("error") || message.toLowerCase().includes("failed") 
+              ? "bg-red-50 border-red-200" 
+              : "bg-blue-50 border-blue-200"
+          }`}>
+            {message.toLowerCase().includes("error") || message.toLowerCase().includes("failed") ? (
+              <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            ) : (
+              <Loader2 className="h-5 w-5 text-blue-600 shrink-0 mt-0.5 animate-spin" />
+            )}
             <div className="flex-1">
-              <p className="text-sm font-medium text-red-800">{message}</p>
+              <p className={`text-sm font-medium ${
+                message.toLowerCase().includes("error") || message.toLowerCase().includes("failed")
+                  ? "text-red-800"
+                  : "text-blue-800"
+              }`}>{message}</p>
               {(message.toLowerCase().includes("jwt") || message.toLowerCase().includes("session") || message.toLowerCase().includes("auth")) && (
                 <button
                   onClick={async () => {

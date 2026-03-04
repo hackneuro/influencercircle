@@ -589,6 +589,23 @@ export default function OnboardingForm() {
                  setLoading(false);
              }
         } else {
+            // If already authenticated, try to update the password to what they entered
+            if (password) {
+                setLoading(true);
+                try {
+                    const { error } = await supabase.auth.updateUser({ password: password });
+                    if (error) {
+                        console.error("Failed to update password:", error);
+                        // Optional: decide if we want to show this error or just proceed
+                        // setMessage("Could not update password: " + error.message);
+                        // return; 
+                    }
+                } catch (err) {
+                    console.error("Error updating password:", err);
+                } finally {
+                    setLoading(false);
+                }
+            }
             transitionToNextStep(1);
         }
       } else {

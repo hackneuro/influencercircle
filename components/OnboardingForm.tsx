@@ -506,9 +506,7 @@ export default function OnboardingForm() {
       } else if (!isUrl(data.linkedin_url)) {
         newErrors.linkedin_url = "Invalid LinkedIn URL";
       }
-      if (!data.instagram_url?.trim()) {
-        newErrors.instagram_url = "Instagram link is required";
-      } else if (!isUrl(data.instagram_url)) {
+      if (data.instagram_url?.trim() && !isUrl(data.instagram_url)) {
         newErrors.instagram_url = "Invalid Instagram URL";
       }
       if (!data.objective?.trim()) newErrors.objective = "Objective is required";
@@ -911,6 +909,12 @@ export default function OnboardingForm() {
       </div>
 
       <div className="min-h-[300px]">
+        {message && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+            <p className="text-sm font-medium text-red-800">{message}</p>
+          </div>
+        )}
         {step === 1 && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex flex-col">
@@ -1254,7 +1258,7 @@ export default function OnboardingForm() {
                 <InputError name="linkedin_url" />
               </div>
               <div className="flex flex-col">
-                <label className="text-sm font-semibold text-slate-700 mb-1.5">Instagram Profile URL</label>
+                <label className="text-sm font-semibold text-slate-700 mb-1.5">Instagram Profile URL (optional)</label>
                 <input className={inputClass("instagram_url")} placeholder="https://instagram.com/username" value={data.instagram_url}
                   onChange={(e) => update("instagram_url", e.target.value)} />
                 <InputError name="instagram_url" />
@@ -1601,11 +1605,6 @@ export default function OnboardingForm() {
                 Complete Onboarding
                 {loading ? <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
-              {message && (
-                <p className="mt-4 text-center text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg flex items-center justify-center gap-2">
-                  <AlertCircle className="h-4 w-4" /> {message}
-                </p>
-              )}
             </div>
           </div>
         )}

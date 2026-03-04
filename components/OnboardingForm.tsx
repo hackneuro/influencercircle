@@ -609,9 +609,29 @@ export default function OnboardingForm() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3) || !validateStep(4)) {
-      setMessage("Please correct the errors before completing.");
-      return;
+    // Validate steps sequentially to ensure user sees the error
+    if (!validateStep(1)) {
+        setStep(1);
+        setMessage("Please complete the missing information in Step 1.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+    if (!validateStep(2)) {
+        setStep(2);
+        setMessage("Please complete the missing information in Step 2.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+    if (!validateStep(3)) {
+        setStep(3);
+        setMessage("Please connect your LinkedIn account in Step 3.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+    if (!validateStep(4)) {
+        setMessage("Please select a region and accept the authorization.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
     }
 
     setLoading(true);

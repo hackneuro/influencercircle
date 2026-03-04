@@ -1,10 +1,19 @@
 "use client";
-import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown } from "lucide-react";
+import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut } from "lucide-react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function DashboardNav() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2 mb-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-2 mb-4">
       <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/linkedin">
         <Linkedin className="h-5 w-5 text-blue-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight">Linkedin<br />Controls/Stats</span>
@@ -35,6 +44,15 @@ export default function DashboardNav() {
           PUC angels<br />Edu ONG Brazil <span className="text-base align-middle">🇧🇷</span>
         </span>
       </Link>
+      <button 
+        onClick={handleLogout}
+        className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0 border-red-200 hover:bg-red-50 hover:border-red-300"
+      >
+        <LogOut className="h-5 w-5 text-red-600" />
+        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-red-700">
+          Log Out<br />Exit Platform
+        </span>
+      </button>
     </div>
   );
 }

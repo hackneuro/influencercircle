@@ -4,6 +4,7 @@ import Link from "next/link";
 import AccountStatusBadge from "@/components/AccountStatusBadge";
 import EmailConfirmationBanner from "@/components/EmailConfirmationBanner";
 import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -32,6 +33,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
                                 <Link href="/onboarding" className="nav-link text-sm md:text-base px-2 py-1">Onboarding</Link>
                                 <Link href="/dashboard" className="btn btn-primary text-sm md:text-base py-1.5 md:py-2">Dashboard</Link>
                             </nav>
+                            <LanguageSwitcher />
                             <div className="hidden md:block">
                                 <AccountStatusBadge />
                             </div>

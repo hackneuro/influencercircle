@@ -5,6 +5,7 @@ import { CheckCircle, Send, AlertCircle, X } from "lucide-react";
 import type { ServiceRow } from "@/types/database";
 import { getPlatformProducts } from "@/services/marketplaceService";
 import { supabase } from "@/lib/supabaseClient";
+import { useLanguage } from "@/components/marketing/LanguageContext";
 
 function isLinkedInPost(url: string) {
   const u = url.trim();
@@ -16,6 +17,7 @@ function isInstagramPost(url: string) {
 }
 
 export default function SubmitPostPage() {
+  const { t } = useLanguage();
   const [linkedin, setLinkedin] = useState("");
   const [instagram, setInstagram] = useState("");
   const [agree, setAgree] = useState(false);
@@ -157,12 +159,12 @@ export default function SubmitPostPage() {
     setFreeSuccess(false);
     
     if (!freePostUrl.trim()) {
-      setFreeError("Please provide a post URL");
+      setFreeError(t('dashboard.submitPost.alerts.provideUrl'));
       return;
     }
 
     if (freePostUrl.trim() && !isLinkedInPost(freePostUrl)) {
-      setFreeError("LinkedIn link must be a post in your account.");
+      setFreeError(t('dashboard.submitPost.alerts.linkedinOnly'));
       return;
     }
 
@@ -184,7 +186,7 @@ export default function SubmitPostPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit");
+        throw new Error(data.error || t('dashboard.submitPost.alerts.failedSubmit'));
       }
 
       setFreeSuccess(true);
@@ -201,19 +203,19 @@ export default function SubmitPostPage() {
   const submit = async () => {
     setError(null);
     if (!agree) {
-      setError("You must accept the policy before sending.");
+      setError(t('dashboard.submitPost.alerts.acceptPolicy'));
       return;
     }
     if (!selectedProductId) {
-      setError("Please select a package before sending.");
+      setError(t('dashboard.submitPost.alerts.selectPackage'));
       return;
     }
     if (!linkedin.trim() && !instagram.trim()) {
-      setError("Provide at least one post link.");
+      setError(t('dashboard.submitPost.alerts.provideOneLink'));
       return;
     }
     if (linkedin.trim() && !isLinkedInPost(linkedin)) {
-      setError("LinkedIn link must be a post in your account.");
+      setError(t('dashboard.submitPost.alerts.linkedinOnly'));
       return;
     }
     if (instagram.trim() && !isInstagramPost(instagram)) {
@@ -224,7 +226,7 @@ export default function SubmitPostPage() {
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session) {
-        setError("Your login session has expired. Please log in again and try.");
+        setError(t('dashboard.submitPost.alerts.sessionExpired'));
         return;
       }
 
@@ -246,7 +248,7 @@ export default function SubmitPostPage() {
       });
 
       if (!response.ok) {
-        let message = "Failed to start checkout. Please try again.";
+        let message = t('dashboard.submitPost.alerts.checkoutFailed');
         try {
           const data = await response.json();
           if (data?.error && typeof data.error === "string") {
@@ -264,23 +266,23 @@ export default function SubmitPostPage() {
         return;
       }
 
-      setError("Checkout URL was not returned. Please try again.");
+      setError(t('dashboard.submitPost.alerts.noCheckoutUrl'));
     } catch (e: any) {
-      setError(e?.message || "Failed to start checkout. Please try again.");
+      setError(e?.message || t('dashboard.submitPost.alerts.checkoutFailed'));
     } finally {
       setSending(false);
     }
   };
 
   if (loadingProducts) {
-    return <div className="p-8 text-center text-slate-500">Loading products...</div>;
+    return <div className="p-8 text-center text-slate-500">{t('dashboard.submitPost.paid.loading')}</div>;
   }
 
   if (productsError) {
     return (
       <div className="p-8 text-center text-red-600 bg-red-50 rounded-xl border border-red-200">
         <AlertCircle className="w-8 h-8 mx-auto mb-2 text-red-500" />
-        <p className="font-semibold">Error loading products</p>
+        <p className="font-semibold">{t('dashboard.submitPost.paid.error')}</p>
         <p className="text-sm mt-1">{productsError}</p>
       </div>
     );
@@ -295,14 +297,14 @@ export default function SubmitPostPage() {
             <CheckCircle className="w-6 h-6 text-green-600" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-green-900">Purchase Successful!</h3>
+            <h3 className="text-lg font-semibold text-green-900">{t('dashboard.submitPost.alerts.successTitle')}</h3>
             <p className="text-green-800 mt-1">
-              Thank you for your order. We have received your request and will start processing it shortly.
-              You will receive a confirmation email soon.
+              {t('dashboard.submitPost.alerts.successMsg')}
+              {t('dashboard.submitPost.alerts.emailConfirm')}
             </p>
             {orderId && (
               <p className="text-sm text-green-700 mt-2 font-mono bg-green-100/50 inline-block px-2 py-1 rounded">
-                Order Ref: {orderId}
+                {t('dashboard.submitPost.alerts.orderRef')} {orderId}
               </p>
             )}
             <div className="mt-3">
@@ -310,7 +312,7 @@ export default function SubmitPostPage() {
                 onClick={() => setShowSuccess(false)}
                 className="text-sm font-medium text-green-700 hover:text-green-900 underline"
               >
-                Dismiss
+                {t('dashboard.submitPost.alerts.dismiss')}
               </button>
             </div>
           </div>
@@ -319,14 +321,13 @@ export default function SubmitPostPage() {
 
       {/* Header */}
       <section className="card p-6">
-        <h1 className="text-2xl font-semibold mb-2">Send us a Post for Increase engagement</h1>
-        <p className="text-sm text-ic-subtext">Paste your post links below. At least one is required.</p>
+        <h1 className="text-2xl font-semibold mb-2">{t('dashboard.submitPost.title')}</h1>
+        <p className="text-sm text-ic-subtext">{t('dashboard.submitPost.subtitle')}</p>
         {isAuthenticated === true && (
           <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs text-green-800">
             <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
             <span>
-              Você está logado
-              {authEmail ? ` como ${authEmail}` : ""}. Pode concluir a compra com segurança.
+              {t('dashboard.submitPost.loggedInAs', { email: authEmail || '' })}
             </span>
           </div>
         )}
@@ -338,53 +339,53 @@ export default function SubmitPostPage() {
           <h2 className="text-lg font-semibold flex items-center gap-2">
             {isElite ? (
               <>
-                <span className="text-amber-600">👑</span> Elite Daily Engagement
+                <span className="text-amber-600">👑</span> {t('dashboard.submitPost.daily.eliteTitle')}
               </>
-            ) : "Daily Free Engagement"}
+            ) : t('dashboard.submitPost.daily.freeTitle')}
             
             <span className={`text-xs font-normal px-2 py-0.5 rounded-full ${isElite ? "bg-amber-100 text-amber-700 border border-amber-200" : "bg-blue-100 text-blue-700"}`}>
-              {isElite ? "Elite Plan" : "Free Plan"}
+              {isElite ? t('dashboard.submitPost.daily.eliteBadge') : t('dashboard.submitPost.daily.freeBadge')}
             </span>
           </h2>
           <p className="text-sm text-slate-600 mt-1">
             {isElite 
-              ? "As an Elite member, submit your daily post here for prioritized engagement."
-              : "Submit one post per day for free engagement. This limit resets every day at midnight (UTC-3)."
+              ? t('dashboard.submitPost.daily.eliteDesc')
+              : t('dashboard.submitPost.daily.freeDesc')
             }
           </p>
         </div>
 
         {isAuthenticated === false ? (
            <div className="text-sm text-slate-500 bg-slate-50 p-3 rounded-lg">
-              Please log in to use the daily free engagement.
+              {t('dashboard.submitPost.daily.loginRequired')}
            </div>
         ) : loadingFreeLimit ? (
-          <p className="text-sm text-slate-500 animate-pulse">Checking daily limit...</p>
+          <p className="text-sm text-slate-500 animate-pulse">{t('dashboard.submitPost.daily.checking')}</p>
         ) : (
           <div className="space-y-3">
              {freeSuccess && (
                 <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm flex items-center gap-2 animate-in fade-in">
                   <CheckCircle className="h-4 w-4" />
-                  Post submitted successfully! Admin has been notified.
+                  {t('dashboard.submitPost.daily.success')}
                 </div>
              )}
 
              {!canSubmitFree && !freeSuccess ? (
                 <div className="p-3 bg-orange-50 text-orange-800 rounded-lg text-sm flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  You have reached your daily limit. Come back tomorrow for another free boost!
+                  {t('dashboard.submitPost.daily.limitReached')}
                 </div>
              ) : !freeSuccess && (
                 <div className="flex flex-col gap-3">
                   <div>
                     <input
                       className="border rounded-md px-3 py-2 w-full text-sm"
-                      placeholder="Paste your LinkedIn post URL here..."
+                      placeholder={t('dashboard.submitPost.daily.placeholder')}
                       value={freePostUrl}
                       onChange={(e) => setFreePostUrl(e.target.value)}
                       disabled={freeSubmitting}
                     />
-                    <p className="text-xs text-slate-500 mt-1">Only LinkedIn posts are supported currently.</p>
+                    <p className="text-xs text-slate-500 mt-1">{t('dashboard.submitPost.daily.note')}</p>
                   </div>
                   
                   <div className="flex items-center gap-3">
@@ -397,7 +398,7 @@ export default function SubmitPostPage() {
                       disabled={freeSubmitting || !freePostUrl}
                       onClick={handleFreeSubmit}
                     >
-                      {freeSubmitting ? "Submitting..." : isElite ? "Submit Elite Post" : "Submit Free Post"}
+                      {freeSubmitting ? t('dashboard.submitPost.daily.submitting') : isElite ? t('dashboard.submitPost.daily.submitEliteBtn') : t('dashboard.submitPost.daily.submitBtn')}
                     </button>
                     
                     {freeError && (
@@ -414,9 +415,9 @@ export default function SubmitPostPage() {
 
       <section className="card p-6 space-y-4">
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Choose your engagement package</h2>
+          <h2 className="text-lg font-semibold">{t('dashboard.submitPost.paid.title')}</h2>
           {loadingProducts && (
-            <p className="text-sm text-ic-subtext">Loading packages...</p>
+            <p className="text-sm text-ic-subtext">{t('dashboard.submitPost.paid.loading')}</p>
           )}
           {productsError && (
             <p className="text-sm text-red-600 flex items-center gap-1">
@@ -462,14 +463,14 @@ export default function SubmitPostPage() {
 
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <label className="text-sm font-medium">LinkedIn Post</label>
+            <label className="text-sm font-medium">{t('dashboard.submitPost.paid.linkedinLabel')}</label>
             <input
               className="mt-1 border rounded-md px-3 py-2 w-full"
-              placeholder="https://www.linkedin.com/posts/..."
+              placeholder={t('dashboard.submitPost.paid.linkedinPlaceholder')}
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
             />
-            <p className="text-xs text-ic-subtext mt-1">It must be a post in your account.</p>
+            <p className="text-xs text-ic-subtext mt-1">{t('dashboard.submitPost.paid.linkedinNote')}</p>
           </div>
           {/* <div>
             <label className="text-sm font-medium">Instagram Post</label>
@@ -490,7 +491,7 @@ export default function SubmitPostPage() {
             onChange={(e) => setAgree(e.target.checked)}
           />
           <span>
-            We keep our content positive and technical. All post as human-checked so it doesn't contain content that goes against our rules and policy. All Political, Religous, Government related, Adult/ Sexy, Gambiling, Achool, Weapons, Violence, Extremist, Crime/ Drug related will NOT be accepted (it doesn't matter that you are a Member or Elite).
+            {t('dashboard.submitPost.paid.policy')}
           </span>
         </label>
 
@@ -501,7 +502,7 @@ export default function SubmitPostPage() {
               disabled={!canSend || sending}
               onClick={submit}
             >
-              Send <Send className="h-4 w-4" />
+              {t('dashboard.submitPost.paid.submitBtn')} <Send className="h-4 w-4" />
             </button>
             
             {error && (
@@ -515,20 +516,20 @@ export default function SubmitPostPage() {
               <div className="flex items-start gap-2 p-3 rounded-lg border border-yellow-300 bg-yellow-50 text-sm text-yellow-900">
                 <AlertCircle className="h-4 w-4 mt-0.5" />
                 <p>
-                  Para liberar o botão <strong>Send</strong> e comprar o pacote de likes,
-                  você precisa estar logado. Primeiro preencha o{" "}
+                  {t('dashboard.submitPost.paid.loginWarningPre')}
                   <Link href="/onboarding" className="underline font-semibold">
-                    formulário de Onboarding
-                  </Link>{" "}
-                  ou, se já tiver conta,{" "}
+                    {t('platform.onboarding.link')}
+                  </Link>
+                  {t('dashboard.submitPost.paid.loginWarningMid')}
                   <Link href="/login" className="underline font-semibold">
-                    faça login aqui
-                  </Link>{" "}
-                  e depois volte para esta tela.
+                    {t('platform.login.link')}
+                  </Link>
+                  {t('dashboard.submitPost.paid.loginWarningPost')}
                 </p>
               </div>
             </div>
           )}
+
         </div>
       </section>
 

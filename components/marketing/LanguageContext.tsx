@@ -20,7 +20,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [language]);
 
-    const t = (key: string) => {
+    const t = (key: string, params?: Record<string, string | number>) => {
         const keys = key.split('.');
         let value: any = (translations as any)[language];
 
@@ -31,6 +31,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
                 return key; // return the key itself if not found
             }
         }
+        
+        if (typeof value === 'string' && params) {
+            return Object.keys(params).reduce((acc, paramKey) => {
+                return acc.replace(`{${paramKey}}`, String(params[paramKey]));
+            }, value);
+        }
+        
         return value;
     };
 

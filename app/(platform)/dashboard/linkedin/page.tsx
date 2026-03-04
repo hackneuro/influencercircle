@@ -1,6 +1,4 @@
 "use client";
-import ProfileCard from "@/components/ProfileCard";
-import SsiTracker from "@/components/SsiTracker";
 import UnlogLinkedinButton from "@/components/UnlogLinkedinButton";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -83,32 +81,37 @@ function LinkedinDashboardContent() {
           <UnlogLinkedinButton />
         </div>
       </div>
-      <div className="mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-6">
-          <h3 className="font-semibold mb-2">LinkedIn Stats / Control</h3>
-          <p className="text-sm text-ic-subtext mb-3">
-            LinkedIn profile analytics and control panel.
+          <h3 className="font-semibold mb-2">LinkedIn Dashboard</h3>
+          <p className="text-sm text-ic-subtext mb-4">
+            Check your LinkedIn Dashboard page (Profile Views).
           </p>
-          <a className="btn btn-outline" href="https://www.linkedin.com" target="_blank">
-            Open LinkedIn Dashboard
+          <a 
+            href="https://www.linkedin.com/analytics/profile-views/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full"
+          >
+            Go to LinkedIn Dashboard
+          </a>
+        </div>
+
+        <div className="card p-6">
+          <h3 className="font-semibold mb-2">Social Selling Index</h3>
+          <p className="text-sm text-ic-subtext mb-4">
+            Check your Social Selling Index (SSI) Score.
+          </p>
+          <a 
+            href="https://www.linkedin.com/sales/ssi" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full"
+          >
+            Check SSI Score
           </a>
         </div>
       </div>
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <ProfileCard />
-        </div>
-        <div className="card p-6">
-          <h3 className="font-semibold mb-2">LinkedIn Live Data</h3>
-          <p className="text-sm text-ic-subtext mb-3">
-            LinkedIn Profile Views and Creator Content Analytics
-          </p>
-          <a className="btn btn-outline" href="https://www.linkedin.com" target="_blank">
-            For more info, go to your LinkedIn Profile
-          </a>
-        </div>
-      </section>
-      <SsiTracker />
     </main >
   );
 }

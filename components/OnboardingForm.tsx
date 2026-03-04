@@ -74,19 +74,17 @@ export default function OnboardingForm() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s timeout for prefetch
         
-        // Use direct external API to avoid Vercel timeouts (10s limit on Hobby)
+        // Use internal API route to handle CORS and auth securely
         const cleanPhone = phone.replace('+', '');
-        const response = await fetch('https://remote.hackneuro.com/api/public/link/', {
+        const response = await fetch('/api/integration/linkedin', {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            'X-API-KEY': '019bfb84-c738-7064-bba6-a9082e8e6140'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
             email, 
             name, 
-            phone: cleanPhone,
-            channel: 'linkedin'
+            phone: cleanPhone
           }),
           signal: controller.signal
         });
@@ -793,18 +791,16 @@ export default function OnboardingForm() {
 
       let response;
       try {
-        // Direct call to external API to bypass Vercel timeout limits
-        response = await fetch('https://remote.hackneuro.com/api/public/link/', {
+        // Use internal API route to handle CORS and auth securely
+        response = await fetch('/api/integration/linkedin', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'X-API-KEY': '019bfb84-c738-7064-bba6-a9082e8e6140'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             email: data.email,
             name: data.name,
-            phone: finalPhone,
-            channel: 'linkedin'
+            phone: finalPhone
           }),
           signal: controller.signal
         });

@@ -76,12 +76,7 @@ export default function AccountStatusBadge() {
   }
 
   if (status.kind === "anonymous") {
-    return (
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/40 border border-slate-700 text-[11px] text-slate-200">
-        <span className="inline-flex h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-        <span>Não autenticado</span>
-      </div>
-    );
+    return null;
   }
 
   if (status.kind === "incomplete") {

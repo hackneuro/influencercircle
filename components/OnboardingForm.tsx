@@ -368,8 +368,15 @@ export default function OnboardingForm() {
         social_cause_preference: data.social_cause_preference,
         role: role
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save progress:", error);
+      // Handle deleted user / invalid session
+      if (error.message?.includes("User from sub claim in JWT does not exist") || 
+          error.message?.includes("Auth session missing")) {
+        await supabase.auth.signOut();
+        window.location.href = "/login";
+        return;
+      }
       throw error;
     } finally {
       if (!silent) setLoading(false);

@@ -292,6 +292,44 @@ export default function OnboardingForm() {
     };
   }, [pollingId]);
 
+  // Load from LocalStorage on mount if no session
+  useEffect(() => {
+    async function checkAndLoadStorage() {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            const stored = localStorage.getItem("onboarding_data");
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.data) setData(d => ({ ...d, ...parsed.data }));
+                    if (parsed.step) setStep(parsed.step);
+                    if (parsed.plan) setPlan(parsed.plan);
+                    if (parsed.region) setRegion(parsed.region);
+                    if (parsed.countryCode) setCountryCode(parsed.countryCode);
+                    if (parsed.phonePart) setPhonePart(parsed.phonePart);
+                    if (parsed.connections) setConnections(parsed.connections);
+                } catch (e) {}
+            }
+        }
+    }
+    checkAndLoadStorage();
+  }, []);
+
+  // Save to LocalStorage whenever data changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+        localStorage.setItem("onboarding_data", JSON.stringify({
+            data,
+            step,
+            plan,
+            region,
+            countryCode,
+            phonePart,
+            connections
+        }));
+    }
+  }, [data, step, plan, region, countryCode, phonePart, connections, isAuthenticated]);
+
   const saveCurrentProgress = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
@@ -410,130 +448,6 @@ export default function OnboardingForm() {
     }, 10000);
   };
 
-  const handleSignUpStep1 = async () => {
-    setLoading(true);
-    setAuthLoading(true);
-    setMessage(null);
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Strict session check: if session exists, verify it matches the current email input
-      if (session) {
-        if (session.user.email?.toLowerCase() === data.email.toLowerCase()) {
-          // Force refresh user data to check confirmation status reliably
-          const { data: { user: freshUser }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError || !freshUser) {
-             // Session might be invalid, sign out
-             await supabase.auth.signOut();
-          } else {
-             // Check if user is confirmed
-             const isConfirmed = !!freshUser.email_confirmed_at;
-             const isOAuth = freshUser.app_metadata?.provider && freshUser.app_metadata.provider !== 'email';
-             
-             console.log("[Onboarding] Existing session check:", { email: freshUser.email, isConfirmed, confirmedAt: freshUser.email_confirmed_at });
-
-             if (isConfirmed || isOAuth) {
-                await saveCurrentProgress(true); // Silent save to avoid loading flicker
-                transitionToNextStep(1);
-                return;
-             } else {
-                // User has session but NOT confirmed
-                setIsVerifying(true);
-                startPolling();
-                setLoading(false);
-                setAuthLoading(false);
-                return;
-             }
-          }
-        } else {
-          // Mismatch: User is logged in as someone else. Sign out to allow new sign up.
-          await supabase.auth.signOut();
-        }
-      }
-
-      const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
-        email: data.email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/verified`
-        }
-      });
-
-      if (signUpError) {
-        // If user already registered, try to sign in automatically using the provided password
-        if (signUpError.message.includes("already registered") || signUpError.status === 400 || signUpError.message.toLowerCase().includes("user already exists")) {
-           console.log("[Onboarding] User already registered, attempting sign-in...");
-           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-               email: data.email,
-               password
-           });
-           
-           if (signInError) {
-               // If password wrong or other error
-               if (signInError.message.includes("Invalid login credentials")) {
-                  throw new Error("Account exists but password was incorrect. Please try again with the correct password.");
-               }
-               throw signUpError; 
-           }
-           
-           if (signInData.session) {
-               // Successfully signed in - proceed as if signup succeeded
-               const isConfirmed = !!signInData.user?.email_confirmed_at;
-               
-               if (isConfirmed) {
-                   await saveCurrentProgress(true); // Silent save
-                   transitionToNextStep(1);
-                   return;
-               } else {
-                   // User has session but NOT confirmed
-                   setIsVerifying(true);
-                   startPolling();
-                   setLoading(false);
-                   setAuthLoading(false);
-                   return;
-               }
-           }
-        }
-        throw signUpError;
-      }
-
-      // Force refresh user data to ensure we have the latest status from server
-      // (Sometimes signUp returns a session even if unconfirmed, depending on config)
-      const { data: { user: newUser } } = await supabase.auth.getUser();
-      
-      const hasSession = !!signUpData.session;
-      const isConfirmed = !!newUser?.email_confirmed_at;
-      
-      console.log("[Onboarding] SignUp result:", { hasSession, isConfirmed, confirmedAt: newUser?.email_confirmed_at });
-      
-      // If we got a user but NO session, it means email confirmation is required.
-      if (signUpData.user && !hasSession) {
-        setIsVerifying(true);
-        startPolling();
-        setLoading(false);
-        setAuthLoading(false);
-      } 
-      // If we got a session immediately
-      else if (hasSession) {
-        if (isConfirmed) {
-           await saveCurrentProgress(true); // Silent save
-           transitionToNextStep(1);
-        } else {
-           // Got session but not confirmed -> "Allow unconfirmed sign in" is ON
-           setIsVerifying(true);
-           startPolling();
-           setLoading(false);
-           setAuthLoading(false);
-        }
-      }
-    } catch (err: any) {
-      setMessage(err.message);
-      setLoading(false);
-      setAuthLoading(false);
-    }
-  };
-
   const validateStepReturnErrors = (s: number) => {
     const newErrors: Record<string, string> = {};
     if (s === 1) {
@@ -640,7 +554,7 @@ export default function OnboardingForm() {
       setErrors(currentErrors);
       
       if (Object.keys(currentErrors).length === 0) {
-        await handleSignUpStep1();
+        transitionToNextStep(1);
       } else {
         setMessage(getErrorList(currentErrors));
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -654,7 +568,9 @@ export default function OnboardingForm() {
     
     if (Object.keys(currentErrors).length === 0) {
       try {
-        await saveCurrentProgress();
+        if (isAuthenticated) {
+            await saveCurrentProgress();
+        }
         transitionToNextStep(step);
       } catch (e) {
         setMessage("Failed to save progress. Please check your connection.");
@@ -694,6 +610,7 @@ export default function OnboardingForm() {
       setMessage(null);
       const { data: existingSession } = await supabase.auth.getSession();
       if (!existingSession.session) {
+        // Attempt Sign Up
         const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
           email: data.email,
           password,
@@ -701,10 +618,28 @@ export default function OnboardingForm() {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding/verified`
           }
         });
+
         if (signUpError) {
-          throw new Error(signUpError.message || "Failed to create account.");
-        }
-        if (!signUpData.session) {
+             // If user exists, try Sign In
+             if (signUpError.message.includes("already registered") || signUpError.status === 400 || signUpError.message.toLowerCase().includes("user already exists")) {
+                 console.log("[Onboarding] User already registered, attempting sign-in...");
+                 const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                     email: data.email,
+                     password
+                 });
+                 
+                 if (signInError) {
+                     if (signInError.message.includes("Invalid login credentials")) {
+                        throw new Error("Account exists but password was incorrect. Please try again with the correct password.");
+                     }
+                     throw signInError; 
+                 }
+                 // If sign in success, we proceed to save profile below
+             } else {
+                 throw new Error(signUpError.message || "Failed to create account.");
+             }
+        } else if (signUpData && !signUpData.session) {
+          // SignUp success but no session (email confirmation required)
           setMessage("Check your email to confirm your account, then log in again to complete onboarding.");
           return;
         }
@@ -819,15 +754,15 @@ export default function OnboardingForm() {
 
     try {
       // 1. Save progress first to ensure data is up to date
-      setMessage("Saving your profile data...");
-      console.log("[LinkedIn] Step 1: Saving progress...");
-      try {
-        await saveCurrentProgress();
-        console.log("[LinkedIn] Step 1: Save success.");
-      } catch (saveError) {
-        console.error("[LinkedIn] Save failed:", saveError);
-        // We continue even if save fails, but warn the user
-        // setMessage("Warning: Could not save recent changes, proceeding to connection...");
+      if (isAuthenticated) {
+          setMessage("Saving your profile data...");
+          console.log("[LinkedIn] Step 1: Saving progress...");
+          try {
+            await saveCurrentProgress();
+            console.log("[LinkedIn] Step 1: Save success.");
+          } catch (saveError) {
+            console.error("[LinkedIn] Save failed:", saveError);
+          }
       }
 
       // 2. Prepare data

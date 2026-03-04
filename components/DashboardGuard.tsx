@@ -67,17 +67,15 @@ export default function DashboardGuard({ children }: { children: React.ReactNode
         }
 
         // Check for essential fields that indicate onboarding completion
-        // We assume Step 2 completion (Objectives) is the main gatekeeper
         const hasBasicInfo = profile.name && profile.city && profile.country;
         const hasObjectives = profile.objective && profile.market_objective && profile.location_objective;
         
-        // Also check for social links which are part of Step 2/3
-        const hasSocials = profile.linkedin_url && profile.instagram_url;
-
-        // Check disclaimer (Step 4)
+        // Check for social links (Step 3)
+        // We consider onboarding successful if LinkedIn is connected, even if disclaimer (Step 4) isn't accepted yet
+        const hasLinkedIn = !!profile.linkedin_url;
         const hasDisclaimer = profile.disclaimer_accepted;
 
-        if (hasBasicInfo && hasObjectives && hasSocials && hasDisclaimer) {
+        if (hasBasicInfo && hasObjectives && (hasLinkedIn || hasDisclaimer)) {
           setAuthorized(true);
         } else {
           router.push("/onboarding");

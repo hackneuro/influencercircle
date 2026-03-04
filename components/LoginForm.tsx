@@ -170,9 +170,11 @@ export default function LoginForm() {
           )}
 
           {message && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-100 flex items-start gap-2 text-red-600 text-sm">
-              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-              <span>{message}</span>
+            <div className="p-3 rounded-lg bg-red-50 border border-red-100 flex flex-col gap-2 text-red-600 text-sm">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                <span>{message}</span>
+              </div>
             </div>
           )}
 

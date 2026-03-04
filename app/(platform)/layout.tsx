@@ -2,10 +2,12 @@ import UpgradeCta from "@/components/UpgradeCta";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import AccountStatusBadge from "@/components/AccountStatusBadge";
+import EmailConfirmationBanner from "@/components/EmailConfirmationBanner";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
+            <EmailConfirmationBanner />
             <div className="brand-bar">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">

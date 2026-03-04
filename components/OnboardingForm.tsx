@@ -187,13 +187,15 @@ export default function OnboardingForm() {
         if (!session) return;
 
         // Check confirmation status on load
-        // STRICT CHECK: user must be confirmed or not email provider
+        // STRICT CHECK REMOVED: allow unconfirmed users to proceed
+        /*
         if (user && !user.email_confirmed_at && user.app_metadata.provider === 'email') {
            console.log("[Onboarding] User has session but is unconfirmed. Enforcing verification.");
            setIsVerifying(true);
            startPolling();
            return;
         }
+        */
 
         const profile = await getMyProfile();
         if (profile) {
@@ -557,7 +559,38 @@ export default function OnboardingForm() {
       setErrors(currentErrors);
       
       if (Object.keys(currentErrors).length === 0) {
-        transitionToNextStep(1);
+        if (!isAuthenticated) {
+             setLoading(true);
+             try {
+                 const { error, data: signUpData } = await supabase.auth.signUp({
+                     email: data.email,
+                     password: password,
+                 });
+
+                 if (error) {
+                     if (error.message.includes("already registered") || error.message.toLowerCase().includes("user already exists")) {
+                         setMessage("Este e-mail já está em uso. Por favor, faça login.");
+                         setTimeout(() => {
+                             router.push("/login");
+                         }, 2000);
+                         return;
+                     }
+                     throw error;
+                 }
+                 
+                 if (signUpData.session) {
+                     setIsAuthenticated(true);
+                 }
+                 transitionToNextStep(1);
+             } catch (err: any) {
+                 setMessage(err.message || "Failed to create account.");
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+             } finally {
+                 setLoading(false);
+             }
+        } else {
+            transitionToNextStep(1);
+        }
       } else {
         setMessage(getErrorList(currentErrors));
         window.scrollTo({ top: 0, behavior: 'smooth' });

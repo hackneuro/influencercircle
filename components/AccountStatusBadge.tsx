@@ -85,13 +85,7 @@ export default function AccountStatusBadge() {
   }
 
   if (status.kind === "incomplete") {
-    return (
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/15 border border-yellow-400 text-[11px] text-yellow-100 shadow-sm">
-        <span className="inline-flex h-1.5 w-1.5 rounded-full bg-yellow-400 animate-pulse" />
-        <span className="font-semibold uppercase tracking-wide">Cadastro Incompleto</span>
-        {status.email && <span className="text-[10px] text-yellow-100/80">({status.email})</span>}
-      </div>
-    );
+    return null;
   }
 
   if (status.kind === "elite") {

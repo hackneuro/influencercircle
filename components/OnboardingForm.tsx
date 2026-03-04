@@ -460,7 +460,43 @@ export default function OnboardingForm() {
         }
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // If user already registered, try to sign in automatically using the provided password
+        if (signUpError.message.includes("already registered") || signUpError.status === 400 || signUpError.message.toLowerCase().includes("user already exists")) {
+           console.log("[Onboarding] User already registered, attempting sign-in...");
+           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+               email: data.email,
+               password
+           });
+           
+           if (signInError) {
+               // If password wrong or other error
+               if (signInError.message.includes("Invalid login credentials")) {
+                  throw new Error("Account exists but password was incorrect. Please try again with the correct password.");
+               }
+               throw signUpError; 
+           }
+           
+           if (signInData.session) {
+               // Successfully signed in - proceed as if signup succeeded
+               const isConfirmed = !!signInData.user?.email_confirmed_at;
+               
+               if (isConfirmed) {
+                   await saveCurrentProgress(true); // Silent save
+                   transitionToNextStep(1);
+                   return;
+               } else {
+                   // User has session but NOT confirmed
+                   setIsVerifying(true);
+                   startPolling();
+                   setLoading(false);
+                   setAuthLoading(false);
+                   return;
+               }
+           }
+        }
+        throw signUpError;
+      }
 
       // Force refresh user data to ensure we have the latest status from server
       // (Sometimes signUp returns a session even if unconfirmed, depending on config)

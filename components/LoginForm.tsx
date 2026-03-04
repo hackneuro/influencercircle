@@ -11,17 +11,41 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [mode, setMode] = useState<"login" | "reset">("login");
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const handleResendConfirmation = async () => {
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+      });
+      if (error) throw error;
+      setMessage("E-mail de confirmação reenviado! Verifique sua caixa de entrada.");
+      setUnconfirmedEmail(false);
+    } catch (err: any) {
+      setMessage(err.message || "Falha ao reenviar e-mail.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
+    setUnconfirmedEmail(false);
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          setUnconfirmedEmail(true);
+          throw new Error("Seu e-mail ainda não foi confirmado. Por favor, confirme seu e-mail para acessar.");
+        }
         throw new Error(error.message || "Falha ao fazer login.");
       }
       router.push("/dashboard");
@@ -175,6 +199,16 @@ export default function LoginForm() {
                 <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
                 <span>{message}</span>
               </div>
+              {unconfirmedEmail && (
+                <button
+                  type="button"
+                  onClick={handleResendConfirmation}
+                  disabled={resendLoading}
+                  className="text-left text-xs font-semibold underline mt-1 hover:text-red-800"
+                >
+                  {resendLoading ? "Enviando..." : "Reenviar e-mail de confirmação"}
+                </button>
+              )}
             </div>
           )}
 

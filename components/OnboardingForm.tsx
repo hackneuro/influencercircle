@@ -579,6 +579,12 @@ export default function OnboardingForm() {
         transitionToNextStep(step);
       } catch (e: any) {
         console.error("Save progress error:", e);
+        if (e.message?.toLowerCase().includes("jwt") || 
+            e.message?.toLowerCase().includes("session")) {
+            await supabase.auth.signOut();
+            window.location.href = "/login";
+            return;
+        }
         setMessage(e.message || "Failed to save progress. Please check your connection.");
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setLoading(false);
@@ -920,7 +926,20 @@ export default function OnboardingForm() {
         {message && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
             <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-            <p className="text-sm font-medium text-red-800">{message}</p>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-800">{message}</p>
+              {(message.toLowerCase().includes("jwt") || message.toLowerCase().includes("session") || message.toLowerCase().includes("auth")) && (
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    window.location.href = '/login';
+                  }}
+                  className="mt-2 text-xs font-semibold text-red-700 hover:text-red-900 underline text-left"
+                >
+                  Click here to fix session (Sign Out)
+                </button>
+              )}
+            </div>
           </div>
         )}
         {step === 1 && (

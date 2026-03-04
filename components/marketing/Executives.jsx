@@ -7,7 +7,6 @@ export default function Executives() {
 
     const executives = [
         { name: "Fernando Dias", role: "CEO & Founder", link: "https://www.linkedin.com/in/fernandoscdias", image: "/fernando.jpeg", specialized: true, badge: "Founder" },
-        { name: "Jonatas Saraiva", role: "CTO & Founder of Obi.tec", link: "https://www.linkedin.com/in/jonatassaraiva/", image: "/saraiva.jpeg", specialized: true, badge: "Founder" },
         { name: "Elaine Cavalheiro", role: "COO of PUC angels", link: "https://www.linkedin.com/in/elainecavalheirolug/", image: "/elaine.jpeg", specialized: true, badge: "COO" },
         { name: "Marina Witzel", role: "Partner at Camim", link: "https://www.linkedin.com/in/marina-taveira-witzel-2b1864137/", image: "/marina.jpeg", specialized: true, badge: "Partner" },
         { name: "Ulisses Melo", role: "Regional President at PUC angels MG", link: "https://www.linkedin.com/in/ulisses-melo/", image: "/ulisses.jpeg", specialized: true, badge: "President" },

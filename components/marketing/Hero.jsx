@@ -9,7 +9,6 @@ export default function Hero() {
 
     const group1 = [
         { name: "Fernando Dias", role: "CEO & Founder", image: "/fernando.jpeg" },
-        { name: "Jonatas Saraiva", role: "CTO & Founder of Obi.tec", image: "/saraiva.jpeg" },
         { name: "Elaine Cavalheiro", role: "COO of PUC angels", image: "/elaine.jpeg" },
         { name: "Marina Witzel", role: "Partner at Camim", image: "/marina.jpeg" }
     ];

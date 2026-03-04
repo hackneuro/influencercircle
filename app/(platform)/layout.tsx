@@ -3,12 +3,14 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import AccountStatusBadge from "@/components/AccountStatusBadge";
 import EmailConfirmationBanner from "@/components/EmailConfirmationBanner";
+import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <>
-            <EmailConfirmationBanner />
-            <div className="brand-bar">
+  return (
+    <>
+      <EmailConfirmationBanner />
+      <ProfileCompletionBanner />
+      <div className="brand-bar">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4 md:gap-6">

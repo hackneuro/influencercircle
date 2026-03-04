@@ -56,35 +56,29 @@ export default function DashboardGuard({ children }: { children: React.ReactNode
   }, [authorized, resetTimer]);
 
   useEffect(() => {
-    async function checkProfile() {
+    async function checkAuth() {
       try {
-        const profile = await getMyProfile();
+        // Just check if the user is authenticated. 
+        // We removed the strict profile checks to prevent redirect loops.
+        // Users can complete their profile in the settings page.
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!profile) {
-          // No profile or not logged in
-          router.push("/onboarding");
+        if (!session) {
+          router.push("/login");
           return;
         }
 
-        // Check for essential fields that indicate onboarding completion
-        const hasBasicInfo = !!profile.name; // Relaxed check: name is enough for basic profile existence
-        
-        // We consider onboarding successful if we have a name.
-        // The user can complete other details later in the profile section.
-        if (hasBasicInfo) {
-          setAuthorized(true);
-        } else {
-          router.push("/onboarding");
-        }
+        // If authenticated, allow access immediately.
+        setAuthorized(true);
       } catch (error) {
         console.error("DashboardGuard error:", error);
-        router.push("/onboarding");
+        router.push("/login");
       } finally {
         setLoading(false);
       }
     }
 
-    checkProfile();
+    checkAuth();
   }, [router]);
 
   if (loading) {

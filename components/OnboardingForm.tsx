@@ -570,8 +570,9 @@ export default function OnboardingForm() {
             await saveCurrentProgress();
         }
         transitionToNextStep(step);
-      } catch (e) {
-        setMessage("Failed to save progress. Please check your connection.");
+      } catch (e: any) {
+        console.error("Save progress error:", e);
+        setMessage(e.message || "Failed to save progress. Please check your connection.");
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setLoading(false);
       }

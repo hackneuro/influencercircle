@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         role: systemRole,
         is_premium: false,
         is_public: true,
-        plan: 'free',
+        plan: 'member',
         updated_at: new Date().toISOString()
       });
 

@@ -18,10 +18,11 @@ export async function POST(request: Request) {
       }
     );
 
-    // Insert into applications table
-    const { data, error } = await supabaseAdmin
-      .from('applications')
-      .insert({
+    // Insert into applications table OR storage as JSON if table fails
+      // Since we had issues with table creation, we will ALSO save to 'applications' bucket as JSON
+      const applicationId = crypto.randomUUID();
+      const applicationData = {
+        id: applicationId,
         first_name: body.firstName,
         last_name: body.lastName,
         role: body.role,
@@ -30,17 +31,41 @@ export async function POST(request: Request) {
         linkedin_url: body.linkedin,
         objective: body.objective,
         cv_url: body.cvUrl,
-        status: 'pending'
-      })
-      .select()
-      .single();
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
 
-    if (error) {
-      console.error('Admin Insert Error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+      // 1. Try to insert into DB first (might fail if table doesn't exist)
+      let dbError = null;
+      try {
+        const { error } = await supabaseAdmin
+          .from('applications')
+          .insert(applicationData);
+        if (error) dbError = error;
+      } catch (e) {
+        dbError = e;
+      }
 
-    return NextResponse.json({ success: true, data });
+      // 2. ALWAYS save to Storage as backup/primary if DB fails
+      const fileName = `${applicationId}.json`;
+      const { error: storageError } = await supabaseAdmin
+        .storage
+        .from('applications')
+        .upload(fileName, JSON.stringify(applicationData), {
+          contentType: 'application/json',
+          upsert: true
+        });
+
+      if (storageError) {
+        console.error('Storage Backup Error:', storageError);
+        // If both fail, throw error
+        if (dbError) {
+          const dbErrorMessage = dbError instanceof Error ? dbError.message : JSON.stringify(dbError);
+          throw new Error(`Submission failed: ${dbErrorMessage} (Storage error: ${storageError.message})`);
+        }
+      }
+
+      return NextResponse.json({ success: true, id: applicationId });
   } catch (error: any) {
     console.error('Submission API Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

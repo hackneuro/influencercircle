@@ -34,13 +34,63 @@ export default function AdminApplicationsPage() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('applications')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let applicationsData: Application[] = [];
 
-      if (error) throw error;
-      setApplications(data || []);
+      // 1. Try to fetch from DB
+      try {
+        const { data, error } = await supabase
+          .from('applications')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          applicationsData = data;
+        }
+      } catch (dbError) {
+        console.warn('DB Fetch failed, trying storage...', dbError);
+      }
+
+      // 2. Also fetch from Storage (as backup or primary if DB failed)
+      try {
+        const { data: files, error: storageError } = await supabase
+          .storage
+          .from('applications')
+          .list();
+
+        if (!storageError && files && files.length > 0) {
+          // Fetch each file content
+          const filePromises = files.map(async (file) => {
+            if (!file.name.endsWith('.json')) return null;
+            
+            // Skip if we already have this ID from DB
+            const id = file.name.replace('.json', '');
+            if (applicationsData.some(app => app.id === id)) return null;
+
+            const { data: blob } = await supabase
+              .storage
+              .from('applications')
+              .download(file.name);
+            
+            if (blob) {
+              const text = await blob.text();
+              return JSON.parse(text) as Application;
+            }
+            return null;
+          });
+
+          const storageApps = (await Promise.all(filePromises)).filter(Boolean) as Application[];
+          applicationsData = [...applicationsData, ...storageApps];
+        }
+      } catch (storageErr) {
+        console.error('Storage Fetch failed:', storageErr);
+      }
+
+      // Sort combined results
+      applicationsData.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setApplications(applicationsData);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast.error('Failed to load applications');

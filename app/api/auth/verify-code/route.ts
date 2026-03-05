@@ -28,7 +28,29 @@ export async function POST(request: Request) {
     }
 
     // Code is valid - we can delete it or mark as used
-    await supabase.from('verification_codes').delete().eq('id', verification.id);
+    const { error: deleteError } = await supabase.from('verification_codes').delete().eq('id', verification.id);
+    
+    if (deleteError) {
+       console.error("Error deleting verification code:", deleteError);
+       // Continue anyway since code was valid
+    }
+
+    // Update profile verification status
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ 
+        email_verified: true,
+        email_verified_at: new Date().toISOString()
+      })
+      .eq('email', email);
+
+    if (profileError) {
+      console.error('Error updating profile verification status:', profileError);
+      return NextResponse.json({ 
+        success: true, 
+        warning: 'Email verified but profile update failed. Please contact support if this persists.' 
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

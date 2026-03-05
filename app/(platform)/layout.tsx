@@ -9,7 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <EmailConfirmationBanner />
+      {/* <EmailConfirmationBanner /> - Disabled until DB migration is run */}
       <ProfileCompletionBanner />
       <div className="brand-bar">
                 <div className="max-w-7xl mx-auto px-6 py-6">

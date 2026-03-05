@@ -1,6 +1,7 @@
 import "./globals.css";
 import { LanguageProvider } from "@/components/marketing/LanguageContext";
 import Script from "next/script";
+import { Toaster } from "sonner";
 
 export const metadata = {
   metadataBase: new URL("https://influencercircle.net"),
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <LanguageProvider>
           {children}
+          <Toaster />
         </LanguageProvider>
       </body>
     </html>

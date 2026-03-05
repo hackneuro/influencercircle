@@ -1,5 +1,5 @@
 "use client";
-import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut } from "lucide-react";
+import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -42,6 +42,12 @@ export default function DashboardNav() {
         <Crown className="h-5 w-5 text-yellow-500" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-yellow-700">
           PUC angels<br />Edu ONG Brazil <span className="text-base align-middle">🇧🇷</span>
+        </span>
+      </Link>
+      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/applications">
+        <ShieldCheck className="h-5 w-5 text-slate-600" />
+        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-slate-700">
+          Admin<br />Applications
         </span>
       </Link>
       <button 

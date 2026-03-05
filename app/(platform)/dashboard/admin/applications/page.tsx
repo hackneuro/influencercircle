@@ -52,13 +52,16 @@ export default function AdminApplicationsPage() {
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('applications')
-        .update({ status: newStatus })
-        .eq('id', id);
+      const response = await fetch('/api/admin/applications/update-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: newStatus }),
+      });
 
-      if (error) throw error;
-      
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+
       setApplications(apps => apps.map(app => 
         app.id === id ? { ...app, status: newStatus } : app
       ));

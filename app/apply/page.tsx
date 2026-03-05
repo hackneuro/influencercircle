@@ -100,7 +100,7 @@ export default function ApplyPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -110,25 +110,26 @@ export default function ApplyPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px]" />
       </div>
 
-      <div className="max-w-md w-full space-y-8 relative z-10 bg-white/95 backdrop-blur-sm p-8 rounded-xl shadow-2xl">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            {t('apply.title')}
-          </h1>
-          <p className="text-slate-600">
-            {t('apply.subtitle')}
-          </p>
-        </div>
-        {/* Wrapper to maintain nesting structure for existing closing tags */}
-        <div>
+      <div className="max-w-2xl w-full space-y-8 relative z-10">
+        {/* Main Card */}
+        <div className="bg-slate-900/90 backdrop-blur-xl p-8 md:p-10 rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.15)] border border-blue-500/30 ring-1 ring-white/10">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
+              {t('apply.title')}
+            </h1>
+            <p className="text-slate-400 text-lg">
+              {t('apply.subtitle')}
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  {t('apply.form.firstName')} <span className="text-red-500">*</span>
+                <label className="text-sm font-semibold text-slate-300 ml-1">
+                  {t('apply.form.firstName')} <span className="text-blue-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -136,12 +137,12 @@ export default function ApplyPage() {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  {t('apply.form.lastName')} <span className="text-red-500">*</span>
+                <label className="text-sm font-semibold text-slate-300 ml-1">
+                  {t('apply.form.lastName')} <span className="text-blue-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -149,34 +150,39 @@ export default function ApplyPage() {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                {t('apply.form.role')} <span className="text-red-500">*</span>
+              <label className="text-sm font-semibold text-slate-300 ml-1">
+                {t('apply.form.role')} <span className="text-blue-400">*</span>
               </label>
-              <select
-                name="role"
-                required
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white"
-              >
-                <option value="">Select...</option>
-                <option value="Influencer">{t('apply.form.roles.influencer')}</option>
-                <option value="Executive">{t('apply.form.roles.executive')}</option>
-                <option value="Student">{t('apply.form.roles.student')}</option>
-                <option value="Beginner">{t('apply.form.roles.beginner')}</option>
-              </select>
+              <div className="relative">
+                <select
+                  name="role"
+                  required
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200 appearance-none"
+                >
+                  <option value="" className="bg-slate-900 text-slate-400">Select...</option>
+                  <option value="Influencer" className="bg-slate-900">{t('apply.form.roles.influencer')}</option>
+                  <option value="Executive" className="bg-slate-900">{t('apply.form.roles.executive')}</option>
+                  <option value="Student" className="bg-slate-900">{t('apply.form.roles.student')}</option>
+                  <option value="Beginner" className="bg-slate-900">{t('apply.form.roles.beginner')}</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  {t('apply.form.email')} <span className="text-red-500">*</span>
+                <label className="text-sm font-semibold text-slate-300 ml-1">
+                  {t('apply.form.email')} <span className="text-blue-400">*</span>
                 </label>
                 <input
                   type="email"
@@ -184,12 +190,12 @@ export default function ApplyPage() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">
-                  {t('apply.form.confirmEmail')} <span className="text-red-500">*</span>
+                <label className="text-sm font-semibold text-slate-300 ml-1">
+                  {t('apply.form.confirmEmail')} <span className="text-blue-400">*</span>
                 </label>
                 <input
                   type="email"
@@ -197,14 +203,14 @@ export default function ApplyPage() {
                   required
                   value={formData.confirmEmail}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                {t('apply.form.mobile')} <span className="text-red-500">*</span>
+              <label className="text-sm font-semibold text-slate-300 ml-1">
+                {t('apply.form.mobile')} <span className="text-blue-400">*</span>
               </label>
               <input
                 type="tel"
@@ -213,13 +219,13 @@ export default function ApplyPage() {
                 placeholder="+55 11 99999-9999"
                 value={formData.mobile}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                {t('apply.form.linkedin')} <span className="text-red-500">*</span>
+              <label className="text-sm font-semibold text-slate-300 ml-1">
+                {t('apply.form.linkedin')} <span className="text-blue-400">*</span>
               </label>
               <input
                 type="url"
@@ -228,13 +234,13 @@ export default function ApplyPage() {
                 placeholder="https://linkedin.com/in/yourname"
                 value={formData.linkedin}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                {t('apply.form.objective')} <span className="text-red-500">*</span>
+              <label className="text-sm font-semibold text-slate-300 ml-1">
+                {t('apply.form.objective')} <span className="text-blue-400">*</span>
               </label>
               <textarea
                 name="objective"
@@ -242,17 +248,21 @@ export default function ApplyPage() {
                 rows={4}
                 value={formData.objective}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all duration-200 resize-none"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
-                {t('apply.form.cv')} <span className="text-red-500">*</span>
+              <label className="text-sm font-semibold text-slate-300 ml-1">
+                {t('apply.form.cv')} <span className="text-blue-400">*</span>
               </label>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${file ? 'border-green-500 bg-green-50' : 'border-slate-300 hover:border-blue-500 hover:bg-slate-50'}`}
+                className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 group ${
+                  file 
+                    ? 'border-blue-500 bg-blue-500/10' 
+                    : 'border-slate-700 hover:border-blue-500 hover:bg-slate-800/50'
+                }`}
               >
                 <input
                   type="file"
@@ -261,18 +271,22 @@ export default function ApplyPage() {
                   accept=".pdf,.doc,.docx"
                   className="hidden"
                 />
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-3">
                   {file ? (
                     <>
-                      <Check className="h-8 w-8 text-green-500" />
-                      <span className="text-green-700 font-medium">{file.name}</span>
-                      <span className="text-xs text-green-600">{t('apply.form.fileSelected')}</span>
+                      <div className="p-3 bg-blue-500/20 rounded-full">
+                        <Check className="h-6 w-6 text-blue-400" />
+                      </div>
+                      <span className="text-blue-400 font-medium">{file.name}</span>
+                      <span className="text-xs text-blue-300/70">{t('apply.form.fileSelected')}</span>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-8 w-8 text-slate-400" />
-                      <span className="text-slate-600">{t('apply.form.filePlaceholder')}</span>
-                      <span className="text-xs text-slate-400">PDF, DOCX (Max 5MB)</span>
+                      <div className="p-3 bg-slate-800 rounded-full group-hover:bg-blue-500/20 transition-colors">
+                        <Upload className="h-6 w-6 text-slate-400 group-hover:text-blue-400 transition-colors" />
+                      </div>
+                      <span className="text-slate-300 font-medium group-hover:text-white transition-colors">{t('apply.form.filePlaceholder')}</span>
+                      <span className="text-xs text-slate-500 group-hover:text-slate-400">PDF, DOCX (Max 5MB)</span>
                     </>
                   )}
                 </div>
@@ -283,7 +297,7 @@ export default function ApplyPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-blue-400/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
               >
                 {loading ? (
                   <>
@@ -293,7 +307,7 @@ export default function ApplyPage() {
                 ) : (
                   <>
                     {t('apply.form.submit')}
-                    <ArrowRight className="h-5 w-5" />
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>

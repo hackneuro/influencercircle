@@ -66,7 +66,10 @@ export default function ApplyPage() {
         .from('cvs')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('CV Upload Error:', uploadError);
+        throw new Error(`CV Upload failed: ${uploadError.message}`);
+      }
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -88,7 +91,10 @@ export default function ApplyPage() {
           status: 'pending'
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Database Insert Error:', insertError);
+        throw new Error(`Application submission failed: ${insertError.message}`);
+      }
 
       setShowSuccess(true);
     } catch (error: any) {

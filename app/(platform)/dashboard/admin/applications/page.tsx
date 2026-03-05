@@ -27,6 +27,12 @@ export default function AdminApplicationsPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [processing, setProcessing] = useState(false);
+
   useEffect(() => {
     fetchApplications();
   }, []);
@@ -50,7 +56,69 @@ export default function AdminApplicationsPage() {
     }
   };
 
+  const handleApproveClick = (app: Application) => {
+    setSelectedApp(app);
+    setPassword("");
+    setConfirmPassword("");
+    setIsModalOpen(true);
+  };
+
+  const handleApproveConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedApp) return;
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      const response = await fetch('/api/admin/applications/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          applicationId: selectedApp.id,
+          email: selectedApp.email,
+          password: password,
+          firstName: selectedApp.first_name,
+          lastName: selectedApp.last_name,
+          role: selectedApp.role
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to approve application');
+      }
+
+      setApplications(apps => apps.map(app => 
+        app.id === selectedApp.id ? { ...app, status: 'approved' } : app
+      ));
+      
+      toast.success(`User created and application approved for ${selectedApp.email}`);
+      setIsModalOpen(false);
+      setSelectedApp(null);
+    } catch (error: any) {
+      console.error('Error approving application:', error);
+      toast.error(error.message || 'Failed to approve application');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const updateStatus = async (id: string, newStatus: string) => {
+    if (newStatus === 'approved') {
+      // This path is now handled by handleApproveClick, but kept for safety/other uses
+      return; 
+    }
+
     try {
       const response = await fetch('/api/admin/applications/update-status', {
         method: 'POST',
@@ -195,7 +263,7 @@ export default function AdminApplicationsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => updateStatus(app.id, 'approved')}
+                          onClick={() => handleApproveClick(app)}
                           className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
                           title="Approve"
                         >
@@ -217,6 +285,74 @@ export default function AdminApplicationsPage() {
           </table>
         </div>
       </div>
+
+      {isModalOpen && selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 m-4">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Approve Application</h2>
+            <p className="text-slate-500 mb-6 text-sm">
+              Create a password for <strong>{selectedApp.email}</strong>. This will create their account and grant them access.
+            </p>
+            
+            <form onSubmit={handleApproveConfirm} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="Enter password (min 6 chars)"
+                  required
+                  minLength={6}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="Confirm password"
+                  required
+                  minLength={6}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-sm font-medium"
+                  disabled={processing}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2 text-sm font-medium"
+                  disabled={processing}
+                >
+                  {processing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create User & Approve'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

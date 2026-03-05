@@ -65,6 +65,8 @@ export default function OnboardingForm() {
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [videoEnded, setVideoEnded] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showConnectLaterPopup, setShowConnectLaterPopup] = useState(false);
+  const [skippedLinkedin, setSkippedLinkedin] = useState(false);
   const [prefetchPromise, setPrefetchPromise] = useState<Promise<string> | null>(null);
 
   const startPrefetch = (email: string, name: string, phone: string) => {
@@ -523,7 +525,7 @@ export default function OnboardingForm() {
       if (!data.about_yourself?.trim()) newErrors.about_yourself = "Please write something about yourself";
     }
     if (s === 3) {
-      if (!connections.linkedin) newErrors.linkedin_connection = "Please login to your LinkedIn account";
+      if (!connections.linkedin && !skippedLinkedin) newErrors.linkedin_connection = "Please login to your LinkedIn account";
       // if (!connections.instagram) newErrors.instagram_connection = "Please login to your Instagram account";
       // if (!connections.whatsapp) newErrors.whatsapp_connection = "Please login to your WhatsApp account";
     }
@@ -1476,6 +1478,51 @@ export default function OnboardingForm() {
                     </div>
                     {connections.linkedin && <CheckCircle className="h-6 w-6 text-blue-600" />}
                 </a>
+
+                <div className="flex justify-center mt-2">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowConnectLaterPopup(true);
+                    }}
+                    className="text-sm text-slate-500 hover:text-slate-700 hover:underline"
+                  >
+                    Connect later
+                  </button>
+                </div>
+
+                {showConnectLaterPopup && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                      <h3 className="text-lg font-bold text-slate-900 mb-4">Connect Later?</h3>
+                      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+                        You need to connect your LinkedIn to the platform for the system to work. If you want to connect later, no problem, but our team will get in touch with you to make create the connection otherwise we cannot put you in the cross-engagement solution neither offer your profile for Brands.
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        <button
+                          onClick={() => {
+                            setSkippedLinkedin(true);
+                            setShowConnectLaterPopup(false);
+                            setErrors(prev => {
+                                const newErrors = {...prev};
+                                delete newErrors.linkedin_connection;
+                                return newErrors;
+                            });
+                          }}
+                          className="w-full py-3 px-4 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors text-sm"
+                        >
+                          Okay, I understand. I will wait for someone to help me connect.
+                        </button>
+                        <button
+                          onClick={() => setShowConnectLaterPopup(false)}
+                          className="w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          I want to connect now.
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {showConfirmation && (
                     <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3 animate-in fade-in duration-300">

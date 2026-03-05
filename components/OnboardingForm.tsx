@@ -1760,7 +1760,7 @@ export default function OnboardingForm() {
 
             <div className="pt-4">
               <button disabled={loading} onClick={handleSubmit} className="btn btn-primary w-full py-4 text-lg">
-                Complete Onboarding
+                Complete Application
                 {loading ? <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <ArrowRight className="h-5 w-5" />}
               </button>
             </div>

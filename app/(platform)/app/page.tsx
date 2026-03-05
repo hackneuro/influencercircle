@@ -56,7 +56,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {displayedInfluencers.map(inf => (
-          <Link href="/onboarding" key={inf.id} className="group relative bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col">
+          <Link href="/apply" key={inf.id} className="group relative bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col">
             <div className="relative aspect-square overflow-hidden shrink-0">
               <img
                 src={inf.image}

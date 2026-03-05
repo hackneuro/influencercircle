@@ -182,8 +182,8 @@ function PricingContent() {
               <p>
                 Para assinar o plano Elite você precisa estar logado. Primeiro{" "}
                 <Link href="/apply" className="underline font-semibold">
-                  preencha o formulário de Onboarding
-                </Link>{" "}
+                  preencha o formulário de aplicação
+    </Link>{" "}
                 ou, se já tiver conta,{" "}
                 <Link href="/login" className="underline font-semibold">
                   faça login aqui

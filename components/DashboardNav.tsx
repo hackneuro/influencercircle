@@ -18,7 +18,7 @@ export default function DashboardNav() {
         <Linkedin className="h-5 w-5 text-blue-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight">Linkedin<br />Controls/Stats</span>
       </Link>
-      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/instagram">
+      {/* <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/instagram">
         <Instagram className="h-5 w-5 text-pink-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight">Instagram<br />Controls/Stats</span>
       </Link>
@@ -29,12 +29,12 @@ export default function DashboardNav() {
       <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/sales">
         <Target className="h-5 w-5 text-indigo-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight">Sales Controls<br />(Stats and Funnel)</span>
-      </Link>
+      </Link> */}
       <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/profile">
         <User className="h-5 w-5 text-orange-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-orange-700">Profile ID Control</span>
       </Link>
-      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/market">
+      {/* <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/market">
         <ShoppingBag className="h-5 w-5 text-amber-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-amber-900">Influencer<br />Market</span>
       </Link>
@@ -49,7 +49,7 @@ export default function DashboardNav() {
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-slate-700">
           Admin<br />Applications
         </span>
-      </Link>
+      </Link> */}
       <button 
         onClick={handleLogout}
         className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0 border-red-200 hover:bg-red-50 hover:border-red-300"

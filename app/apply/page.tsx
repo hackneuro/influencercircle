@@ -59,41 +59,57 @@ export default function ApplyPage() {
     }
 
     try {
-      // 1. Upload CV
+      // 1. Upload CV (Using server-side Signed URL to bypass RLS)
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${formData.firstName}_${formData.lastName}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('cvs')
-        .upload(fileName, file);
+      
+      // Get Signed URL
+      const uploadUrlRes = await fetch('/api/application/upload-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName, fileType: file.type })
+      });
+      
+      if (!uploadUrlRes.ok) {
+        const error = await uploadUrlRes.json();
+        throw new Error(`Failed to get upload URL: ${error.error}`);
+      }
+      
+      const { signedUrl, path, publicUrl } = await uploadUrlRes.json();
 
-      if (uploadError) {
-        console.error('CV Upload Error:', uploadError);
-        throw new Error(`CV Upload failed: ${uploadError.message}`);
+      // Upload file to Signed URL
+      const uploadRes = await fetch(signedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadRes.ok) {
+        console.error('CV Upload Error Status:', uploadRes.status);
+        throw new Error('CV Upload failed: Could not upload to storage');
       }
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('cvs')
-        .getPublicUrl(fileName);
-
-      // 2. Insert Application
-      const { error: insertError } = await supabase
-        .from('applications')
-        .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
+      // 2. Insert Application (Using server-side API to bypass RLS)
+      const submitRes = await fetch('/api/application/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           role: formData.role,
           email: formData.email,
           mobile: formData.mobile,
-          linkedin_url: formData.linkedin,
+          linkedin: formData.linkedin,
           objective: formData.objective,
-          cv_url: publicUrl,
-          status: 'pending'
-        });
+          cvUrl: publicUrl
+        })
+      });
 
-      if (insertError) {
-        console.error('Database Insert Error:', insertError);
-        throw new Error(`Application submission failed: ${insertError.message}`);
+      if (!submitRes.ok) {
+        const error = await submitRes.json();
+        throw new Error(`Application submission failed: ${error.error}`);
       }
 
       setShowSuccess(true);

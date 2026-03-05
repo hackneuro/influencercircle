@@ -57,6 +57,11 @@ export default function OnboardingForm() {
     whatsapp: false
   });
 
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+
   const [isVerifying, setIsVerifying] = useState(false);
   const [pollingId, setPollingId] = useState<NodeJS.Timeout | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -545,6 +550,66 @@ export default function OnboardingForm() {
 
 
 
+  const performSignup = async () => {
+      setLoading(true);
+      try {
+          const { error, data: signUpData } = await supabase.auth.signUp({
+              email: data.email,
+              password: password,
+          });
+
+          if (error) {
+              if (error.message.includes("already registered") || error.message.toLowerCase().includes("user already exists")) {
+                  setMessage("Este e-mail já está em uso. Por favor, faça login.");
+                  setTimeout(() => {
+                      router.push("/login");
+                  }, 2000);
+                  return;
+              }
+              throw error;
+          }
+          
+          if (signUpData.session) {
+              setIsAuthenticated(true);
+          }
+          transitionToNextStep(1);
+      } catch (err: any) {
+         setMessage(err.message || "Failed to create account.");
+         window.scrollTo({ top: 0, behavior: 'smooth' });
+     } finally {
+          setLoading(false);
+      }
+  };
+
+  const verifyCode = async () => {
+    if (!verificationCode) return;
+    setVerificationError(null);
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, code: verificationCode })
+      });
+      const json = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(json.error || 'Invalid code');
+      }
+      
+      setIsEmailVerified(true);
+      setShowVerificationModal(false);
+      
+      // Proceed with signup
+      await performSignup();
+      
+    } catch (err: any) {
+      setVerificationError(err.message || "Verification failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const next = async () => {
     setMessage(null); // Clear previous messages
     
@@ -562,34 +627,26 @@ export default function OnboardingForm() {
       
       if (Object.keys(currentErrors).length === 0) {
         if (!isAuthenticated) {
-             setLoading(true);
-             try {
-                 const { error, data: signUpData } = await supabase.auth.signUp({
-                     email: data.email,
-                     password: password,
-                 });
-
-                 if (error) {
-                     if (error.message.includes("already registered") || error.message.toLowerCase().includes("user already exists")) {
-                         setMessage("Este e-mail já está em uso. Por favor, faça login.");
-                         setTimeout(() => {
-                             router.push("/login");
-                         }, 2000);
-                         return;
-                     }
-                     throw error;
+             if (!isEmailVerified) {
+                 setLoading(true);
+                 try {
+                     const res = await fetch('/api/auth/send-verification', {
+                         method: 'POST',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ email: data.email })
+                     });
+                     if (!res.ok) throw new Error('Failed to send verification code');
+                     setShowVerificationModal(true);
+                     setMessage("Verification code sent to " + data.email);
+                 } catch (err: any) {
+                     setMessage(err.message || "Error sending verification code.");
+                 } finally {
+                     setLoading(false);
                  }
-                 
-                 if (signUpData.session) {
-                     setIsAuthenticated(true);
-                 }
-                 transitionToNextStep(1);
-             } catch (err: any) {
-                setMessage(err.message || "Failed to create account.");
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } finally {
-                 setLoading(false);
+                 return;
              }
+
+             await performSignup();
         } else {
             // If already authenticated, try to update the password to what they entered
             if (password) {
@@ -1808,6 +1865,52 @@ export default function OnboardingForm() {
                <p className="text-xs text-slate-400">
                  Esta tela avançará automaticamente assim que você confirmar.
                </p>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {showVerificationModal && (
+        <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-slate-100 text-center relative overflow-hidden">
+             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+             
+             <div className="mx-auto w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 shadow-sm ring-4 ring-blue-50/50">
+                <Mail className="h-10 w-10 text-blue-600" />
+             </div>
+             
+             <h3 className="text-2xl font-bold text-slate-900 mb-3">Check your email</h3>
+             <p className="text-slate-600 mb-6 leading-relaxed">
+               We sent a verification code to <br/><strong className="text-slate-900 font-medium">{data.email}</strong>.
+             </p>
+             
+             <div className="flex flex-col gap-4">
+               <input
+                 type="text"
+                 placeholder="Enter 6-digit code"
+                 value={verificationCode}
+                 onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                 className="text-center text-2xl tracking-widest font-bold p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+               />
+               
+               {verificationError && (
+                 <p className="text-red-500 text-sm">{verificationError}</p>
+               )}
+
+               <button 
+                 onClick={verifyCode}
+                 disabled={loading || verificationCode.length < 6}
+                 className="btn btn-primary w-full py-3"
+               >
+                 {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Verify Code"}
+               </button>
+               
+               <button 
+                 onClick={() => setShowVerificationModal(false)}
+                 className="text-slate-400 text-sm hover:text-slate-600"
+               >
+                 Cancel
+               </button>
              </div>
           </div>
         </div>

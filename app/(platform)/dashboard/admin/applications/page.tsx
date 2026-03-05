@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2, FileText, ExternalLink, Check, X, Search } from "lucide-react";
+import { Loader2, FileText, ExternalLink, Check, X, Search, Key } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -262,6 +262,13 @@ export default function AdminApplicationsPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleApproveClick(app)}
+                          className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                          title="Create User Password"
+                        >
+                          <Key className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => handleApproveClick(app)}
                           className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition-colors"

@@ -59,36 +59,37 @@ export default function ApplyPage() {
     }
 
     try {
-      // 1. Upload CV (Using server-side Signed URL to bypass RLS)
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${formData.firstName}_${formData.lastName}.${fileExt}`;
-      
-      // Get Signed URL
-      const uploadUrlRes = await fetch('/api/application/upload-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName, fileType: file.type })
-      });
-      
-      if (!uploadUrlRes.ok) {
-        const error = await uploadUrlRes.json();
-        throw new Error(`Failed to get upload URL: ${error.error}`);
-      }
-      
-      const { signedUrl, path, publicUrl } = await uploadUrlRes.json();
-
-      // Upload file to Signed URL
-      const uploadRes = await fetch(signedUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
-
-      if (!uploadRes.ok) {
-        console.error('CV Upload Error Status:', uploadRes.status);
-        throw new Error('CV Upload failed: Could not upload to storage');
+      // 1. Upload CV (Optional)
+      let publicUrl = null;
+      if (file) {
+        // Get Signed URL
+        const uploadUrlRes = await fetch('/api/application/upload-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name, fileType: file.type })
+        });
+        
+        if (!uploadUrlRes.ok) {
+          const error = await uploadUrlRes.json();
+          throw new Error(`Failed to get upload URL: ${error.error}`);
+        }
+        
+        const { signedUrl, path, publicUrl: url } = await uploadUrlRes.json();
+        publicUrl = url;
+  
+        // Upload file to Signed URL
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
+  
+        if (!uploadRes.ok) {
+          console.error('CV Upload Error Status:', uploadRes.status);
+          throw new Error('CV Upload failed: Could not upload to storage');
+        }
       }
 
       // 2. Insert Application (Using server-side API to bypass RLS)
@@ -276,7 +277,7 @@ export default function ApplyPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-300 ml-1">
-                {t('apply.form.cv')} <span className="text-blue-400">*</span>
+                {t('apply.form.cv')} <span className="text-slate-500 text-sm font-normal">({t('apply.optional') || 'Optional'})</span>
               </label>
               <div 
                 onClick={() => fileInputRef.current?.click()}

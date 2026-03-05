@@ -181,7 +181,7 @@ function PricingContent() {
               <AlertCircle className="h-4 w-4 mt-0.5" />
               <p>
                 Para assinar o plano Elite você precisa estar logado. Primeiro{" "}
-                <Link href="/onboarding" className="underline font-semibold">
+                <Link href="/apply" className="underline font-semibold">
                   preencha o formulário de Onboarding
                 </Link>{" "}
                 ou, se já tiver conta,{" "}

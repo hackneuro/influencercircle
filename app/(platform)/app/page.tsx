@@ -34,11 +34,11 @@ export default function HomePage() {
               </p>
             </div>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/onboarding" className="btn btn-primary px-8">
+              <Link href="/apply" className="btn btn-primary px-8">
                 Get Started for Free Now
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/onboarding" className="btn btn-outline px-8 transition-all hover:translate-y-[-2px]">
+              <Link href="/apply" className="btn btn-outline px-8 transition-all hover:translate-y-[-2px]">
                 Brand/ Campaign
               </Link>
               <Link href="/dashboard" className="btn btn-outline px-8 transition-all hover:translate-y-[-2px]">

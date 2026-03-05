@@ -107,7 +107,7 @@ export default function LoginForm() {
         </h1>
         <p className="text-sm text-slate-500 mb-6">
           {mode === "login"
-            ? "Use o e-mail e senha que você cadastrou no onboarding."
+            ? "Use o e-mail e senha que você cadastrou na aplicação."
             : "Informe o e-mail cadastrado para receber um link de redefinição de senha."}
         </p>
 
@@ -241,7 +241,7 @@ export default function LoginForm() {
               <p>
                 Ainda não tem conta?{" "}
                 <a
-                  href="/onboarding"
+                  href="/apply"
                   className="text-blue-600 hover:text-blue-700 hover:underline"
                 >
                   Comece pelo onboarding

@@ -61,7 +61,7 @@ export default function Hero() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start pt-4">
-                        <a href="/onboarding" className="btn-primary w-full sm:w-auto text-lg px-8 py-4 shadow-xl shadow-blue-600/20 text-center">
+                        <a href="/apply" className="btn-primary w-full sm:w-auto text-lg px-8 py-4 shadow-xl shadow-blue-600/20 text-center">
                             {t('hero.cta')}
                         </a>
                         {/* <div className="text-sm text-text-muted font-medium flex items-center gap-2">

@@ -23,7 +23,7 @@ const Footer = () => {
                     <div className="space-y-4">
                         <h4 className="font-bold text-slate-900">Influencers</h4>
                         <p className="text-sm text-slate-600">Do you want to make money by becoming an Influencer?</p>
-                        <a href="/onboarding" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                        <a href="/apply" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm">
                             Join the Influencer Circle.
                         </a>
                     </div>

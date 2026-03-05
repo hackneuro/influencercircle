@@ -66,7 +66,7 @@ export default function Header() {
                                 PLATFORM / APP
                             </Link>
                             <Link
-                                href="/app"
+                                href="/apply"
                                 className="btn-primary py-2.5 px-6 text-sm shadow-lg shadow-blue-500/20"
                             >
                                 {t('header.joinCreator')}
@@ -138,7 +138,7 @@ export default function Header() {
                                 PLATFORM / APP
                             </Link>
                             <Link
-                                href="/app"
+                                href="/apply"
                                 onClick={() => setIsMenuOpen(false)}
                                 className="btn-primary w-full text-center"
                             >

@@ -517,7 +517,7 @@ export default function SubmitPostPage() {
                 <AlertCircle className="h-4 w-4 mt-0.5" />
                 <p>
                   {t('dashboard.submitPost.paid.loginWarningPre')}
-                  <Link href="/onboarding" className="underline font-semibold">
+                  <Link href="/apply" className="underline font-semibold">
                     {t('platform.onboarding.link')}
                   </Link>
                   {t('dashboard.submitPost.paid.loginWarningMid')}

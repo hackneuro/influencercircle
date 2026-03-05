@@ -49,7 +49,7 @@ export default function EmailConfirmationBanner() {
   if (checkingStatus || !user || isVerified) return null;
 
   // Don't show banner on onboarding pages
-  if (pathname?.startsWith("/onboarding")) return null;
+  if (pathname?.startsWith("/onboarding") || pathname?.startsWith("/apply")) return null;
 
   const handleSendCode = async () => {
     setLoading(true);

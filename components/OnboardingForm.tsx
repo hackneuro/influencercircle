@@ -585,9 +585,14 @@ export default function OnboardingForm() {
                  }
                  transitionToNextStep(1);
              } catch (err: any) {
-                 setMessage(err.message || "Failed to create account.");
-                 window.scrollTo({ top: 0, behavior: 'smooth' });
-             } finally {
+                const msg = err.message || "Failed to create account.";
+                if (msg.toLowerCase().includes("rate limit exceeded") || msg.toLowerCase().includes("too many requests")) {
+                    setMessage("You need to confirm your email in order to access the dashboard. Go to your email and check the message from Influencer Circle");
+                } else {
+                    setMessage(msg);
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } finally {
                  setLoading(false);
              }
         } else {

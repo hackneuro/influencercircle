@@ -298,7 +298,9 @@ export default function AdminApplicationsPage() {
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 m-4">
             <h2 className="text-xl font-bold text-slate-900 mb-2">Approve Application</h2>
             <p className="text-slate-500 mb-6 text-sm">
-              Create a password for <strong>{selectedApp.email}</strong>. This will create their account and grant them access.
+              Set a login password for <strong>{selectedApp.email}</strong>.
+              <br/><br/>
+              <span className="text-amber-600 font-medium">Important:</span> The user will need this password to log in. Please copy and send it to them securely.
             </p>
             
             <form onSubmit={handleApproveConfirm} className="space-y-4">

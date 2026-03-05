@@ -771,6 +771,8 @@ export default function OnboardingForm() {
       const msg = err?.message ?? "Failed to submit onboarding.";
       if (msg.includes("Auth session missing") || msg.includes("Not authenticated")) {
         setMessage("Sua sessão de autenticação expirou ou não foi criada. Atualize a página, faça login novamente e tente completar o onboarding.");
+      } else if (msg.toLowerCase().includes("rate limit exceeded") || msg.toLowerCase().includes("too many requests")) {
+        setMessage("You need to confirm your email in order to access the dashboard. Go to your email and check the message from Influencer Circle");
       } else {
         setMessage(msg);
       }

@@ -1,7 +1,7 @@
 import { ArrowRight, Trophy, Users, ShieldCheck, BarChart3, PieChart, DollarSign, MapPin, TrendingUp, CheckCircle, Linkedin, Instagram, Heart } from "lucide-react";
 import Link from "next/link";
 import { INFLUENCERS } from "@/lib/data";
-import CompanyCarousel from "@/components/CompanyCarousel";
+import Executives from "@/components/marketing/Executives";
 
 export default function HomePage() {
   // Randomly select 8 influencers to display
@@ -49,6 +49,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <Executives />
 
       {/* Influencer Grid - HIDDEN FOR NOW
       <section>

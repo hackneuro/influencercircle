@@ -12,10 +12,13 @@ function getEnv(val: string | undefined): string | undefined {
 }
 
 function priceEnvFor(region: string | null) {
+  // Normalize region
+  const normalizedRegion = region ? region.toLowerCase().trim() : null;
+
   // Default fallback (USA)
   // Ensure we have a fallback even if NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID is missing
   const defaultPriceId = getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID) || getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_USA);
-  if (!region) return defaultPriceId;
+  if (!normalizedRegion) return defaultPriceId;
 
   const envMap: Record<string, string | undefined> = {
     // USA and fallbacks to USA
@@ -40,10 +43,12 @@ function priceEnvFor(region: string | null) {
     "latin-america": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_COLOMBIA)
   };
 
-  return envMap[region] ?? defaultPriceId;
+  return envMap[normalizedRegion] ?? defaultPriceId;
 }
 
 function regionPricing(region: string | null) {
+  const normalizedRegion = region ? region.toLowerCase().trim() : "usa";
+  
   const table: Record<string, { label: string; price: string; discount: string; currencyLabel: string; isSpecial?: boolean }> = {
     "usa": { label: "USA", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
     "other": { label: "Other", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
@@ -59,13 +64,14 @@ function regionPricing(region: string | null) {
     "chile": { label: "Chile", price: "CLP 49011/mo", discount: "CLP 32619/mo", currencyLabel: "CLP" },
     "latin-america": { label: "Latin America", price: "COP 203000/mo", discount: "COP 135000/mo", currencyLabel: "COP" }
   };
-  const key = region ?? "usa";
+  const key = normalizedRegion;
   return table[key] ?? table["usa"];
 }
 
 function PricingContent() {
   const params = useSearchParams();
-  const region = params.get("region");
+  const rawRegion = params.get("region");
+  const region = rawRegion ? rawRegion.toLowerCase().trim() : null;
   const priceId = priceEnvFor(region);
   const pricing = regionPricing(region);
   const [message, setMessage] = useState<string | null>(null);

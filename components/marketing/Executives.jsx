@@ -1,6 +1,7 @@
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
+import CompanyCarousel from '@/components/CompanyCarousel';
 
 export default function Executives() {
     const { t } = useLanguage();
@@ -123,8 +124,8 @@ export default function Executives() {
                     </div>
                 </div>
 
-                {/* Companies Grid */}
-                <div className="text-center border-t border-gray-100 pt-16">
+                {/* Companies Grid - REPLACED BY CAROUSEL */}
+                {/* <div className="text-center border-t border-gray-100 pt-16">
                     <h3 className="font-bold text-sm tracking-widest text-text-muted mb-10 uppercase">{t('executives.poweringBrands')}</h3>
                     <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8">
                         {companies.map((company, idx) => (
@@ -144,6 +145,10 @@ export default function Executives() {
                             </a>
                         ))}
                     </div>
+                </div> */}
+                
+                <div className="pt-16 border-t border-gray-100">
+                    <CompanyCarousel />
                 </div>
 
             </div>

@@ -50,8 +50,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <CompanyCarousel />
-
       {/* Influencer Grid - HIDDEN FOR NOW
       <section>
         <div className="mb-8">

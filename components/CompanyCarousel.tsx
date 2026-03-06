@@ -72,8 +72,10 @@ export default function CompanyCarousel() {
 
   return (
     <div className="py-12 bg-slate-50/50 border-y border-slate-100 overflow-hidden space-y-4">
-      <div className="text-center mb-8">
-        <h2 className="text-lg font-bold text-slate-400 uppercase tracking-widest">Trusted by Professionals from</h2>
+      <div className="text-center mb-8 px-4">
+        <h2 className="text-lg font-bold text-slate-500 uppercase tracking-widest max-w-4xl mx-auto leading-relaxed">
+          Companies that did Marketing Campaigns with us and professionals from this companies that are in.
+        </h2>
       </div>
       
       {rows.map((rowItems, index) => (
@@ -87,7 +89,7 @@ export default function CompanyCarousel() {
             // Let's alternate direction
           }}
         >
-          <div className={`marquee-content ${index % 2 === 1 ? 'reverse' : ''}`} style={{ animationDuration: `${40 + index * 5}s` }}>
+          <div className={`marquee-content ${index % 2 === 1 ? 'reverse' : ''}`} style={{ animationDuration: `${60 + index * 10}s` }}>
             {/* Render items twice for seamless loop */}
             {rowItems.map((company, i) => (
               <CompanyItem key={`${index}-${i}-1`} name={company} />

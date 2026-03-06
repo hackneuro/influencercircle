@@ -45,7 +45,6 @@ export default function MarketingPage() {
                 return (
                     <>
                         <Hero />
-                        <CompanyCarousel />
                         <Philosophy />
                         <Executives />
                     </>

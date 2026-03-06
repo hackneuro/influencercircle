@@ -15,32 +15,45 @@ function priceEnvFor(region: string | null) {
   // Normalize region
   const normalizedRegion = region ? region.toLowerCase().trim() : null;
 
+  // Active Price IDs (Verified from Stripe)
+  const PRICES = {
+    USA: "price_1T52QVPcE1dEtoc2LeCUYCfO",
+    BRAZIL: "price_1T52PgPcE1dEtoc2KJAJTNAc",
+    ARGENTINA: "price_1T52MpPcE1dEtoc26s777X8i",
+    AUSTRALIA: "price_1Srux6PcE1dEtoc2p5MWOkZJ",
+    CHILE: "price_1SruzDPcE1dEtoc2YjMhLcpb",
+    COLOMBIA: "price_1SruxdPcE1dEtoc2ixO01SZR",
+    EUROPE: "price_1Sruw2PcE1dEtoc2x5UgRZG3",
+    INDIA: "price_1SruwmPcE1dEtoc2J68vDUy3",
+    MEXICO: "price_1SruydPcE1dEtoc21hLdbYlM",
+    PUC_ANGELS: "price_1T52RePcE1dEtoc2yGU5eht3"
+  };
+
   // Default fallback (USA)
-  // Ensure we have a fallback even if NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID is missing
-  const defaultPriceId = getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID) || getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_USA);
+  const defaultPriceId = PRICES.USA;
   if (!normalizedRegion) return defaultPriceId;
 
   const envMap: Record<string, string | undefined> = {
     // USA and fallbacks to USA
-    "usa": "price_1T52QVPcE1dEtoc2LeCUYCfO",
-    "rest-of-asia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_REST_OF_ASIA) || defaultPriceId,
-    "other": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_OTHER) || defaultPriceId,
+    "usa": PRICES.USA,
+    "rest-of-asia": PRICES.USA, // Fallback to USA
+    "other": PRICES.USA, // Fallback to USA
 
     // Specific regions
-    "brazil": "price_1T52PgPcE1dEtoc2KJAJTNAc",
-    "puc-angels": "price_1T52RePcE1dEtoc2yGU5eht3",
-    "europe": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_EUROPE),
-    "india": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_INDIA),
-    "australia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_AUSTRALIA),
+    "brazil": PRICES.BRAZIL,
+    "puc-angels": PRICES.PUC_ANGELS,
+    "europe": PRICES.EUROPE,
+    "india": PRICES.INDIA,
+    "australia": PRICES.AUSTRALIA,
     
     // Latin America Specifics
-    "colombia": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_COLOMBIA),
-    "argentina": "price_1T52MpPcE1dEtoc26s777X8i",
-    "mexico": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_MEXICO),
-    "chile": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_CHILE),
+    "colombia": PRICES.COLOMBIA,
+    "argentina": PRICES.ARGENTINA,
+    "mexico": PRICES.MEXICO,
+    "chile": PRICES.CHILE,
     
     // Latin America General -> Uses Colombia ID
-    "latin-america": getEnv(process.env.NEXT_PUBLIC_STRIPE_ELITE_PRICE_ID_COLOMBIA)
+    "latin-america": PRICES.COLOMBIA
   };
 
   return envMap[normalizedRegion] ?? defaultPriceId;

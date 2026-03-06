@@ -12,6 +12,7 @@ import CreatorPortal from '@/components/marketing/CreatorPortal';
 import BrandPortal from '@/components/marketing/BrandPortal';
 import Executives from '@/components/marketing/Executives';
 import Philosophy from '@/components/marketing/Philosophy';
+import CompanyCarousel from '@/components/CompanyCarousel';
 import { useView } from '@/components/marketing/ViewContext';
 
 export default function MarketingPage() {
@@ -44,6 +45,7 @@ export default function MarketingPage() {
                 return (
                     <>
                         <Hero />
+                        <CompanyCarousel />
                         <Philosophy />
                         <Executives />
                     </>

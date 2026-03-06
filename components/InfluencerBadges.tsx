@@ -45,7 +45,7 @@ export default function InfluencerBadges({ isPucAngel, verified, highEngagement 
   };
 
   const handleRegionSelect = (regionId: string) => {
-    router.push(`/onboarding/elite-pricing?region=${regionId}`);
+    router.push(`/apply/elite-pricing?region=${regionId}`);
   };
 
   return (

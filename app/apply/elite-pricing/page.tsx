@@ -18,7 +18,7 @@ function priceEnvFor(region: string | null) {
   // Active Price IDs (Verified from Stripe)
   const PRICES = {
     USA: "price_1T52QVPcE1dEtoc2LeCUYCfO",
-    BRAZIL: "price_1T5518PcE1dEtoc2zY140v9K",
+    BRAZIL: "price_1T82OaPcE1dEtoc2zl540Jiq",
     ARGENTINA: "price_1T52MpPcE1dEtoc26s777X8i",
     AUSTRALIA: "price_1Srux6PcE1dEtoc2p5MWOkZJ",
     CHILE: "price_1SruzDPcE1dEtoc2YjMhLcpb",
@@ -65,7 +65,7 @@ function regionPricing(region: string | null) {
   const table: Record<string, { label: string; price: string; discount: string; currencyLabel: string; isSpecial?: boolean }> = {
     "usa": { label: "USA", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
     "other": { label: "Other", price: "USD 199/mo", discount: "USD 99/mo", currencyLabel: "USD" },
-    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 299/mo", currencyLabel: "BRL" },
+    "brazil": { label: "Brazil", price: "BRL 299/mo", discount: "BRL 199/mo", currencyLabel: "BRL" },
     "puc-angels": { label: "PUC angels (Participants)", price: "BRL 299/mo", discount: "BRL 29,90/mo", currencyLabel: "BRL", isSpecial: true },
     "europe": { label: "Europe", price: "EUR 199/mo", discount: "EUR 99/mo", currencyLabel: "EUR" },
     "india": { label: "India", price: "INR 8000/mo", discount: "INR 4000/mo", currencyLabel: "INR" },

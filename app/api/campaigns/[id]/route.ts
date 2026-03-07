@@ -23,6 +23,19 @@ export async function GET(
   }
 
   try {
+    // Try to fetch from Storage (Bucket: 'campaigns')
+    // This is the fallback/primary method since table migration failed
+    const { data: blob, error: storageError } = await supabase.storage
+      .from("campaigns")
+      .download(`${id}.json`);
+
+    if (blob) {
+      const text = await blob.text();
+      const campaign = JSON.parse(text);
+      return NextResponse.json(campaign);
+    }
+
+    // Fallback to table if storage fails (just in case table exists)
     const { data, error } = await supabase
       .from("campaigns")
       .select("opportunity_title, location, campaign_name")

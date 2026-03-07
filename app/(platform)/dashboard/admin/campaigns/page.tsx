@@ -34,12 +34,10 @@ export default function AdminCampaignsPage() {
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      // Fetch from our API which handles Storage/DB abstraction
+      const res = await fetch('/api/admin/campaigns');
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
       setCampaigns(data || []);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
@@ -54,14 +52,18 @@ export default function AdminCampaignsPage() {
     setCreating(true);
 
     try {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .insert([formData])
-        .select()
-        .single();
+      const res = await fetch('/api/admin/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to create');
+      }
 
+      const data = await res.json();
       setCampaigns([data, ...campaigns]);
       setFormData({ opportunity_title: "", campaign_name: "", location: "" });
       toast.success("Campaign created successfully");
@@ -86,12 +88,9 @@ export default function AdminCampaignsPage() {
     if (!confirm("Are you sure you want to delete this campaign? Existing applications will still keep the ID.")) return;
 
     try {
-      const { error } = await supabase
-        .from('campaigns')
-        .delete()
-        .eq('id', id);
+      const res = await fetch(`/api/admin/campaigns?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
 
-      if (error) throw error;
       setCampaigns(campaigns.filter(c => c.id !== id));
       toast.success("Campaign deleted");
     } catch (error) {

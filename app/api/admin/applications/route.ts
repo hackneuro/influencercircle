@@ -76,6 +76,48 @@ export async function GET(request: Request) {
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
+    // 3. Hydrate Campaign Data for applications that have campaign_id but no campaign details (e.g. from Storage or failed DB join)
+    try {
+      // Fetch all campaigns from storage (since DB join might fail or campaigns are in storage now)
+      // This is less efficient but necessary for the storage fallback architecture
+      const { data: campaignFiles } = await supabaseAdmin.storage.from('campaigns').list();
+      const campaignsMap: Record<string, any> = {};
+
+      if (campaignFiles) {
+        await Promise.all(campaignFiles.map(async (file) => {
+           if (!file.name.endsWith('.json')) return;
+           const id = file.name.replace('.json', '');
+           // Only fetch if we have applications referencing this ID
+           if (applicationsData.some(app => app.campaign_id === id && !app.campaigns)) {
+             const { data } = await supabaseAdmin.storage.from('campaigns').download(file.name);
+             if (data) {
+               try {
+                 const text = await data.text();
+                 campaignsMap[id] = JSON.parse(text);
+               } catch (e) {}
+             }
+           }
+        }));
+      }
+
+      // Attach campaign details
+      applicationsData = applicationsData.map(app => {
+        if (app.campaign_id && !app.campaigns && campaignsMap[app.campaign_id]) {
+          return {
+            ...app,
+            campaigns: {
+              campaign_name: campaignsMap[app.campaign_id].campaign_name,
+              opportunity_title: campaignsMap[app.campaign_id].opportunity_title,
+              location: campaignsMap[app.campaign_id].location
+            }
+          };
+        }
+        return app;
+      });
+    } catch (hydrateError) {
+      console.warn('Campaign hydration failed:', hydrateError);
+    }
+
     return NextResponse.json({ success: true, data: applicationsData });
   } catch (error: any) {
     console.error('Admin API Error:', error);

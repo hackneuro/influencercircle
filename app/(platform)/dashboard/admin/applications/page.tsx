@@ -19,6 +19,11 @@ interface Application {
   cv_url: string;
   status: string;
   created_at: string;
+  campaigns?: {
+    campaign_name: string;
+    opportunity_title: string;
+    location: string;
+  };
 }
 
 export default function AdminApplicationsPage() {
@@ -195,7 +200,8 @@ export default function AdminApplicationsPage() {
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4">Applicant</th>
+                <th className="px-6 py-4">Name</th>
+                <th className="px-6 py-4">Campaign</th>
                 <th className="px-6 py-4">Role</th>
                 <th className="px-6 py-4">Contact</th>
                 <th className="px-6 py-4">Links</th>
@@ -220,6 +226,17 @@ export default function AdminApplicationsPage() {
                       <div className="text-xs text-slate-500">
                         {new Date(app.created_at).toLocaleDateString()}
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {app.campaigns ? (
+                        <div className="text-xs">
+                          <div className="font-bold text-purple-600">{app.campaigns.campaign_name}</div>
+                          <div className="text-slate-600">{app.campaigns.opportunity_title}</div>
+                          <div className="text-slate-400">{app.campaigns.location}</div>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-xs italic">General</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

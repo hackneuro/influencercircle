@@ -34,6 +34,10 @@ export default function DashboardNav() {
         <User className="h-5 w-5 text-orange-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-orange-700">Profile ID Control</span>
       </Link>
+      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/campaigns">
+        <Target className="h-5 w-5 text-purple-600" />
+        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-purple-700">Admin<br />Campaigns</span>
+      </Link>
       {/* <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/market">
         <ShoppingBag className="h-5 w-5 text-amber-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-amber-900">Influencer<br />Market</span>
@@ -50,7 +54,7 @@ export default function DashboardNav() {
           Admin<br />Applications
         </span>
       </Link> */}
-      <button 
+      <button
         onClick={handleLogout}
         className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0 border-red-200 hover:bg-red-50 hover:border-red-300"
       >

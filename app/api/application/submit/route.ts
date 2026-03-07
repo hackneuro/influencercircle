@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         linkedin_url: body.linkedin,
         objective: body.objective,
         cv_url: body.cvUrl,
+        campaign_id: body.campaignId || null,
         status: 'pending',
         created_at: new Date().toISOString()
       };

@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     try {
       const { data, error } = await supabaseAdmin
         .from('applications')
-        .select('*')
+        .select('*, campaigns(campaign_name, opportunity_title, location)')
         .order('created_at', { ascending: false });
 
       if (!error && data) {

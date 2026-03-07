@@ -1,20 +1,25 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useLanguage } from "@/components/marketing/LanguageContext";
 import { supabase } from "@/lib/supabaseClient";
 import { Upload, X, Check, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
-export default function ApplyPage() {
+function ApplyContent() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
+  const campaignId = searchParams.get("campaign_id");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [campaign, setCampaign] = useState<{ opportunity_title: string; location: string } | null>(null);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -25,6 +30,19 @@ export default function ApplyPage() {
     linkedin: "",
     objective: "",
   });
+
+  useEffect(() => {
+    if (campaignId) {
+      fetch(`/api/campaigns/${campaignId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && !data.error) {
+            setCampaign(data);
+          }
+        })
+        .catch(err => console.error("Failed to load campaign", err));
+    }
+  }, [campaignId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -104,7 +122,8 @@ export default function ApplyPage() {
           mobile: formData.mobile,
           linkedin: formData.linkedin,
           objective: formData.objective,
-          cvUrl: publicUrl
+          cvUrl: publicUrl,
+          campaignId: campaignId // Pass campaign ID
         })
       });
 
@@ -143,9 +162,21 @@ export default function ApplyPage() {
             <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
               {t('apply.title')}
             </h1>
-            <p className="text-slate-400 text-lg">
-              {t('apply.subtitle')}
-            </p>
+            {campaign ? (
+              <div className="space-y-2">
+                <p className="text-blue-400 text-xl font-semibold">
+                  {campaign.opportunity_title}
+                </p>
+                <p className="text-slate-400 text-base flex items-center justify-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-slate-500"></span>
+                  {campaign.location}
+                </p>
+              </div>
+            ) : (
+              <p className="text-slate-400 text-lg">
+                {t('apply.subtitle')}
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -373,5 +404,13 @@ export default function ApplyPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><Loader2 className="h-8 w-8 text-blue-500 animate-spin" /></div>}>
+      <ApplyContent />
+    </Suspense>
   );
 }

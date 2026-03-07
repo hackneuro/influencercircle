@@ -2,6 +2,8 @@
 import { Pool } from 'pg';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   // Security check: require a secret token or admin session
   // For now, let's rely on the service role key or a simple secret

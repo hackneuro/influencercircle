@@ -22,6 +22,10 @@ export async function POST(request: Request) {
       }
     );
 
+    // Generate a unique filename to avoid "resource already exists" errors
+    // Format: timestamp-random-originalName
+    const uniqueFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${fileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
     // Create a signed URL for uploading (valid for 60 seconds)
     // Note: createSignedUploadUrl is for overwriting or creating.
     // However, it's simpler to use createSignedUrl if the file exists, 
@@ -29,7 +33,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseAdmin
       .storage
       .from('cvs')
-      .createSignedUploadUrl(fileName);
+      .createSignedUploadUrl(uniqueFileName);
 
     if (error) {
       console.error('Storage Signed URL Error:', error);
@@ -40,7 +44,7 @@ export async function POST(request: Request) {
     const { data: publicUrlData } = supabaseAdmin
       .storage
       .from('cvs')
-      .getPublicUrl(fileName);
+      .getPublicUrl(uniqueFileName);
 
     return NextResponse.json({ 
       signedUrl: data.signedUrl, 

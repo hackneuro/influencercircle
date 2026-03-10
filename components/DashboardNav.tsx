@@ -1,16 +1,42 @@
 "use client";
-import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut, ShieldCheck } from "lucide-react";
+import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut, ShieldCheck, Lock } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function DashboardNav() {
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
+
+  useEffect(() => {
+    async function loadRole() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setIsAdmin(false);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        setIsAdmin(profile?.role === "admin");
+      } catch {
+        setIsAdmin(false);
+      }
+    }
+
+    loadRole();
+  }, []);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-2 mb-4">
@@ -34,10 +60,24 @@ export default function DashboardNav() {
         <User className="h-5 w-5 text-orange-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-orange-700">Profile ID Control</span>
       </Link>
-      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/campaigns">
-        <Target className="h-5 w-5 text-purple-600" />
-        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-purple-700">Admin<br />Campaigns</span>
+      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/profile#password">
+        <Lock className="h-5 w-5 text-slate-700" />
+        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-slate-700">Change<br />Password</span>
       </Link>
+      {isAdmin && (
+        <>
+          <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/campaigns">
+            <Target className="h-5 w-5 text-purple-600" />
+            <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-purple-700">Admin<br />Campaigns</span>
+          </Link>
+          <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/applications">
+            <ShieldCheck className="h-5 w-5 text-slate-600" />
+            <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-slate-700">
+              Admin<br />Applications
+            </span>
+          </Link>
+        </>
+      )}
       {/* <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/market">
         <ShoppingBag className="h-5 w-5 text-amber-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-amber-900">Influencer<br />Market</span>
@@ -48,12 +88,7 @@ export default function DashboardNav() {
           PUC angels<br />Edu ONG Brazil <span className="text-base align-middle">🇧🇷</span>
         </span>
       </Link>
-      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/admin/applications">
-        <ShieldCheck className="h-5 w-5 text-slate-600" />
-        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-slate-700">
-          Admin<br />Applications
-        </span>
-      </Link> */}
+      */}
       <button
         onClick={handleLogout}
         className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0 border-red-200 hover:bg-red-50 hover:border-red-300"

@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Application {
   id: string;
@@ -27,8 +28,10 @@ interface Application {
 }
 
 export default function AdminApplicationsPage() {
+  const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingRole, setCheckingRole] = useState(true);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
@@ -39,7 +42,30 @@ export default function AdminApplicationsPage() {
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
-    fetchApplications();
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace("/login");
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profile?.role !== "admin") {
+          router.replace("/dashboard");
+          return;
+        }
+
+        await fetchApplications();
+      } finally {
+        setCheckingRole(false);
+      }
+    })();
   }, []);
 
   const fetchApplications = async () => {
@@ -60,6 +86,15 @@ export default function AdminApplicationsPage() {
       setLoading(false);
     }
   };
+
+  if (checkingRole) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+        <p className="text-slate-500 text-sm">Checking access...</p>
+      </div>
+    );
+  }
 
   const handleApproveClick = (app: Application) => {
     setSelectedApp(app);

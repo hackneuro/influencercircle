@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Plus, Copy, Check, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Campaign {
   id: string;
@@ -16,10 +17,12 @@ interface Campaign {
 }
 
 export default function AdminCampaignsPage() {
+  const router = useRouter();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [checkingRole, setCheckingRole] = useState(true);
 
   const [formData, setFormData] = useState({
     opportunity_title: "",
@@ -28,7 +31,30 @@ export default function AdminCampaignsPage() {
   });
 
   useEffect(() => {
-    fetchCampaigns();
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace("/login");
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profile?.role !== "admin") {
+          router.replace("/dashboard");
+          return;
+        }
+
+        await fetchCampaigns();
+      } finally {
+        setCheckingRole(false);
+      }
+    })();
   }, []);
 
   const fetchCampaigns = async () => {
@@ -46,6 +72,15 @@ export default function AdminCampaignsPage() {
       setLoading(false);
     }
   };
+
+  if (checkingRole) {
+    return (
+      <div className="min-h-[50vh] flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+        <p className="text-slate-500 text-sm">Checking access...</p>
+      </div>
+    );
+  }
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

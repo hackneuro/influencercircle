@@ -2,14 +2,14 @@ import UpgradeCta from "@/components/UpgradeCta";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import AccountStatusBadge from "@/components/AccountStatusBadge";
-import EmailConfirmationBanner from "@/components/EmailConfirmationBanner";
 import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import PasswordChangeBanner from "@/components/PasswordChangeBanner";
 
 export default function PlatformLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* <EmailConfirmationBanner /> - Disabled until DB migration is run */}
+      <PasswordChangeBanner />
       <ProfileCompletionBanner />
       <div className="brand-bar">
                 <div className="max-w-7xl mx-auto px-6 py-6">

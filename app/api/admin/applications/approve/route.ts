@@ -31,7 +31,8 @@ export async function POST(request: Request) {
       email_confirm: true,
       user_metadata: {
         name: `${firstName} ${lastName}`,
-        role: role // Store original role in metadata
+        role: role,
+        force_password_change: true
       }
     });
 

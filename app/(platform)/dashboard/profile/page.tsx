@@ -16,6 +16,9 @@ export default function ProfileControlPage() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);
@@ -154,6 +157,35 @@ export default function ProfileControlPage() {
       setMessage({ type: "error", text: error.message || "Failed to upload resume." });
     } finally {
       setUploadingResume(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setMessage({ type: "error", text: "Password must be at least 6 characters." });
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setMessage({ type: "error", text: "Passwords do not match." });
+      return;
+    }
+
+    setSavingPassword(true);
+    setMessage(null);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+        data: { force_password_change: false }
+      });
+      if (error) throw error;
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setMessage({ type: "success", text: "Password updated successfully!" });
+      window.scrollTo(0, 0);
+    } catch (error: any) {
+      setMessage({ type: "error", text: error.message || "Failed to update password." });
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -640,6 +672,57 @@ export default function ProfileControlPage() {
               </div>
             </section>
           </div>
+
+          <section id="password" className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
+              <Lock className="h-5 w-5 text-slate-700" />
+              Change Password
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="input w-full bg-slate-50 border-slate-200"
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  className="input w-full bg-slate-50 border-slate-200"
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handlePasswordUpdate}
+                disabled={savingPassword}
+                className="btn btn-outline flex items-center gap-2 px-6 py-3 rounded-xl"
+              >
+                {savingPassword ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-5 w-5" />
+                    Update Password
+                  </>
+                )}
+              </button>
+            </div>
+          </section>
           
           <div className="flex justify-end pt-4">
             <button

@@ -3,8 +3,10 @@ import UnlogLinkedinButton from "@/components/UnlogLinkedinButton";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useEffect } from "react";
+import { useLanguage } from "@/components/marketing/LanguageContext";
 
 function LinkedinDashboardContent() {
+  const { t } = useLanguage();
   const searchParams = useSearchParams();
   const checkout = searchParams.get("checkout");
   const showEliteSuccess = checkout === "elite-success";
@@ -23,11 +25,10 @@ function LinkedinDashboardContent() {
         <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-4 md:p-5 flex items-start gap-3 shadow-sm">
           <div className="flex-1">
             <h2 className="text-lg md:text-xl font-semibold">
-              Assinatura Elite confirmada com sucesso!
+              {t("dashboard.linkedin.eliteSuccessTitle")}
             </h2>
             <p className="text-xs md:text-sm mt-1">
-              Sua compra foi concluída e sua conta será atualizada como Elite Member em instantes.
-              Aproveite os novos benefícios dentro do Dashboard.
+              {t("dashboard.linkedin.eliteSuccessDesc")}
             </p>
           </div>
         </div>
@@ -38,7 +39,7 @@ function LinkedinDashboardContent() {
                onClick={() => setActivePopup('create')}
                className="w-full btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold flex-1 text-center"
              >
-              Create content
+              {t("dashboard.linkedin.createContent")}
             </button>
             {activePopup === 'create' && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg z-50 text-center shadow-xl animate-in fade-in zoom-in duration-200">
@@ -48,21 +49,21 @@ function LinkedinDashboardContent() {
                 >
                   ×
                 </button>
-                Create content feature is coming soon!
+                {t("dashboard.linkedin.comingSoon")}
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
               </div>
             )}
         </div>
 
         <Link href="/dashboard/submit-post" className="btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold flex-1 text-center">
-          Send us a Post for Increase engagement
+          {t("dashboard.submitPost.title")}
         </Link>
         <div className="relative flex-1">
           <button 
             onClick={() => setActivePopup('radar')}
             className="w-full btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold"
           >
-            Turn on Exec-Radar
+            {t("dashboard.linkedin.execRadar")}
           </button>
           {activePopup === 'radar' && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg z-50 text-center shadow-xl animate-in fade-in zoom-in duration-200">
@@ -72,7 +73,7 @@ function LinkedinDashboardContent() {
                 >
                   ×
                 </button>
-                Create content feature is coming soon!
+                {t("dashboard.linkedin.comingSoon")}
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
               </div>
             )}
@@ -83,9 +84,9 @@ function LinkedinDashboardContent() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-6">
-          <h3 className="font-semibold mb-2">LinkedIn Dashboard</h3>
+          <h3 className="font-semibold mb-2">{t("dashboard.linkedin.linkedinDashboardTitle")}</h3>
           <p className="text-sm text-ic-subtext mb-4">
-            Check your LinkedIn Dashboard page (Profile Views).
+            {t("dashboard.linkedin.linkedinDashboardDesc")}
           </p>
           <a 
             href="https://www.linkedin.com/analytics/profile-views/" 
@@ -93,14 +94,14 @@ function LinkedinDashboardContent() {
             rel="noopener noreferrer"
             className="btn btn-primary w-full"
           >
-            Go to LinkedIn Dashboard
+            {t("dashboard.linkedin.linkedinDashboardCta")}
           </a>
         </div>
 
         <div className="card p-6">
-          <h3 className="font-semibold mb-2">Social Selling Index</h3>
+          <h3 className="font-semibold mb-2">{t("dashboard.linkedin.ssiTitle")}</h3>
           <p className="text-sm text-ic-subtext mb-4">
-            Check your Social Selling Index (SSI) Score.
+            {t("dashboard.linkedin.ssiDesc")}
           </p>
           <a 
             href="https://www.linkedin.com/sales/ssi" 
@@ -108,7 +109,7 @@ function LinkedinDashboardContent() {
             rel="noopener noreferrer"
             className="btn btn-primary w-full"
           >
-            Check SSI Score
+            {t("dashboard.linkedin.ssiCta")}
           </a>
         </div>
       </div>
@@ -117,8 +118,9 @@ function LinkedinDashboardContent() {
 }
 
 export default function LinkedinDashboardPage() {
+  const { t } = useLanguage();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("dashboard.linkedin.loading")}</div>}>
       <LinkedinDashboardContent />
     </Suspense>
   );

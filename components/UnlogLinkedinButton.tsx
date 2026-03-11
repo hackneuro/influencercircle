@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle } from "lucide-react";
+import { useLanguage } from "@/components/marketing/LanguageContext";
 
 export default function UnlogLinkedinButton() {
+  const { t } = useLanguage();
   const [step, setStep] = useState(0);
   const [mounted, setMounted] = useState(false);
 
@@ -20,7 +22,7 @@ export default function UnlogLinkedinButton() {
         onClick={() => setStep(1)}
         className="text-xs text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
       >
-        Unlog your Linkedin
+        {t("dashboard.linkedin.unlog.button")}
       </button>
 
       {/* Modal 1: First Warning */}
@@ -33,17 +35,17 @@ export default function UnlogLinkedinButton() {
             <div className="p-6">
               <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <AlertTriangle className="h-6 w-6 text-orange-500" />
-                Are you sure you want to disconnect?
+                {t("dashboard.linkedin.unlog.modal1Title")}
               </h3>
               <div className="space-y-4 text-slate-600 text-sm leading-relaxed">
                 <p>
-                  By disconnecting, you will lose immediate access to the system and the ability to send content. Your SSI will drop and your engagement will fall 10x.
+                  {t("dashboard.linkedin.unlog.modal1P1")}
                 </p>
                 <p>
-                  On top of that, to ensure platform stability and fair usage, we limit reconnections to two instances. Frequent disconnecting may lead to temporary account restrictions or even black list.
+                  {t("dashboard.linkedin.unlog.modal1P2")}
                 </p>
                 <p className="font-semibold text-slate-900">
-                  We recommend staying logged in to keep your workflow seamless!
+                  {t("dashboard.linkedin.unlog.modal1P3")}
                 </p>
               </div>
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -51,13 +53,13 @@ export default function UnlogLinkedinButton() {
                   onClick={closeModal}
                   className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                 >
-                  Never mind, I was just testing
+                  {t("dashboard.linkedin.unlog.modal1Cancel")}
                 </button>
                 <button 
                   onClick={() => setStep(2)}
                   className="flex-1 px-4 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors"
                 >
-                  Yes, unlog please
+                  {t("dashboard.linkedin.unlog.modal1Confirm")}
                 </button>
               </div>
             </div>
@@ -75,24 +77,24 @@ export default function UnlogLinkedinButton() {
           >
             <div className="p-6 text-center">
               <h3 className="text-xl font-bold text-slate-900 mb-2">
-                This is a serious step
+                {t("dashboard.linkedin.unlog.modal2Title")}
               </h3>
-              <p className="text-slate-500 mb-6">(and we will miss you)</p>
+              <p className="text-slate-500 mb-6">{t("dashboard.linkedin.unlog.modal2Subtitle")}</p>
               
-              <p className="font-bold text-slate-900 mb-6 text-left">Please confirm:</p>
+              <p className="font-bold text-slate-900 mb-6 text-left">{t("dashboard.linkedin.unlog.modal2Prompt")}</p>
               
               <div className="flex flex-col gap-3">
                 <button 
                   onClick={closeModal}
                   className="w-full px-4 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
                 >
-                  Keep me logged
+                  {t("dashboard.linkedin.unlog.modal2Keep")}
                 </button>
                 <button 
                   onClick={() => setStep(3)}
                   className="w-full px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
                 >
-                  Unlog my Linkedin
+                  {t("dashboard.linkedin.unlog.modal2Unlog")}
                 </button>
               </div>
             </div>
@@ -113,16 +115,16 @@ export default function UnlogLinkedinButton() {
                 <AlertTriangle className="h-8 w-8 text-red-600" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-4">
-                Disconnected
+                {t("dashboard.linkedin.unlog.modal3Title")}
               </h3>
               <p className="text-slate-600">
-                You are unlogged from the Linkedin and our platform.
+                {t("dashboard.linkedin.unlog.modal3Desc")}
               </p>
               <button 
                 onClick={() => window.location.href = '/'} 
                 className="mt-8 w-full px-4 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors"
               >
-                Close
+                {t("dashboard.linkedin.unlog.modal3Close")}
               </button>
             </div>
           </div>

@@ -299,7 +299,10 @@ export default function OnboardingForm() {
     async function checkAndLoadStorage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-            const stored = localStorage.getItem("onboarding_data");
+            let stored: string | null = null;
+            try {
+                stored = localStorage.getItem("onboarding_data");
+            } catch {}
             if (stored) {
                 try {
                     const parsed = JSON.parse(stored);
@@ -320,15 +323,17 @@ export default function OnboardingForm() {
   // Save to LocalStorage whenever data changes
   useEffect(() => {
     if (!isAuthenticated) {
-        localStorage.setItem("onboarding_data", JSON.stringify({
-            data,
-            step,
-            plan,
-            region,
-            countryCode,
-            phonePart,
-            connections
-        }));
+        try {
+            localStorage.setItem("onboarding_data", JSON.stringify({
+                data,
+                step,
+                plan,
+                region,
+                countryCode,
+                phonePart,
+                connections
+            }));
+        } catch {}
     }
   }, [data, step, plan, region, countryCode, phonePart, connections, isAuthenticated]);
 

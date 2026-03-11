@@ -6,17 +6,31 @@ import { translations } from '@/lib/translations';
 const LanguageContext = createContext<any>(null);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+    const safeGetItem = (key: string) => {
+        try {
+            return window.localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    };
+
+    const safeSetItem = (key: string, value: string) => {
+        try {
+            window.localStorage.setItem(key, value);
+        } catch {}
+    };
+
     const [language, setLanguage] = useState(() => {
         if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('language');
-            return saved || 'pt-br';
+            const saved = safeGetItem('language');
+            return saved || "pt-br";
         }
-        return 'pt-br';
+        return "pt-br";
     });
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('language', language);
+            safeSetItem('language', language);
         }
     }, [language]);
 

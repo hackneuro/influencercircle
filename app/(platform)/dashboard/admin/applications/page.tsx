@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy } from "lucide-react";
+import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -40,6 +40,43 @@ export default function AdminApplicationsPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [processing, setProcessing] = useState(false);
+
+  const deleteApplication = async (app: Application) => {
+    const deleteAuthUser = app.status === "approved"
+      ? window.confirm("This application is approved. Delete the user account too? (OK = delete user + application, Cancel = delete application only)")
+      : false;
+
+    const confirmed = window.confirm(`Delete application for ${app.email}? This cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const response = await fetch("/api/admin/applications/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          applicationId: app.id,
+          email: app.email,
+          cvUrl: app.cv_url,
+          deleteAuthUser
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to delete");
+
+      setApplications(prev => prev.filter(a => a.id !== app.id));
+      toast.success("Deleted");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete");
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -190,6 +227,12 @@ export default function AdminApplicationsPage() {
     return matchesFilter && matchesSearch;
   });
 
+  const totalCount = applications.length;
+  const filteredCount = filteredApplications.length;
+  const pendingCount = applications.filter(a => a.status === "pending").length;
+  const approvedCount = applications.filter(a => a.status === "approved").length;
+  const rejectedCount = applications.filter(a => a.status === "rejected").length;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -204,6 +247,13 @@ export default function AdminApplicationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Application Approvals</h1>
           <p className="text-slate-500">Manage incoming applications for Influencer Circle</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">Total: {totalCount}</span>
+            <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Showing: {filteredCount}</span>
+            <span className="px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-800 font-semibold">Pending: {pendingCount}</span>
+            <span className="px-2.5 py-1 rounded-full bg-green-50 text-green-800 font-semibold">Approved: {approvedCount}</span>
+            <span className="px-2.5 py-1 rounded-full bg-red-50 text-red-800 font-semibold">Rejected: {rejectedCount}</span>
+          </div>
         </div>
         
         <div className="flex gap-2">
@@ -334,6 +384,13 @@ export default function AdminApplicationsPage() {
                           title="Reject"
                         >
                           <X className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteApplication(app)}
+                          className="p-1.5 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>

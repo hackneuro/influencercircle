@@ -7,9 +7,11 @@ import type { ProfileRow } from "@/types/database";
 import { Loader2, Save, User, MapPin, Link as LinkIcon, Target, Camera, Upload, FileText, Trash2, Eye, Lock, Globe, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/components/marketing/LanguageContext";
 
 export default function ProfileControlPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -28,6 +30,7 @@ export default function ProfileControlPage() {
     name: "",
     username: "",
     whatsapp: "",
+    how_seen: "executive",
     city: "",
     state: "",
     country: "",
@@ -54,11 +57,14 @@ export default function ProfileControlPage() {
     try {
       const data = await getMyProfile();
       if (data) {
+        const roleOptions = ["executive", "influencer", "student", "beginner"];
+        const howSeen = (data.user_types || []).find((v) => roleOptions.includes(v)) || "executive";
         setProfile(data);
         setFormData({
           name: data.name || "",
           username: data.username || "",
           whatsapp: data.whatsapp || "",
+          how_seen: howSeen,
           city: data.city || "",
           state: data.state || "",
           country: data.country || "",
@@ -79,7 +85,7 @@ export default function ProfileControlPage() {
       }
     } catch (error) {
       console.error("Error loading profile:", error);
-      setMessage({ type: "error", text: "Failed to load profile data." });
+      setMessage({ type: "error", text: t("dashboard.profile.messages.loadFailed") });
     } finally {
       setLoading(false);
     }
@@ -120,10 +126,10 @@ export default function ProfileControlPage() {
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       
       setFormData(prev => ({ ...prev, image: data.publicUrl }));
-      setMessage({ type: "success", text: "Image uploaded successfully!" });
+      setMessage({ type: "success", text: t("dashboard.profile.messages.imageUploaded") });
     } catch (error: any) {
       console.error("Error uploading image:", error);
-      setMessage({ type: "error", text: error.message || "Failed to upload image." });
+      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.imageUploadFailed") });
     } finally {
       setUploadingImage(false);
     }
@@ -151,10 +157,10 @@ export default function ProfileControlPage() {
       const { data } = supabase.storage.from('resumes').getPublicUrl(filePath);
       
       setFormData(prev => ({ ...prev, resume_url: data.publicUrl }));
-      setMessage({ type: "success", text: "Resume uploaded successfully!" });
+      setMessage({ type: "success", text: t("dashboard.profile.messages.resumeUploaded") });
     } catch (error: any) {
       console.error("Error uploading resume:", error);
-      setMessage({ type: "error", text: error.message || "Failed to upload resume." });
+      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.resumeUploadFailed") });
     } finally {
       setUploadingResume(false);
     }
@@ -162,11 +168,11 @@ export default function ProfileControlPage() {
 
   const handlePasswordUpdate = async () => {
     if (!newPassword || newPassword.length < 6) {
-      setMessage({ type: "error", text: "Password must be at least 6 characters." });
+      setMessage({ type: "error", text: t("dashboard.profile.messages.passwordTooShort") });
       return;
     }
     if (newPassword !== confirmNewPassword) {
-      setMessage({ type: "error", text: "Passwords do not match." });
+      setMessage({ type: "error", text: t("dashboard.profile.messages.passwordsDontMatch") });
       return;
     }
 
@@ -180,10 +186,10 @@ export default function ProfileControlPage() {
       if (error) throw error;
       setNewPassword("");
       setConfirmNewPassword("");
-      setMessage({ type: "success", text: "Password updated successfully!" });
+      setMessage({ type: "success", text: t("dashboard.profile.messages.passwordUpdated") });
       window.scrollTo(0, 0);
     } catch (error: any) {
-      setMessage({ type: "error", text: error.message || "Failed to update password." });
+      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.passwordUpdateFailed") });
     } finally {
       setSavingPassword(false);
     }
@@ -197,18 +203,28 @@ export default function ProfileControlPage() {
     try {
       if (!profile) return;
 
+      const roleOptions = ["executive", "influencer", "student", "beginner"];
+      const baseUserTypes = (profile.user_types ?? []).filter((v) => !roleOptions.includes(v));
+      const userTypes = [...baseUserTypes, formData.how_seen];
+      const systemRole =
+        profile.role === "admin"
+          ? "admin"
+          : formData.how_seen === "influencer"
+            ? "influencer"
+            : "user";
+
       await upsertProfileFromOnboarding({
         ...formData,
         email: profile.email,
         plan: profile.plan,
-        role: profile.role,
+        role: systemRole,
         advisor_sub_choices: profile.advisor_sub_choices ?? [],
         influencer_channels: profile.influencer_channels ?? [],
         student_level: profile.student_level ?? [],
         company_type: profile.company_type ?? [],
         investor_type: profile.investor_type ?? [],
         executive_experience: profile.executive_experience ?? [],
-        user_types: profile.user_types ?? [],
+        user_types: userTypes,
         is_visible: formData.is_public,
         show_email: formData.show_email,
         show_phone: formData.show_phone,
@@ -219,13 +235,13 @@ export default function ProfileControlPage() {
         resume_url: formData.resume_url
       });
 
-      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setMessage({ type: "success", text: t("dashboard.profile.messages.profileUpdated") });
       window.scrollTo(0, 0);
       loadProfile();
       
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      setMessage({ type: "error", text: error.message || "Failed to update profile." });
+      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.profileUpdateFailed") });
     } finally {
       setSaving(false);
     }
@@ -244,8 +260,8 @@ export default function ProfileControlPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Profile Control</h1>
-          <p className="text-slate-500 mt-1">Manage your public presence and professional details.</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{t("dashboard.profile.title")}</h1>
+          <p className="text-slate-500 mt-1">{t("dashboard.profile.subtitle")}</p>
         </div>
         {profile?.username && (
           <Link 
@@ -254,7 +270,7 @@ export default function ProfileControlPage() {
             className="btn btn-outline flex items-center gap-2 group"
           >
             <Eye className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
-            View Public Profile
+            {t("dashboard.profile.viewPublicProfile")}
           </Link>
         )}
       </div>
@@ -274,7 +290,7 @@ export default function ProfileControlPage() {
           <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center space-y-4">
             <h2 className="text-lg font-bold text-slate-800 w-full flex items-center gap-2 pb-2 border-b border-slate-100">
               <Camera className="h-5 w-5 text-blue-500" />
-              Profile Photo
+              {t("dashboard.profile.photo.title")}
             </h2>
             
             <div className="relative group">
@@ -300,8 +316,8 @@ export default function ProfileControlPage() {
             </div>
             
             <div className="text-xs text-slate-500">
-              <p>Recommended: Square image, max 2MB.</p>
-              <p>This photo will be displayed in the Market.</p>
+              <p>{t("dashboard.profile.photo.recommended")}</p>
+              <p>{t("dashboard.profile.photo.marketNote")}</p>
             </div>
             <input 
               type="file" 
@@ -316,7 +332,7 @@ export default function ProfileControlPage() {
           <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 pb-2 border-b border-slate-100">
               <FileText className="h-5 w-5 text-orange-500" />
-              Resume / CV
+              {t("dashboard.profile.resume.title")}
             </h2>
 
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/50">
@@ -327,8 +343,8 @@ export default function ProfileControlPage() {
                        <FileText className="h-6 w-6 text-slate-600" />
                      </div>
                      <div className="text-left">
-                        <p className="text-sm font-semibold text-slate-900">Resume Uploaded</p>
-                        <a href={formData.resume_url} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">View current resume</a>
+                        <p className="text-sm font-semibold text-slate-900">{t("dashboard.profile.resume.uploaded")}</p>
+                        <a href={formData.resume_url} target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline">{t("dashboard.profile.resume.viewCurrent")}</a>
                      </div>
                    </div>
                    <button 
@@ -341,7 +357,7 @@ export default function ProfileControlPage() {
                  </div>
                ) : (
                  <div className="text-center py-4 text-slate-500 text-sm">
-                   <p>No resume uploaded yet.</p>
+                  <p>{t("dashboard.profile.resume.none")}</p>
                  </div>
                )}
             </div>
@@ -353,7 +369,7 @@ export default function ProfileControlPage() {
               disabled={uploadingResume}
             >
               {uploadingResume ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {formData.resume_url ? "Replace Resume" : "Upload Resume"}
+              {formData.resume_url ? t("dashboard.profile.resume.replace") : t("dashboard.profile.resume.upload")}
             </button>
             <input 
               type="file" 
@@ -371,12 +387,12 @@ export default function ProfileControlPage() {
            <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
               <User className="h-6 w-6 text-blue-600" />
-              Basic Information
+              {t("dashboard.profile.basic.title")}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Full Name</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.basic.fullName")}</label>
                 <input
                   name="name"
                   value={formData.name}
@@ -387,7 +403,7 @@ export default function ProfileControlPage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Username</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.basic.username")}</label>
                 <div className="flex items-center">
                   <span className="bg-slate-100 border border-r-0 border-slate-200 text-slate-500 px-3 py-3 rounded-l-xl text-sm">@</span>
                   <input
@@ -397,13 +413,13 @@ export default function ProfileControlPage() {
                     className="input w-full rounded-l-none bg-slate-50 border-slate-200 focus:bg-white transition-colors"
                     required
                     pattern="^[a-zA-Z0-9_-]+$"
-                    title="Username can only contain letters, numbers, underscores and hyphens"
+                    title={t("dashboard.profile.basic.usernameHelp")}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">WhatsApp</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.basic.whatsapp")}</label>
                 <input
                   name="whatsapp"
                   value={formData.whatsapp}
@@ -412,16 +428,30 @@ export default function ProfileControlPage() {
                   placeholder="+55 11 99999-9999"
                 />
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.basic.howSeen")}</label>
+                <select
+                  name="how_seen"
+                  value={formData.how_seen}
+                  onChange={handleChange}
+                  className="input w-full bg-slate-50 border-slate-200"
+                >
+                  <option value="executive">{t("apply.form.roles.executive")}</option>
+                  <option value="influencer">{t("apply.form.roles.influencer")}</option>
+                  <option value="student">{t("apply.form.roles.student")}</option>
+                  <option value="beginner">{t("apply.form.roles.beginner")}</option>
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">About Yourself (Bio)</label>
+              <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.basic.about")}</label>
               <textarea
                 name="about_yourself"
                 value={formData.about_yourself}
                 onChange={handleChange}
                 className="textarea w-full h-32 bg-slate-50 border-slate-200 focus:bg-white transition-colors text-base"
-                placeholder="Tell us about your professional background and goals..."
+                placeholder={t("dashboard.profile.basic.aboutPlaceholder")}
               />
             </div>
           </section>
@@ -429,7 +459,7 @@ export default function ProfileControlPage() {
           <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
               <Lock className="h-6 w-6 text-purple-600" />
-              Privacy & Visibility
+              {t("dashboard.profile.privacy.title")}
             </h2>
 
             {/* Profile Visibility */}
@@ -438,11 +468,10 @@ export default function ProfileControlPage() {
                 <div>
                   <h3 className="font-bold text-slate-900 flex items-center gap-2">
                      <Globe className="h-4 w-4 text-blue-500" />
-                     Public Profile Visibility
+                     {t("dashboard.profile.privacy.publicVisibilityTitle")}
                   </h3>
                   <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                    When enabled, your profile will be visible to everyone on the internet. 
-                    Disable this to hide your profile from the public market and search engines.
+                    {t("dashboard.profile.privacy.publicVisibilityDesc")}
                   </p>
                 </div>
                 <input
@@ -457,16 +486,16 @@ export default function ProfileControlPage() {
 
             {/* Contact Info Privacy */}
             <div className="space-y-4">
-              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Contact Information</h3>
+              <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{t("dashboard.profile.privacy.contactTitle")}</h3>
               
               {/* Email */}
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:border-blue-200 transition-colors">
                  <div className="space-y-1">
                    <div className="flex items-center gap-2">
                      <Mail className="h-4 w-4 text-slate-500" />
-                     <span className="font-semibold text-slate-900">Email Address</span>
+                     <span className="font-semibold text-slate-900">{t("dashboard.profile.privacy.emailLabel")}</span>
                    </div>
-                   <p className="text-xs text-slate-500">Show {profile?.email} on your public profile</p>
+                   <p className="text-xs text-slate-500">{t("dashboard.profile.privacy.emailHint", { email: profile?.email || "" })}</p>
                  </div>
                  <label className="relative inline-flex items-center cursor-pointer">
                    <input 
@@ -485,9 +514,9 @@ export default function ProfileControlPage() {
                  <div className="space-y-1">
                    <div className="flex items-center gap-2">
                      <Phone className="h-4 w-4 text-slate-500" />
-                     <span className="font-semibold text-slate-900">Phone Number</span>
+                     <span className="font-semibold text-slate-900">{t("dashboard.profile.privacy.phoneLabel")}</span>
                    </div>
-                   <p className="text-xs text-slate-500">Show your WhatsApp/Phone on your public profile</p>
+                   <p className="text-xs text-slate-500">{t("dashboard.profile.privacy.phoneHint")}</p>
                  </div>
                  <label className="relative inline-flex items-center cursor-pointer">
                    <input 
@@ -507,12 +536,12 @@ export default function ProfileControlPage() {
           <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
             <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
               <MapPin className="h-6 w-6 text-green-600" />
-              Location
+              {t("dashboard.profile.location.title")}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">City</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.location.city")}</label>
                 <input
                   name="city"
                   value={formData.city}
@@ -522,7 +551,7 @@ export default function ProfileControlPage() {
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">State / Province</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.location.state")}</label>
                 <input
                   name="state"
                   value={formData.state}
@@ -532,7 +561,7 @@ export default function ProfileControlPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Country</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.location.country")}</label>
                 <input
                   name="country"
                   value={formData.country}
@@ -542,19 +571,19 @@ export default function ProfileControlPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Region</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.location.region")}</label>
                 <select
                   name="region"
                   value={formData.region}
                   onChange={handleChange}
                   className="input w-full bg-slate-50 border-slate-200"
                 >
-                  <option value="">Select Region</option>
-                  <option value="Americas">Americas</option>
-                  <option value="Europe">Europe</option>
-                  <option value="Asia">Asia</option>
-                  <option value="Africa">Africa</option>
-                  <option value="Oceania">Oceania</option>
+                  <option value="">{t("dashboard.profile.location.regionSelect")}</option>
+                  <option value="Americas">{t("dashboard.profile.location.regionOptions.americas")}</option>
+                  <option value="Europe">{t("dashboard.profile.location.regionOptions.europe")}</option>
+                  <option value="Asia">{t("dashboard.profile.location.regionOptions.asia")}</option>
+                  <option value="Africa">{t("dashboard.profile.location.regionOptions.africa")}</option>
+                  <option value="Oceania">{t("dashboard.profile.location.regionOptions.oceania")}</option>
                 </select>
               </div>
             </div>
@@ -565,12 +594,12 @@ export default function ProfileControlPage() {
             <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
                 <LinkIcon className="h-5 w-5 text-purple-600" />
-                Social Links
+                {t("dashboard.profile.social.title")}
               </h2>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">LinkedIn</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.social.linkedin")}</label>
                   <input
                     name="linkedin_url"
                     value={formData.linkedin_url}
@@ -581,7 +610,7 @@ export default function ProfileControlPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Instagram</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.social.instagram")}</label>
                   <input
                     name="instagram_url"
                     value={formData.instagram_url}
@@ -592,7 +621,7 @@ export default function ProfileControlPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Content Price (Avg)</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.social.contentPrice")}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
                     <input
@@ -611,62 +640,62 @@ export default function ProfileControlPage() {
             <section className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
                 <Target className="h-5 w-5 text-red-600" />
-                Objectives
+                {t("dashboard.profile.objectives.title")}
               </h2>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Primary Goal</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.objectives.primaryGoal")}</label>
                   <select
                     name="objective"
                     value={formData.objective}
                     onChange={handleChange}
                     className="input w-full bg-slate-50 border-slate-200"
                   >
-                    <option value="">Select Objective</option>
-                    <option value="Grow Audience">Grow Audience</option>
-                    <option value="Monetize Content">Monetize Content</option>
-                    <option value="Networking">Networking</option>
-                    <option value="Find Jobs">Find Jobs</option>
-                    <option value="Find Talent">Find Talent</option>
-                    <option value="Brand Awareness">Brand Awareness</option>
+                    <option value="">{t("dashboard.profile.objectives.selectObjective")}</option>
+                    <option value="Grow Audience">{t("dashboard.profile.objectives.options.growAudience")}</option>
+                    <option value="Monetize Content">{t("dashboard.profile.objectives.options.monetizeContent")}</option>
+                    <option value="Networking">{t("dashboard.profile.objectives.options.networking")}</option>
+                    <option value="Find Jobs">{t("dashboard.profile.objectives.options.findJobs")}</option>
+                    <option value="Find Talent">{t("dashboard.profile.objectives.options.findTalent")}</option>
+                    <option value="Brand Awareness">{t("dashboard.profile.objectives.options.brandAwareness")}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Target Market</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.objectives.targetMarket")}</label>
                   <select
                     name="market_objective"
                     value={formData.market_objective}
                     onChange={handleChange}
                     className="input w-full bg-slate-50 border-slate-200"
                   >
-                     <option value="">Select Market</option>
-                     <option value="Technology">Technology</option>
-                     <option value="Finance">Finance</option>
-                     <option value="Health">Health</option>
-                     <option value="Education">Education</option>
-                     <option value="Entertainment">Entertainment</option>
-                     <option value="Retail">Retail</option>
-                     <option value="Other">Other</option>
+                     <option value="">{t("dashboard.profile.objectives.selectMarket")}</option>
+                     <option value="Technology">{t("dashboard.profile.objectives.marketOptions.technology")}</option>
+                     <option value="Finance">{t("dashboard.profile.objectives.marketOptions.finance")}</option>
+                     <option value="Health">{t("dashboard.profile.objectives.marketOptions.health")}</option>
+                     <option value="Education">{t("dashboard.profile.objectives.marketOptions.education")}</option>
+                     <option value="Entertainment">{t("dashboard.profile.objectives.marketOptions.entertainment")}</option>
+                     <option value="Retail">{t("dashboard.profile.objectives.marketOptions.retail")}</option>
+                     <option value="Other">{t("dashboard.profile.objectives.marketOptions.other")}</option>
                   </select>
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Target Location</label>
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.objectives.targetLocation")}</label>
                   <select
                     name="location_objective"
                     value={formData.location_objective}
                     onChange={handleChange}
                     className="input w-full bg-slate-50 border-slate-200"
                   >
-                     <option value="">Select Location</option>
-                     <option value="Global">Global</option>
-                     <option value="North America">North America</option>
-                     <option value="South America">South America</option>
-                     <option value="Europe">Europe</option>
-                     <option value="Asia">Asia</option>
-                     <option value="Local">Local Only</option>
+                     <option value="">{t("dashboard.profile.objectives.selectLocation")}</option>
+                     <option value="Global">{t("dashboard.profile.objectives.locationOptions.global")}</option>
+                     <option value="North America">{t("dashboard.profile.objectives.locationOptions.northAmerica")}</option>
+                     <option value="South America">{t("dashboard.profile.objectives.locationOptions.southAmerica")}</option>
+                     <option value="Europe">{t("dashboard.profile.objectives.locationOptions.europe")}</option>
+                     <option value="Asia">{t("dashboard.profile.objectives.locationOptions.asia")}</option>
+                     <option value="Local">{t("dashboard.profile.objectives.locationOptions.local")}</option>
                   </select>
                 </div>
               </div>
@@ -676,12 +705,12 @@ export default function ProfileControlPage() {
           <section id="password" className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 space-y-6">
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
               <Lock className="h-5 w-5 text-slate-700" />
-              Change Password
+              {t("dashboard.profile.password.title")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">New Password</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.password.new")}</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -691,7 +720,7 @@ export default function ProfileControlPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Confirm New Password</label>
+                <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.password.confirm")}</label>
                 <input
                   type="password"
                   value={confirmNewPassword}
@@ -712,12 +741,12 @@ export default function ProfileControlPage() {
                 {savingPassword ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Updating...
+                    {t("dashboard.profile.password.updating")}
                   </>
                 ) : (
                   <>
                     <Lock className="h-5 w-5" />
-                    Update Password
+                    {t("dashboard.profile.password.update")}
                   </>
                 )}
               </button>
@@ -733,12 +762,12 @@ export default function ProfileControlPage() {
               {saving ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  Saving Changes...
+                  {t("dashboard.profile.save.saving")}
                 </>
               ) : (
                 <>
                   <Save className="h-5 w-5" />
-                  Save Changes
+                  {t("dashboard.profile.save.save")}
                 </>
               )}
             </button>

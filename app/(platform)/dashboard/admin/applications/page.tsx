@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy, Trash2, Link2 } from "lucide-react";
+import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy, Trash2, Link2, Tag } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -44,6 +44,10 @@ export default function AdminApplicationsPage() {
   const [linkCreating, setLinkCreating] = useState(false);
   const [generatedLink, setGeneratedLink] = useState("");
   const [generatedPayload, setGeneratedPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
+  const [promoCreating, setPromoCreating] = useState(false);
+  const [promoModalOpen, setPromoModalOpen] = useState(false);
+  const [promoLink, setPromoLink] = useState("");
+  const [promoPayload, setPromoPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
 
   const deleteApplication = async (app: Application) => {
     const deleteAuthUser = app.status === "approved"
@@ -118,6 +122,45 @@ export default function AdminApplicationsPage() {
       toast.error(error.message || "Failed to generate link");
     } finally {
       setLinkCreating(false);
+    }
+  };
+
+  const createPromo49Link = async (app: Application) => {
+    try {
+      setPromoCreating(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const phone = String(app.mobile || "").replace(/\D/g, "");
+      const name = `${app.first_name} ${app.last_name}`.trim();
+
+      const response = await fetch("/api/admin/applications/promo49br", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          applicationId: app.id,
+          email: app.email,
+          name,
+          phone
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to generate promo link");
+
+      const url = `${window.location.origin}${result.path}`;
+      setPromoLink(url);
+      setPromoPayload({ email: app.email, name, phone });
+      setPromoModalOpen(true);
+      toast.success("Promo link generated");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate promo link");
+    } finally {
+      setPromoCreating(false);
     }
   };
 
@@ -403,6 +446,15 @@ export default function AdminApplicationsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => createPromo49Link(app)}
+                          disabled={promoCreating}
+                          className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                          title="Generate PROMO49BR link"
+                        >
+                          <Tag className="h-4 w-4" />
+                          PROMO49BR
+                        </button>
+                        <button
                           onClick={() => createMaskedLink(app)}
                           disabled={linkCreating}
                           className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -574,6 +626,50 @@ export default function AdminApplicationsPage() {
               <button
                 type="button"
                 onClick={() => setLinkModalOpen(false)}
+                className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {promoModalOpen && promoPayload && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-xl p-6 m-4">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">PROMO49BR Link</h2>
+            <p className="text-slate-500 mb-4 text-sm">
+              Copy this link and send it to the user via WhatsApp.
+            </p>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm mb-4">
+              <pre className="whitespace-pre-wrap break-words text-slate-800">{JSON.stringify({ ...promoPayload, channel: "payment", promo: "PROMO49BR" }, null, 2)}</pre>
+            </div>
+
+            <div className="relative mb-6">
+              <input
+                value={promoLink}
+                readOnly
+                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none pr-10 font-mono text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(promoLink);
+                  toast.success("Link copied");
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100 transition-colors"
+                title="Copy Link"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setPromoModalOpen(false)}
                 className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-sm font-medium"
               >
                 Close

@@ -328,6 +328,7 @@ export default function AdminApplicationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Application Approvals</h1>
           <p className="text-slate-500">Manage incoming applications for Influencer Circle</p>
+          <div className="mt-1 text-[11px] font-semibold text-slate-400">build PROMO49BR 2026-03-11-02</div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
             <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-semibold">Total: {totalCount}</span>
             <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold">Showing: {filteredCount}</span>
@@ -444,7 +445,7 @@ export default function AdminApplicationsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
                           onClick={() => createPromo49Link(app)}
                           disabled={promoCreating}

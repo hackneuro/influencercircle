@@ -18,8 +18,7 @@ export async function POST(request: Request) {
       }
     );
 
-    // Insert into applications table OR storage as JSON if table fails
-      // Since we had issues with table creation, we will ALSO save to 'applications' bucket as JSON
+    // Store new applications in Storage only.
       const applicationId = crypto.randomUUID();
       const applicationData = {
         id: applicationId,
@@ -36,18 +35,6 @@ export async function POST(request: Request) {
         created_at: new Date().toISOString()
       };
 
-      // 1. Try to insert into DB first (might fail if table doesn't exist)
-      let dbError = null;
-      try {
-        const { error } = await supabaseAdmin
-          .from('applications')
-          .insert(applicationData);
-        if (error) dbError = error;
-      } catch (e) {
-        dbError = e;
-      }
-
-      // 2. ALWAYS save to Storage as backup/primary if DB fails
       const fileName = `${applicationId}.json`;
       const { error: storageError } = await supabaseAdmin
         .storage
@@ -59,11 +46,7 @@ export async function POST(request: Request) {
 
       if (storageError) {
         console.error('Storage Backup Error:', storageError);
-        // If both fail, throw error
-        if (dbError) {
-          const dbErrorMessage = dbError instanceof Error ? dbError.message : JSON.stringify(dbError);
-          throw new Error(`Submission failed: ${dbErrorMessage} (Storage error: ${storageError.message})`);
-        }
+        throw new Error(`Submission failed: ${storageError.message}`);
       }
 
       return NextResponse.json({ success: true, id: applicationId });

@@ -16,69 +16,15 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { applicationId, email, password, firstName, lastName, role } = await request.json();
+    const { applicationId } = await request.json();
 
-    if (!applicationId || !email || !password || !firstName || !lastName) {
+    if (!applicationId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    console.log(`Approving application ${applicationId} for ${email}`);
+    console.log(`Approving application ${applicationId}`);
 
-    // 1. Create User in Supabase Auth
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: email,
-      password: password,
-      email_confirm: true,
-      user_metadata: {
-        name: `${firstName} ${lastName}`,
-        role: role,
-        force_password_change: true
-      }
-    });
-
-    if (authError) {
-      console.error('Error creating auth user:', authError);
-      return NextResponse.json({ error: `Failed to create user: ${authError.message}` }, { status: 400 });
-    }
-
-    const userId = authData.user.id;
-
-    // 2. Determine Profile Role
-    // Map application roles to system roles (user, influencer, admin)
-    let systemRole = 'user';
-    if (role && role.toLowerCase().includes('influencer')) {
-      systemRole = 'influencer';
-    }
-    // Executive, Student, Beginner -> user (default)
-
-    // 3. Create Profile
-    // Generate a simple username
-    const username = `${firstName.toLowerCase()}_${lastName.toLowerCase()}_${Math.floor(Math.random() * 1000)}`;
-
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .insert({
-        id: userId,
-        email: email,
-        name: `${firstName} ${lastName}`,
-        username: username,
-        role: systemRole,
-        is_premium: false,
-        is_public: true,
-        plan: 'member',
-        updated_at: new Date().toISOString()
-      });
-
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
-      // Clean up auth user if profile creation fails? 
-      // Ideally yes, but for now we'll just report error. 
-      // The user exists in Auth but has no profile.
-      return NextResponse.json({ error: `User created but profile failed: ${profileError.message}` }, { status: 500 });
-    }
-
-    // 4. Update Application Status to 'approved'
-    // 4.1 Update DB
+    // Update Application Status to 'approved' (no user creation here)
     let dbError = null;
     try {
       const { error } = await supabaseAdmin
@@ -126,7 +72,11 @@ export async function POST(request: Request) {
          console.warn(`Could not find file ${fileName} in storage to update.`);
     }
 
-    return NextResponse.json({ success: true, userId: userId });
+    if (storageError) {
+      return NextResponse.json({ error: `Failed to update storage: ${(storageError as any).message || storageError}` }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Approve API Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -133,14 +133,14 @@ export default function AdminApplicationsPage() {
     );
   }
 
-  const handleApproveClick = (app: Application) => {
+  const handleUserLoggedClick = (app: Application) => {
     setSelectedApp(app);
     setPassword("");
     setConfirmPassword("");
     setIsModalOpen(true);
   };
 
-  const handleApproveConfirm = async (e: React.FormEvent) => {
+  const handleUserLoggedConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedApp) return;
 
@@ -156,7 +156,7 @@ export default function AdminApplicationsPage() {
 
     try {
       setProcessing(true);
-      const response = await fetch('/api/admin/applications/approve', {
+      const response = await fetch('/api/admin/applications/user-logged', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,7 +179,7 @@ export default function AdminApplicationsPage() {
         app.id === selectedApp.id ? { ...app, status: 'approved' } : app
       ));
       
-      toast.success(`User created and application approved for ${selectedApp.email}`);
+      toast.success(`User created for ${selectedApp.email}`);
       setIsModalOpen(false);
       setSelectedApp(null);
     } catch (error: any) {
@@ -191,11 +191,6 @@ export default function AdminApplicationsPage() {
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
-    if (newStatus === 'approved') {
-      // This path is now handled by handleApproveClick, but kept for safety/other uses
-      return; 
-    }
-
     try {
       const response = await fetch('/api/admin/applications/update-status', {
         method: 'POST',
@@ -365,14 +360,14 @@ export default function AdminApplicationsPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleApproveClick(app)}
+                          onClick={() => handleUserLoggedClick(app)}
                           className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                          title="Create User Password"
+                          title="Create User (User logged)"
                         >
                           <Key className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleApproveClick(app)}
+                          onClick={() => updateStatus(app.id, 'approved')}
                           className="p-1.5 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
                           title="Approve"
                         >
@@ -392,6 +387,13 @@ export default function AdminApplicationsPage() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
+                        <button
+                          onClick={() => handleUserLoggedClick(app)}
+                          className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                          title="User logged (create user in database)"
+                        >
+                          User logged
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -405,14 +407,14 @@ export default function AdminApplicationsPage() {
       {isModalOpen && selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 m-4">
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Approve Application</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">User Logged</h2>
             <p className="text-slate-500 mb-6 text-sm">
-              Set a login password for <strong>{selectedApp.email}</strong>.
+              Create the user account in Supabase for <strong>{selectedApp.email}</strong>.
               <br/><br/>
               <span className="text-amber-600 font-medium">Important:</span> The user will need this password to log in. Please copy and send it to them securely.
             </p>
             
-            <form onSubmit={handleApproveConfirm} className="space-y-4">
+            <form onSubmit={handleUserLoggedConfirm} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Password
@@ -476,7 +478,7 @@ export default function AdminApplicationsPage() {
                       Creating...
                     </>
                   ) : (
-                    'Create User & Approve'
+                    'Create User'
                   )}
                 </button>
               </div>

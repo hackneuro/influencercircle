@@ -41,10 +41,13 @@ export async function POST(req: Request) {
       .delete()
       .eq("id", applicationId);
 
-    if (deleteDbError) {
-      try {
-        await supabaseAdmin.storage.from("applications").remove([`${applicationId}.json`]);
-      } catch {}
+    const dbMissingTable =
+      deleteDbError &&
+      (deleteDbError.code === "PGRST205" ||
+        deleteDbError.message?.includes("schema cache") ||
+        deleteDbError.message?.includes("Could not find the table"));
+
+    if (deleteDbError && !dbMissingTable) {
       return NextResponse.json({ error: deleteDbError.message }, { status: 500 });
     }
 
@@ -81,4 +84,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 });
   }
 }
-

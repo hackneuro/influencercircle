@@ -73,14 +73,7 @@ export default async function Promo49Page({ params }: PageProps) {
         </div>
 
         <ProceedPaymentButton token={token} />
-
-        <div className="text-xs text-slate-500">
-          ID do produto: <span className="font-mono">prod_U84sTzhxpzCSML</span>
-          <br />
-          ID do preço: <span className="font-mono">price_1T9oirPcE1dEtoc2UzZk0Vjh</span>
-        </div>
       </div>
     </main>
   );
 }
-

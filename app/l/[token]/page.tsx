@@ -4,6 +4,7 @@ import ProceedButton from "./ProceedButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 type PageProps = {
   params: Promise<{ token: string }>;
@@ -48,7 +49,7 @@ export default async function LinkPage({ params }: PageProps) {
             </div>
             <div className="leading-tight">
               <h1 className="text-xl font-bold text-slate-900">LinkedIn Secure Connection</h1>
-              <div className="text-xs text-slate-500">influencercircle.net</div>
+              <div className="text-xs text-slate-500">influencercircle.net · build 2026-03-11-01</div>
             </div>
           </div>
           <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">

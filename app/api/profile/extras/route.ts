@@ -42,13 +42,16 @@ export async function GET(req: Request) {
     await ensureBucket(supabaseAdmin);
 
     const { data: blob } = await supabaseAdmin.storage.from(BUCKET).download(`${user.id}.json`);
-    if (!blob) return NextResponse.json({ tiktok_url: "", x_url: "" });
+    if (!blob) return NextResponse.json({ tiktok_url: "", x_url: "", banner_url: "", gallery_urls: [], expertise: "" });
 
     const text = await blob.text();
     const payload = JSON.parse(text);
     return NextResponse.json({
       tiktok_url: String(payload?.tiktok_url || ""),
-      x_url: String(payload?.x_url || "")
+      x_url: String(payload?.x_url || ""),
+      banner_url: String(payload?.banner_url || ""),
+      gallery_urls: Array.isArray(payload?.gallery_urls) ? payload.gallery_urls.map((u: any) => String(u || "")).filter(Boolean).slice(0, 5) : [],
+      expertise: String(payload?.expertise || "")
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
@@ -63,6 +66,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const tiktok_url = normalizeUrl(body?.tiktok_url || "");
     const x_url = normalizeUrl(body?.x_url || "");
+    const banner_url = normalizeUrl(body?.banner_url || "");
+    const gallery_urls = Array.isArray(body?.gallery_urls) ? body.gallery_urls.map((u: any) => normalizeUrl(String(u || ""))).filter(Boolean).slice(0, 5) : [];
+    const expertise = String(body?.expertise || "").trim().slice(0, 300);
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false }
@@ -70,7 +76,23 @@ export async function POST(req: Request) {
 
     await ensureBucket(supabaseAdmin);
 
-    const payload = { tiktok_url, x_url, updated_at: new Date().toISOString() };
+    const { data: existingBlob } = await supabaseAdmin.storage.from(BUCKET).download(`${user.id}.json`);
+    let existing: any = {};
+    if (existingBlob) {
+      try {
+        existing = JSON.parse(await existingBlob.text());
+      } catch {}
+    }
+
+    const payload = {
+      ...existing,
+      tiktok_url,
+      x_url,
+      banner_url,
+      gallery_urls,
+      expertise,
+      updated_at: new Date().toISOString()
+    };
 
     const { error } = await supabaseAdmin.storage
       .from(BUCKET)
@@ -78,9 +100,8 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    return NextResponse.json({ success: true, tiktok_url, x_url });
+    return NextResponse.json({ success: true, tiktok_url, x_url, banner_url, gallery_urls, expertise });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
-

@@ -38,6 +38,8 @@ export default function ProfileControlPage() {
     about_yourself: "",
     linkedin_url: "",
     instagram_url: "",
+    tiktok_url: "",
+    x_url: "",
     average_content_price: 0,
     objective: "",
     market_objective: "",
@@ -72,6 +74,8 @@ export default function ProfileControlPage() {
           about_yourself: data.about_yourself || data.bio || "",
           linkedin_url: data.linkedin_url || "",
           instagram_url: data.instagram_url || "",
+          tiktok_url: "",
+          x_url: "",
           average_content_price: data.average_content_price || 0,
           objective: data.objective || "",
           market_objective: data.market_objective || "",
@@ -82,6 +86,22 @@ export default function ProfileControlPage() {
           image: data.image || "",
           resume_url: data.resume_url || ""
         });
+
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (token) {
+          const extrasRes = await fetch("/api/profile/extras", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const extras = await extrasRes.json().catch(() => ({}));
+          if (extrasRes.ok) {
+            setFormData((prev) => ({
+              ...prev,
+              tiktok_url: extras?.tiktok_url || "",
+              x_url: extras?.x_url || ""
+            }));
+          }
+        }
       }
     } catch (error) {
       console.error("Error loading profile:", error);
@@ -213,8 +233,10 @@ export default function ProfileControlPage() {
             ? "influencer"
             : "user";
 
+      const { tiktok_url, x_url, ...profileForm } = formData;
+
       await upsertProfileFromOnboarding({
-        ...formData,
+        ...profileForm,
         email: profile.email,
         plan: profile.plan,
         role: systemRole,
@@ -234,6 +256,19 @@ export default function ProfileControlPage() {
         image: formData.image,
         resume_url: formData.resume_url
       });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (token) {
+        await fetch("/api/profile/extras", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ tiktok_url, x_url })
+        });
+      }
 
       setMessage({ type: "success", text: t("dashboard.profile.messages.profileUpdated") });
       window.scrollTo(0, 0);
@@ -617,6 +652,28 @@ export default function ProfileControlPage() {
                     onChange={handleChange}
                     className="input w-full bg-slate-50 border-slate-200"
                     placeholder="https://instagram.com/..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.social.tiktok")}</label>
+                  <input
+                    name="tiktok_url"
+                    value={formData.tiktok_url}
+                    onChange={handleChange}
+                    className="input w-full bg-slate-50 border-slate-200"
+                    placeholder="https://tiktok.com/@..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.social.x")}</label>
+                  <input
+                    name="x_url"
+                    value={formData.x_url}
+                    onChange={handleChange}
+                    className="input w-full bg-slate-50 border-slate-200"
+                    placeholder="https://x.com/..."
                   />
                 </div>
 

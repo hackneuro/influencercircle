@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ProfileRow } from "@/types/database";
 import { getPublicProfile } from "@/services/profileService";
+import { createClient } from "@supabase/supabase-js";
 import { 
   MapPin, 
   Linkedin, 
@@ -22,6 +23,32 @@ type PageProps = {
     username: string;
   }>;
 };
+
+type ProfileExtras = {
+  tiktok_url?: string;
+  x_url?: string;
+};
+
+async function getProfileExtras(profileId: string): Promise<ProfileExtras> {
+  try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    );
+
+    const { data: blob } = await supabaseAdmin.storage.from("profile-extras").download(`${profileId}.json`);
+    if (!blob) return {};
+    const text = await blob.text();
+    const json = JSON.parse(text);
+    return {
+      tiktok_url: typeof json?.tiktok_url === "string" ? json.tiktok_url : "",
+      x_url: typeof json?.x_url === "string" ? json.x_url : ""
+    };
+  } catch {
+    return {};
+  }
+}
 
 function EliteBadge() {
   return (
@@ -47,8 +74,8 @@ function RoleBadge({ role }: { role: string }) {
   );
 }
 
-function PublicProfileView({ profile }: { profile: ProfileRow }) {
-  const hasSocials = profile.linkedin_url || profile.instagram_url || profile.resume_url;
+function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: ProfileExtras }) {
+  const hasSocials = profile.linkedin_url || profile.instagram_url || profile.resume_url || extras.tiktok_url || extras.x_url;
   const hasLocation = profile.city || profile.state || profile.country;
   const locationString = [profile.city, profile.state, profile.country].filter(Boolean).join(", ");
 
@@ -172,6 +199,34 @@ function PublicProfileView({ profile }: { profile: ProfileRow }) {
                     <div>
                       <span className="block text-sm font-semibold text-slate-900">Instagram</span>
                       <span className="block text-xs text-slate-500">Social Portfolio</span>
+                    </div>
+                  </a>
+                )}
+
+                {extras.tiktok_url && (
+                  <a href={extras.tiktok_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
+                    <div className="bg-black p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M14 3v10.2a3.8 3.8 0 1 1-3-3.72V6.5c-.35-.07-.72-.1-1.1-.1A6.4 6.4 0 1 0 16.4 12V7.9c1.2.9 2.7 1.5 4.4 1.6V6.6c-2.1-.2-3.9-1.5-4.5-3.6H14Z" fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="block text-sm font-semibold text-slate-900">TikTok</span>
+                      <span className="block text-xs text-slate-500">Short-form Content</span>
+                    </div>
+                  </a>
+                )}
+
+                {extras.x_url && (
+                  <a href={extras.x_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
+                    <div className="bg-black p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M18.9 2H22l-7.6 8.7L23 22h-7l-5.5-7.2L4.2 22H1l8.2-9.4L1 2h7.2l5 6.6L18.9 2Zm-1.2 18h1.7L6.2 3.9H4.4L17.7 20Z" fill="currentColor" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="block text-sm font-semibold text-slate-900">X</span>
+                      <span className="block text-xs text-slate-500">Updates & Threads</span>
                     </div>
                   </a>
                 )}
@@ -338,5 +393,6 @@ export default async function PublicProfilePage({ params }: PageProps) {
     );
   }
 
-  return <PublicProfileView profile={profile as ProfileRow} />;
+  const extras = await getProfileExtras((profile as ProfileRow).id);
+  return <PublicProfileView profile={profile as ProfileRow} extras={extras} />;
 }

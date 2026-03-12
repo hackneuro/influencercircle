@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { getMyProfile, upsertProfileFromOnboarding } from "@/services/profileService";
 import type { ProfileRow } from "@/types/database";
-import { Loader2, Save, User, MapPin, Link as LinkIcon, Target, Camera, Upload, FileText, Trash2, Eye, Lock, Globe, Mail, Phone, Image as ImageIcon } from "lucide-react";
+import { Loader2, Save, User, MapPin, Link as LinkIcon, Target, Camera, Upload, FileText, Trash2, Eye, Lock, Globe, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/marketing/LanguageContext";
@@ -24,8 +24,6 @@ export default function ProfileControlPage() {
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const resumeInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -42,9 +40,6 @@ export default function ProfileControlPage() {
     instagram_url: "",
     tiktok_url: "",
     x_url: "",
-    banner_url: "",
-    gallery_urls: [] as string[],
-    expertise: "",
     average_content_price: 0,
     objective: "",
     market_objective: "",
@@ -81,9 +76,6 @@ export default function ProfileControlPage() {
           instagram_url: data.instagram_url || "",
           tiktok_url: "",
           x_url: "",
-          banner_url: "",
-          gallery_urls: [],
-          expertise: "",
           average_content_price: data.average_content_price || 0,
           objective: data.objective || "",
           market_objective: data.market_objective || "",
@@ -106,10 +98,7 @@ export default function ProfileControlPage() {
             setFormData((prev) => ({
               ...prev,
               tiktok_url: extras?.tiktok_url || "",
-              x_url: extras?.x_url || "",
-              banner_url: extras?.banner_url || "",
-              gallery_urls: Array.isArray(extras?.gallery_urls) ? extras.gallery_urls : [],
-              expertise: extras?.expertise || ""
+              x_url: extras?.x_url || ""
             }));
           }
         }
@@ -161,62 +150,6 @@ export default function ProfileControlPage() {
     } catch (error: any) {
       console.error("Error uploading image:", error);
       setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.imageUploadFailed") });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!e.target.files || e.target.files.length === 0) return;
-      setUploadingImage(true);
-      const file = e.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `banner_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      setFormData((prev) => ({ ...prev, banner_url: data.publicUrl }));
-      setMessage({ type: "success", text: t("dashboard.profile.messages.bannerUploaded") });
-    } catch (error: any) {
-      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.bannerUploadFailed") });
-    } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!e.target.files || e.target.files.length === 0) return;
-      setUploadingImage(true);
-
-      const files = Array.from(e.target.files);
-      const existingCount = formData.gallery_urls.length;
-      const availableSlots = Math.max(0, 5 - existingCount);
-      const toUpload = files.slice(0, availableSlots);
-
-      const uploadedUrls: string[] = [];
-      for (const file of toUpload) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `gallery_${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, file);
-        if (uploadError) throw uploadError;
-        const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
-        uploadedUrls.push(data.publicUrl);
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        gallery_urls: [...prev.gallery_urls, ...uploadedUrls].slice(0, 5)
-      }));
-      if (uploadedUrls.length > 0) {
-        setMessage({ type: "success", text: t("dashboard.profile.messages.galleryUploaded") });
-      }
-    } catch (error: any) {
-      setMessage({ type: "error", text: error.message || t("dashboard.profile.messages.galleryUploadFailed") });
     } finally {
       setUploadingImage(false);
     }
@@ -300,7 +233,7 @@ export default function ProfileControlPage() {
             ? "influencer"
             : "user";
 
-      const { tiktok_url, x_url, banner_url, gallery_urls, expertise, ...profileForm } = formData;
+      const { tiktok_url, x_url, ...profileForm } = formData;
 
       await upsertProfileFromOnboarding({
         ...profileForm,
@@ -333,7 +266,7 @@ export default function ProfileControlPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify({ tiktok_url, x_url, banner_url, gallery_urls, expertise })
+          body: JSON.stringify({ tiktok_url, x_url })
         });
       }
 
@@ -480,102 +413,6 @@ export default function ProfileControlPage() {
               accept=".pdf,.doc,.docx" 
               onChange={handleResumeUpload}
             />
-          </section>
-
-          <section className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 w-full flex items-center gap-2 pb-2 border-b border-slate-100">
-              <ImageIcon className="h-5 w-5 text-indigo-500" />
-              {t("dashboard.profile.media.title")}
-            </h2>
-
-            <div className="space-y-4">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/50 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-semibold text-slate-900">{t("dashboard.profile.media.banner")}</div>
-                  {formData.banner_url ? (
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, banner_url: "" }))}
-                      className="text-slate-400 hover:text-red-500 transition-colors"
-                      title={t("dashboard.profile.media.remove")}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  ) : null}
-                </div>
-                <div className="text-xs text-slate-500">{t("dashboard.profile.media.bannerHint")}</div>
-                {formData.banner_url ? (
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
-                    <img src={formData.banner_url} alt="Banner" className="w-full h-28 object-cover" />
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4 text-xs text-slate-500">
-                    {t("dashboard.profile.media.bannerEmpty")}
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => bannerInputRef.current?.click()}
-                  className="btn btn-outline w-full flex items-center justify-center gap-2"
-                  disabled={uploadingImage}
-                >
-                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  {t("dashboard.profile.media.uploadBanner")}
-                </button>
-                <input
-                  type="file"
-                  ref={bannerInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleBannerUpload}
-                />
-              </div>
-
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/50 space-y-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-semibold text-slate-900">{t("dashboard.profile.media.gallery")}</div>
-                  <div className="text-xs font-semibold text-slate-500">{formData.gallery_urls.length}/5</div>
-                </div>
-                {formData.gallery_urls.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-2">
-                    {formData.gallery_urls.map((url, idx) => (
-                      <div key={`${url}-${idx}`} className="relative rounded-xl overflow-hidden border border-slate-200 bg-white">
-                        <img src={url} alt={`Gallery ${idx + 1}`} className="w-full h-20 object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setFormData((prev) => ({ ...prev, gallery_urls: prev.gallery_urls.filter((_, i) => i !== idx) }))}
-                          className="absolute top-1 right-1 bg-white/90 hover:bg-white text-slate-700 rounded-full p-1 shadow"
-                          title={t("dashboard.profile.media.remove")}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4 text-xs text-slate-500">
-                    {t("dashboard.profile.media.galleryEmpty")}
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="btn btn-outline w-full flex items-center justify-center gap-2"
-                  disabled={uploadingImage || formData.gallery_urls.length >= 5}
-                >
-                  {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  {t("dashboard.profile.media.uploadGallery")}
-                </button>
-                <input
-                  type="file"
-                  ref={galleryInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  multiple
-                  onChange={handleGalleryUpload}
-                />
-              </div>
-            </div>
           </section>
         </div>
 
@@ -864,16 +701,6 @@ export default function ProfileControlPage() {
               </h2>
               
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.objectives.expertise")}</label>
-                  <input
-                    name="expertise"
-                    value={formData.expertise}
-                    onChange={handleChange}
-                    className="input w-full bg-slate-50 border-slate-200"
-                    placeholder={t("dashboard.profile.objectives.expertisePlaceholder")}
-                  />
-                </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">{t("dashboard.profile.objectives.primaryGoal")}</label>
                   <select

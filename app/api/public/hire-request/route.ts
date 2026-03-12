@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     const objective_type = String(body?.objective_type || "").trim();
     const pay_per_message = Number(body?.pay_per_message);
     const total_budget = Number(body?.total_budget);
+    const currency = String(body?.currency || "").trim().slice(0, 10);
 
     if (!Number.isFinite(pay_per_message) || !Number.isFinite(total_budget)) {
       return NextResponse.json({ error: "Invalid numeric fields." }, { status: 400 });
@@ -58,7 +59,8 @@ export async function POST(req: Request) {
       objective_type,
       pay_per_message,
       want_other_talent: !!body?.want_other_talent,
-      total_budget
+      total_budget,
+      currency
     };
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
@@ -79,4 +81,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
-

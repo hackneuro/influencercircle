@@ -40,7 +40,8 @@ export default function HireCampaignButton({ targetUsername, targetName, targetP
     objective_type: "Brand Campaign" as ObjectiveType,
     pay_per_message: "",
     want_other_talent: "NO" as "YES" | "NO",
-    total_budget: ""
+    total_budget: "",
+    currency: ""
   });
 
   useEffect(() => setMounted(true), []);
@@ -81,7 +82,8 @@ export default function HireCampaignButton({ targetUsername, targetName, targetP
         objective_type: form.objective_type,
         pay_per_message: Number(form.pay_per_message),
         want_other_talent: form.want_other_talent === "YES",
-        total_budget: Number(form.total_budget)
+        total_budget: Number(form.total_budget),
+        currency: form.currency.trim().slice(0, 10)
       };
 
       const res = await fetch("/api/public/hire-request", {
@@ -234,6 +236,17 @@ export default function HireCampaignButton({ targetUsername, targetName, targetP
                   />
                 </div>
               </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-slate-700">Place here what currency your want to apply (ex. USD, or R$, or EU$, colombian pesos, AR$, etc.)</label>
+                <input
+                  className="input w-full bg-slate-50 border-slate-200"
+                  value={form.currency}
+                  maxLength={10}
+                  onChange={(e) => setForm((p) => ({ ...p, currency: e.target.value.slice(0, 10) }))}
+                  placeholder="USD"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -268,4 +281,3 @@ export default function HireCampaignButton({ targetUsername, targetName, targetP
     </>
   );
 }
-

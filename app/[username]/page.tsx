@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { ProfileRow } from "@/types/database";
 import { getPublicProfile } from "@/services/profileService";
 import { createClient } from "@supabase/supabase-js";
+import HireCampaignButton from "@/components/HireCampaignButton";
 import { 
   MapPin, 
   Linkedin, 
@@ -15,7 +16,8 @@ import {
   Target,
   Download,
   Calendar,
-  User
+  User,
+  Image as ImageIcon
 } from "lucide-react";
 
 type PageProps = {
@@ -27,6 +29,9 @@ type PageProps = {
 type ProfileExtras = {
   tiktok_url?: string;
   x_url?: string;
+  banner_url?: string;
+  gallery_urls?: string[];
+  expertise?: string;
 };
 
 async function getProfileExtras(profileId: string): Promise<ProfileExtras> {
@@ -43,7 +48,10 @@ async function getProfileExtras(profileId: string): Promise<ProfileExtras> {
     const json = JSON.parse(text);
     return {
       tiktok_url: typeof json?.tiktok_url === "string" ? json.tiktok_url : "",
-      x_url: typeof json?.x_url === "string" ? json.x_url : ""
+      x_url: typeof json?.x_url === "string" ? json.x_url : "",
+      banner_url: typeof json?.banner_url === "string" ? json.banner_url : "",
+      gallery_urls: Array.isArray(json?.gallery_urls) ? json.gallery_urls.map((u: any) => String(u || "")).filter(Boolean).slice(0, 5) : [],
+      expertise: typeof json?.expertise === "string" ? json.expertise : ""
     };
   } catch {
     return {};
@@ -78,12 +86,25 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
   const hasSocials = profile.linkedin_url || profile.instagram_url || profile.resume_url || extras.tiktok_url || extras.x_url;
   const hasLocation = profile.city || profile.state || profile.country;
   const locationString = [profile.city, profile.state, profile.country].filter(Boolean).join(", ");
+  const howSeenOptions = ["executive", "influencer", "student", "beginner"];
+  const howSeen = (profile.user_types || []).find((v) => howSeenOptions.includes(v));
+  const howSeenLabel =
+    howSeen === "executive" ? "Executive" :
+    howSeen === "influencer" ? "Influencer" :
+    howSeen === "student" ? "Student" :
+    howSeen === "beginner" ? "Beginner" :
+    "";
 
   return (
     <main className="min-h-screen bg-slate-50 pb-20">
       {/* Header / Cover Area */}
       <div className="h-48 md:h-64 bg-gradient-to-r from-slate-900 to-slate-800 w-full relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}></div>
+        {extras.banner_url ? (
+          <img src={extras.banner_url} alt="Banner" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}></div>
+        )}
+        <div className="absolute inset-0 bg-slate-900/40" />
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative">
@@ -131,10 +152,20 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
                     {locationString}
                   </div>
                 )}
+                {howSeenLabel && (
+                  <div className="text-slate-600 text-sm font-semibold">
+                    {howSeenLabel}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons (Desktop) */}
               <div className="hidden md:flex flex-col gap-3 shrink-0">
+                <HireCampaignButton
+                  targetUsername={String(profile.username || "")}
+                  targetName={profile.name}
+                  targetProfileId={profile.id}
+                />
                 {profile.resume_url && (
                   <a 
                     href={profile.resume_url} 
@@ -153,6 +184,11 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
 
         {/* Mobile Action Buttons */}
         <div className="md:hidden mt-6 flex flex-col gap-3">
+           <HireCampaignButton
+             targetUsername={String(profile.username || "")}
+             targetName={profile.name}
+             targetProfileId={profile.id}
+           />
            {profile.resume_url && (
               <a 
                 href={profile.resume_url} 
@@ -179,6 +215,17 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
               </h2>
               
               <div className="space-y-3">
+                {profile.resume_url && (
+                  <a href={profile.resume_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
+                    <div className="bg-slate-900 p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="block text-sm font-semibold text-slate-900">Download CV</span>
+                      <span className="block text-xs text-slate-500">Resume / CV</span>
+                    </div>
+                  </a>
+                )}
                 {profile.linkedin_url && (
                   <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group border border-transparent hover:border-slate-200">
                     <div className="bg-[#0077b5] p-2 rounded-lg text-white group-hover:scale-110 transition-transform">
@@ -271,8 +318,14 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
               <div className="space-y-4 text-sm">
                  {profile.region && (
                    <div>
-                     <span className="block text-xs font-semibold text-slate-500 uppercase">Region</span>
+                     <span className="block text-xs font-semibold text-slate-500 uppercase">Area</span>
                      <span className="text-slate-900">{profile.region}</span>
+                   </div>
+                 )}
+                 {extras.expertise && (
+                   <div>
+                     <span className="block text-xs font-semibold text-slate-500 uppercase">Expertise</span>
+                     <span className="text-slate-900">{extras.expertise}</span>
                    </div>
                  )}
                  {profile.average_content_price && profile.average_content_price > 0 && (
@@ -295,6 +348,21 @@ function PublicProfileView({ profile, extras }: { profile: ProfileRow; extras: P
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {extras.gallery_urls && extras.gallery_urls.length > 0 && (
+              <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4 text-indigo-500" />
+                  Photos
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {extras.gallery_urls.slice(0, 5).map((url, idx) => (
+                    <div key={`${url}-${idx}`} className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                      <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-28 object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
             
             {/* About Section */}
             <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">

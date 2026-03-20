@@ -98,7 +98,7 @@ export default async function LinkPage({ params }: PageProps) {
 
         {isRevoked ? (
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-            <div className="text-sm font-bold text-slate-900">This link is no longer active.</div>
+            <div className="text-sm font-bold text-slate-900">This unique link is no longer available.</div>
             <ExpiredRedirect seconds={5} />
           </div>
         ) : (

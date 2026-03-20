@@ -12,6 +12,25 @@ export default function ProceedButton(props: { token: string; proceedUrl?: strin
     setLoading(true);
     setError(null);
     try {
+      try {
+        const statusRes = await fetch(`/api/public/connect-link-status?token=${encodeURIComponent(token)}`, {
+          method: "GET"
+        });
+        const statusJson = await statusRes.json().catch(() => ({}));
+        if (statusRes.ok && statusJson?.revoked) {
+          setError("This unique link is no longer available.");
+          window.setTimeout(() => {
+            window.location.href = "https://www.influencercircle.net";
+          }, 5000);
+          return;
+        }
+        const overrideProceed = typeof statusJson?.proceed_url === "string" ? statusJson.proceed_url : "";
+        if (overrideProceed && overrideProceed.startsWith("http")) {
+          window.location.href = overrideProceed;
+          return;
+        }
+      } catch {}
+
       if (typeof proceedUrl === "string" && proceedUrl.length > 0) {
         window.location.href = proceedUrl;
         return;

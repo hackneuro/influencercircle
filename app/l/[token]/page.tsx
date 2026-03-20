@@ -43,6 +43,17 @@ export default async function LinkPage({ params }: PageProps) {
   if (!payload?.email || !payload?.name || !payload?.phone) notFound();
   const isRevoked = !!payload.revoked_at;
 
+  if (isRevoked) {
+    return (
+      <main className="max-w-2xl mx-auto space-y-6 py-10">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+          <h1 className="text-xl font-bold text-slate-900">This unique link is no longer available.</h1>
+          <ExpiredRedirect seconds={5} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-2xl mx-auto space-y-6 py-10">
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5">
@@ -96,14 +107,7 @@ export default async function LinkPage({ params }: PageProps) {
           </div>
         </div>
 
-        {isRevoked ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-            <div className="text-sm font-bold text-slate-900">This unique link is no longer available.</div>
-            <ExpiredRedirect seconds={5} />
-          </div>
-        ) : (
-          <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
-        )}
+        <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
       </div>
     </main>
   );

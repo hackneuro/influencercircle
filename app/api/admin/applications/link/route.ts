@@ -80,6 +80,7 @@ export async function POST(req: Request) {
       phone,
       channel: "linkedin",
       proceed_url: "",
+      revoked_at: "",
       created_at: new Date().toISOString()
     };
 
@@ -163,6 +164,60 @@ export async function PUT(req: Request) {
     } catch {}
 
     return NextResponse.json({ success: true, proceed_url: proceedUrl });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const admin = await requireAdmin(req);
+    if ("error" in admin) return NextResponse.json({ error: admin.error }, { status: admin.status });
+    const { supabaseAdmin } = admin;
+
+    const body = await req.json();
+    const token = String(body.token || "");
+    if (!token) return NextResponse.json({ error: "Missing token" }, { status: 400 });
+
+    await ensureBucket(supabaseAdmin);
+
+    const { data: blob, error: downloadError } = await supabaseAdmin.storage.from(BUCKET).download(`${token}.json`);
+    if (downloadError || !blob) return NextResponse.json({ error: "Link token not found" }, { status: 404 });
+
+    let payload: any = {};
+    try {
+      payload = JSON.parse(await blob.text());
+    } catch {
+      payload = {};
+    }
+
+    payload.revoked_at = new Date().toISOString();
+    payload.revoked_reason = "admin_cancelled";
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from(BUCKET)
+      .upload(`${token}.json`, JSON.stringify(payload), { contentType: "application/json", upsert: true });
+
+    if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
+
+    try {
+      const applicationId = String(payload.applicationId || "");
+      if (applicationId) {
+        const { data: appBlob } = await supabaseAdmin.storage.from("applications").download(`${applicationId}.json`);
+        if (appBlob) {
+          const text = await appBlob.text();
+          const appData = JSON.parse(text);
+          appData.connect_link_revoked_at = payload.revoked_at;
+          appData.connect_link_revoked_reason = payload.revoked_reason;
+          await supabaseAdmin.storage.from("applications").upload(`${applicationId}.json`, JSON.stringify(appData), {
+            contentType: "application/json",
+            upsert: true
+          });
+        }
+      }
+    } catch {}
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || "Unknown error" }, { status: 500 });
   }

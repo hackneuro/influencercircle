@@ -47,6 +47,7 @@ export default function AdminApplicationsPage() {
   const [generatedPayload, setGeneratedPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
   const [proceedUrl, setProceedUrl] = useState("");
   const [proceedSaving, setProceedSaving] = useState(false);
+  const [linkCancelling, setLinkCancelling] = useState(false);
   const [promoCreating, setPromoCreating] = useState(false);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [promoLink, setPromoLink] = useState("");
@@ -159,6 +160,34 @@ export default function AdminApplicationsPage() {
       toast.error(error.message || "Failed to save proceed URL");
     } finally {
       setProceedSaving(false);
+    }
+  };
+
+  const cancelGeneratedLink = async () => {
+    try {
+      setLinkCancelling(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+      if (!generatedLinkToken) throw new Error("Missing link token");
+
+      const response = await fetch("/api/admin/applications/link", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ token: generatedLinkToken })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to cancel link");
+
+      toast.success("Link cancelled");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to cancel link");
+    } finally {
+      setLinkCancelling(false);
     }
   };
 
@@ -684,6 +713,14 @@ export default function AdminApplicationsPage() {
             </div>
 
             <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={cancelGeneratedLink}
+                disabled={linkCancelling}
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-bold mr-auto disabled:opacity-50"
+              >
+                {linkCancelling ? "Cancelling..." : "Cancel link (expire)"}
+              </button>
               <button
                 type="button"
                 onClick={() => setLinkModalOpen(false)}

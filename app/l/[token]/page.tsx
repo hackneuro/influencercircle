@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import ProceedButton from "./ProceedButton";
+import ExpiredRedirect from "./ExpiredRedirect";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -24,7 +25,7 @@ export default async function LinkPage({ params }: PageProps) {
   const { data: blob, error } = await supabaseAdmin.storage.from(BUCKET).download(`${token}.json`);
   if (error || !blob) notFound();
 
-  let payload: { email: string; name: string; phone: string; proceed_url?: string } | null = null;
+  let payload: { email: string; name: string; phone: string; proceed_url?: string; revoked_at?: string } | null = null;
   try {
     const text = await blob.text();
     const json = JSON.parse(text);
@@ -32,13 +33,15 @@ export default async function LinkPage({ params }: PageProps) {
       email: String(json.email || ""),
       name: String(json.name || ""),
       phone: String(json.phone || ""),
-      proceed_url: json?.proceed_url ? String(json.proceed_url) : ""
+      proceed_url: json?.proceed_url ? String(json.proceed_url) : "",
+      revoked_at: json?.revoked_at ? String(json.revoked_at) : ""
     };
   } catch {
     payload = null;
   }
 
   if (!payload?.email || !payload?.name || !payload?.phone) notFound();
+  const isRevoked = !!payload.revoked_at;
 
   return (
     <main className="max-w-2xl mx-auto space-y-6 py-10">
@@ -93,7 +96,14 @@ export default async function LinkPage({ params }: PageProps) {
           </div>
         </div>
 
-        <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
+        {isRevoked ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+            <div className="text-sm font-bold text-slate-900">This link is no longer active.</div>
+            <ExpiredRedirect seconds={5} />
+          </div>
+        ) : (
+          <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
+        )}
       </div>
     </main>
   );

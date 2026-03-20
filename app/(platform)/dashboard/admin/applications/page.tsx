@@ -43,7 +43,10 @@ export default function AdminApplicationsPage() {
   const [linkModalOpen, setLinkModalOpen] = useState(false);
   const [linkCreating, setLinkCreating] = useState(false);
   const [generatedLink, setGeneratedLink] = useState("");
+  const [generatedLinkToken, setGeneratedLinkToken] = useState("");
   const [generatedPayload, setGeneratedPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
+  const [proceedUrl, setProceedUrl] = useState("");
+  const [proceedSaving, setProceedSaving] = useState(false);
   const [promoCreating, setPromoCreating] = useState(false);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [promoLink, setPromoLink] = useState("");
@@ -115,13 +118,47 @@ export default function AdminApplicationsPage() {
 
       const url = `${window.location.origin}${result.path}`;
       setGeneratedLink(url);
+      setGeneratedLinkToken(String(result.token || ""));
       setGeneratedPayload({ email: app.email, name, phone });
+      setProceedUrl("");
       setLinkModalOpen(true);
       toast.success("Link generated");
     } catch (error: any) {
       toast.error(error.message || "Failed to generate link");
     } finally {
       setLinkCreating(false);
+    }
+  };
+
+  const saveProceedUrl = async () => {
+    try {
+      setProceedSaving(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+      if (!generatedLinkToken) throw new Error("Missing link token");
+      if (!proceedUrl.trim()) throw new Error("Proceed URL is required");
+
+      const response = await fetch("/api/admin/applications/link", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          token: generatedLinkToken,
+          proceedUrl: proceedUrl.trim()
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to save proceed URL");
+
+      toast.success("Proceed URL saved");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to save proceed URL");
+    } finally {
+      setProceedSaving(false);
     }
   };
 
@@ -621,6 +658,29 @@ export default function AdminApplicationsPage() {
               >
                 <Copy className="h-4 w-4" />
               </button>
+            </div>
+
+            <div className="space-y-2 mb-6">
+              <label className="text-sm font-bold text-slate-700">Proceed URL (user is redirected after clicking Proceed)</label>
+              <div className="flex gap-2">
+                <input
+                  value={proceedUrl}
+                  onChange={(e) => setProceedUrl(e.target.value)}
+                  placeholder="https://www.influencercircle.net/..."
+                  className="flex-1 px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={saveProceedUrl}
+                  disabled={proceedSaving}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm font-medium"
+                >
+                  {proceedSaving ? "Saving..." : "Save"}
+                </button>
+              </div>
+              <div className="text-xs text-slate-500">
+                Allowed: https://*.influencercircle.net/... or a relative path like /dashboard/linkedin
+              </div>
             </div>
 
             <div className="flex justify-end">

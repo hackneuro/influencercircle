@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function ProceedButton(props: { token: string }) {
-  const { token } = props;
+export default function ProceedButton(props: { token: string; proceedUrl?: string }) {
+  const { token, proceedUrl } = props;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,6 +12,11 @@ export default function ProceedButton(props: { token: string }) {
     setLoading(true);
     setError(null);
     try {
+      if (typeof proceedUrl === "string" && proceedUrl.length > 0) {
+        window.location.href = proceedUrl;
+        return;
+      }
+
       const res = await fetch("/api/public/linkedin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -24,14 +24,15 @@ export default async function LinkPage({ params }: PageProps) {
   const { data: blob, error } = await supabaseAdmin.storage.from(BUCKET).download(`${token}.json`);
   if (error || !blob) notFound();
 
-  let payload: { email: string; name: string; phone: string } | null = null;
+  let payload: { email: string; name: string; phone: string; proceed_url?: string } | null = null;
   try {
     const text = await blob.text();
     const json = JSON.parse(text);
     payload = {
       email: String(json.email || ""),
       name: String(json.name || ""),
-      phone: String(json.phone || "")
+      phone: String(json.phone || ""),
+      proceed_url: json?.proceed_url ? String(json.proceed_url) : ""
     };
   } catch {
     payload = null;
@@ -92,7 +93,7 @@ export default async function LinkPage({ params }: PageProps) {
           </div>
         </div>
 
-        <ProceedButton token={token} />
+        <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
       </div>
     </main>
   );

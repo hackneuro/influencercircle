@@ -48,6 +48,7 @@ export default function AdminApplicationsPage() {
   const [proceedUrl, setProceedUrl] = useState("");
   const [proceedSaving, setProceedSaving] = useState(false);
   const [linkCancelling, setLinkCancelling] = useState(false);
+  const [linkRevoked, setLinkRevoked] = useState(false);
   const [promoCreating, setPromoCreating] = useState(false);
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [promoLink, setPromoLink] = useState("");
@@ -122,6 +123,7 @@ export default function AdminApplicationsPage() {
       setGeneratedLinkToken(String(result.token || ""));
       setGeneratedPayload({ email: app.email, name, phone });
       setProceedUrl("");
+      setLinkRevoked(false);
       setLinkModalOpen(true);
       toast.success("Link generated");
     } catch (error: any) {
@@ -163,7 +165,7 @@ export default function AdminApplicationsPage() {
     }
   };
 
-  const cancelGeneratedLink = async () => {
+  const setGeneratedLinkActive = async (active: boolean) => {
     try {
       setLinkCancelling(true);
       const { data: { session } } = await supabase.auth.getSession();
@@ -172,20 +174,21 @@ export default function AdminApplicationsPage() {
       if (!generatedLinkToken) throw new Error("Missing link token");
 
       const response = await fetch("/api/admin/applications/link", {
-        method: "DELETE",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ token: generatedLinkToken })
+        body: JSON.stringify({ token: generatedLinkToken, active })
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to cancel link");
+      if (!response.ok) throw new Error(result.error || "Failed to update link");
 
-      toast.success("Link cancelled");
+      setLinkRevoked(!active);
+      toast.success(active ? "Link reactivated" : "Link cancelled");
     } catch (error: any) {
-      toast.error(error.message || "Failed to cancel link");
+      toast.error(error.message || "Failed to update link");
     } finally {
       setLinkCancelling(false);
     }
@@ -715,11 +718,13 @@ export default function AdminApplicationsPage() {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={cancelGeneratedLink}
+                onClick={() => setGeneratedLinkActive(linkRevoked)}
                 disabled={linkCancelling}
-                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-bold mr-auto disabled:opacity-50"
+                className={`px-4 py-2 rounded-lg transition-colors text-sm font-bold mr-auto disabled:opacity-50 ${
+                  linkRevoked ? "text-emerald-700 hover:bg-emerald-50" : "text-red-600 hover:bg-red-50"
+                }`}
               >
-                {linkCancelling ? "Cancelling..." : "Cancel link (expire)"}
+                {linkCancelling ? (linkRevoked ? "Reactivating..." : "Cancelling...") : (linkRevoked ? "Reactivate link" : "Cancel link (expire)")}
               </button>
               <button
                 type="button"

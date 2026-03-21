@@ -18,7 +18,7 @@ export default function ProceedButton(props: { token: string; proceedUrl?: strin
         });
         const statusJson = await statusRes.json().catch(() => ({}));
         if (statusRes.ok && statusJson?.revoked) {
-          setError("This unique link is no longer available.");
+          setError("This Link is no longer active");
           window.setTimeout(() => {
             window.location.href = "https://www.influencercircle.net";
           }, 5000);

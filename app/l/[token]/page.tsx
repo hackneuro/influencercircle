@@ -47,7 +47,7 @@ export default async function LinkPage({ params }: PageProps) {
     return (
       <main className="max-w-2xl mx-auto space-y-6 py-10">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-          <h1 className="text-xl font-bold text-slate-900">This unique link is no longer available.</h1>
+          <h1 className="text-xl font-bold text-slate-900">This Link is no longer active</h1>
           <ExpiredRedirect seconds={5} />
         </div>
       </main>

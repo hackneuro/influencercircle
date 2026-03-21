@@ -19,7 +19,7 @@ function ApplyContent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [campaign, setCampaign] = useState<{ opportunity_title: string; location: string } | null>(null);
-  const [invite, setInvite] = useState<{ show_inviter_name: boolean; inviter_name: string } | null>(null);
+  const [invite, setInvite] = useState<{ show_inviter_name: boolean; inviter_name: string; inviter_username: string } | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -48,8 +48,11 @@ function ApplyContent() {
   useEffect(() => {
     try {
       const parts = document.cookie.split(";").map((p) => p.trim());
-      const found = parts.find((p) => p.startsWith("ic_ref_campaign="));
-      const code = found ? decodeURIComponent(found.split("=").slice(1).join("=")) : "";
+      const foundCampaign = parts.find((p) => p.startsWith("ic_ref_campaign="));
+      const foundRef = parts.find((p) => p.startsWith("ic_ref_code="));
+      const code = foundCampaign
+        ? decodeURIComponent(foundCampaign.split("=").slice(1).join("="))
+        : (foundRef ? decodeURIComponent(foundRef.split("=").slice(1).join("=")) : "");
       if (!code) return;
       fetch(`/api/public/referral-invite?code=${encodeURIComponent(code)}`)
         .then((res) => res.json())
@@ -57,7 +60,8 @@ function ApplyContent() {
           if (data && data.exists) {
             setInvite({
               show_inviter_name: !!data.show_inviter_name,
-              inviter_name: String(data.inviter_name || "")
+              inviter_name: String(data.inviter_name || ""),
+              inviter_username: String(data.inviter_username || "")
             });
           }
         })
@@ -182,7 +186,14 @@ function ApplyContent() {
           <div className="text-center mb-10">
             {invite?.show_inviter_name && invite.inviter_name ? (
               <div className="mb-5 inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/10 text-slate-200 text-sm border border-white/10">
-                You are being Invite by <span className="font-bold text-white ml-1">{invite.inviter_name}</span>
+                You have been referral (invited) to Influencer Circle by{" "}
+                {invite.inviter_username ? (
+                  <a href={`/${invite.inviter_username}`} className="font-bold text-white ml-1 underline">
+                    {invite.inviter_username}
+                  </a>
+                ) : (
+                  <span className="font-bold text-white ml-1">{invite.inviter_name}</span>
+                )}
               </div>
             ) : null}
             <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
@@ -200,7 +211,7 @@ function ApplyContent() {
               </div>
             ) : (
               <p className="text-slate-400 text-lg">
-                {t('apply.subtitle')}
+                {invite?.show_inviter_name && invite.inviter_name ? "You have been referral (invited) to Influencer Circle" : t('apply.subtitle')}
               </p>
             )}
           </div>

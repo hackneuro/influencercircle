@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Copy, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 type Summary = {
   totals: { level1: number; level2: number; level3: number };
@@ -53,6 +54,7 @@ export default function ReferralsPage() {
       const meRes = await authedFetch("/api/referrals/me");
       const meJson = await meRes.json();
       if (meRes.ok) setReferralCode(String(meJson.referral_code || ""));
+      else toast.error(meJson?.error || "Failed to load referral code");
 
       const sumRes = await authedFetch("/api/referrals/summary");
       const sumJson = await sumRes.json();
@@ -61,6 +63,9 @@ export default function ReferralsPage() {
       const campRes = await authedFetch("/api/referrals/campaigns");
       const campJson = await campRes.json();
       if (campRes.ok) setCampaigns(Array.isArray(campJson.campaigns) ? campJson.campaigns : []);
+      else toast.error(campJson?.error || "Failed to load referral campaigns");
+    } catch (e: any) {
+      toast.error(String(e?.message || "Failed to load referrals"));
     } finally {
       setLoading(false);
     }
@@ -77,7 +82,10 @@ export default function ReferralsPage() {
   }
 
   async function createCampaign() {
-    if (!newCampaign.title.trim()) return;
+    if (!newCampaign.title.trim()) {
+      toast.error("Please add a title");
+      return;
+    }
     setCreating(true);
     try {
       const res = await authedFetch("/api/referrals/campaigns", {
@@ -90,9 +98,14 @@ export default function ReferralsPage() {
         })
       });
       const json = await res.json().catch(() => ({}));
-      if (res.ok && json.campaign) {
+      if (!res.ok) {
+        toast.error(json?.error || "Failed to create campaign link");
+        return;
+      }
+      if (json.campaign) {
         setCampaigns((p) => [json.campaign, ...p]);
         setNewCampaign({ title: "", location: "", show_inviter_name: true });
+        toast.success("Referral campaign link created");
       }
     } finally {
       setCreating(false);
@@ -182,6 +195,7 @@ export default function ReferralsPage() {
             <div className="text-sm font-bold text-slate-700">Title</div>
             <input
               className="input w-full bg-slate-50 border-slate-200"
+              placeholder="Financial Executives, Oncologists Doctors, AI Influencers, etc."
               value={newCampaign.title}
               onChange={(e) => setNewCampaign((p) => ({ ...p, title: e.target.value }))}
             />
@@ -190,6 +204,7 @@ export default function ReferralsPage() {
             <div className="text-sm font-bold text-slate-700">Location</div>
             <input
               className="input w-full bg-slate-50 border-slate-200"
+              placeholder="New York, NY, USA; Sao Paulo, SP, Brazil; Buenos Aires, Argentina; Munmbai, India; etc."
               value={newCampaign.location}
               onChange={(e) => setNewCampaign((p) => ({ ...p, location: e.target.value }))}
             />
@@ -213,7 +228,7 @@ export default function ReferralsPage() {
           disabled={creating}
         >
           {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          Create campaign link
+          Create a Referall Campagin link to increase conversion
         </button>
 
         <div className="divide-y divide-slate-100">
@@ -244,4 +259,3 @@ export default function ReferralsPage() {
     </main>
   );
 }
-

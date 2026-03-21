@@ -19,7 +19,7 @@ function ApplyContent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [campaign, setCampaign] = useState<{ opportunity_title: string; location: string } | null>(null);
-  const [invite, setInvite] = useState<{ show_inviter_name: boolean; inviter_name: string; inviter_username: string } | null>(null);
+  const [invite, setInvite] = useState<{ show_inviter_name: boolean; inviter_name: string; inviter_username: string; title: string; location: string } | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -61,7 +61,9 @@ function ApplyContent() {
             setInvite({
               show_inviter_name: !!data.show_inviter_name,
               inviter_name: String(data.inviter_name || ""),
-              inviter_username: String(data.inviter_username || "")
+              inviter_username: String(data.inviter_username || ""),
+              title: String(data.title || ""),
+              location: String(data.location || "")
             });
           }
         })
@@ -214,6 +216,18 @@ function ApplyContent() {
                 {invite?.show_inviter_name && invite.inviter_name ? "You have been referral (invited) to Influencer Circle" : t('apply.subtitle')}
               </p>
             )}
+            {!campaign && invite?.title ? (
+              <div className="mt-4 space-y-1">
+                <div className="text-blue-400 text-xl font-semibold">
+                  {invite.title}
+                </div>
+                {invite.location ? (
+                  <div className="text-slate-400 text-base">
+                    {invite.location}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">

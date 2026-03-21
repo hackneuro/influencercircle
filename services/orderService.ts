@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { distributeCommissions } from "./referralService";
 
 type CheckoutSession = Stripe.Checkout.Session;
 
@@ -41,7 +42,7 @@ export async function handleStripeCheckoutCompleted(session: CheckoutSession) {
     throw new Error("Service not found when creating order");
   }
 
-  const { error: orderError } = await supabaseAdmin.from("orders").insert({
+  const { data: orderRow, error: orderError } = await supabaseAdmin.from("orders").insert({
     buyer_id: userId,
     service_id: serviceId,
     amount,
@@ -51,11 +52,23 @@ export async function handleStripeCheckoutCompleted(session: CheckoutSession) {
     metadata: {
       stripe_session_id: session.id
     }
-  });
+  }).select("id").single();
 
   if (orderError) {
     console.error("Supabase Order Insert Error:", orderError);
     throw new Error(orderError.message || "Failed to create order");
+  }
+
+  try {
+    await distributeCommissions({
+      supabaseAdmin,
+      orderId: orderRow.id,
+      buyerId: userId,
+      amount,
+      currency
+    });
+  } catch (e) {
+    console.error("Commission distribution failed:", e);
   }
   
   console.log(`Order created successfully: ${userId} -> ${serviceId}`);
@@ -148,7 +161,7 @@ export async function handleEliteSubscriptionCompleted(session: CheckoutSession)
       const currency = session.currency || "usd";
       const amount = amountTotal / 100;
 
-      const { error: orderError } = await supabaseAdmin.from("orders").insert({
+      const { data: eliteOrderRow, error: orderError } = await supabaseAdmin.from("orders").insert({
         buyer_id: userId,
         service_id: eliteService.id,
         amount,
@@ -159,13 +172,24 @@ export async function handleEliteSubscriptionCompleted(session: CheckoutSession)
           stripe_session_id: session.id,
           subscription_id: session.subscription
         }
-      });
+      }).select("id").single();
 
       if (orderError) {
         console.error("Failed to create subscription order:", orderError);
         // Don't throw, as profile update was successful
       } else {
          console.log("Subscription order created.");
+         try {
+           await distributeCommissions({
+             supabaseAdmin,
+             orderId: eliteOrderRow.id,
+             buyerId: userId,
+             amount,
+             currency
+           });
+         } catch (e) {
+           console.error("Commission distribution failed:", e);
+         }
       }
       
       // 3. Send Emails

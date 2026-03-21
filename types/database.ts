@@ -3,6 +3,8 @@ export type ProfileRow = {
   username: string | null;
   name: string;
   email: string;
+  referral_code?: string | null;
+  referred_by_id?: string | null;
   whatsapp: string | null;
   city: string | null;
   state: string | null;
@@ -85,4 +87,3 @@ export type OrderRow = {
   created_at: string;
   updated_at: string;
 };
-

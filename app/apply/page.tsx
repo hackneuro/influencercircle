@@ -19,6 +19,7 @@ function ApplyContent() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [campaign, setCampaign] = useState<{ opportunity_title: string; location: string } | null>(null);
+  const [invite, setInvite] = useState<{ show_inviter_name: boolean; inviter_name: string } | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -43,6 +44,26 @@ function ApplyContent() {
         .catch(err => console.error("Failed to load campaign", err));
     }
   }, [campaignId]);
+
+  useEffect(() => {
+    try {
+      const parts = document.cookie.split(";").map((p) => p.trim());
+      const found = parts.find((p) => p.startsWith("ic_ref_campaign="));
+      const code = found ? decodeURIComponent(found.split("=").slice(1).join("=")) : "";
+      if (!code) return;
+      fetch(`/api/public/referral-invite?code=${encodeURIComponent(code)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.exists) {
+            setInvite({
+              show_inviter_name: !!data.show_inviter_name,
+              inviter_name: String(data.inviter_name || "")
+            });
+          }
+        })
+        .catch(() => {});
+    } catch {}
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -159,6 +180,11 @@ function ApplyContent() {
         {/* Main Card */}
         <div className="bg-slate-900/90 backdrop-blur-xl p-8 md:p-10 rounded-2xl shadow-[0_0_40px_rgba(59,130,246,0.15)] border border-blue-500/30 ring-1 ring-white/10">
           <div className="text-center mb-10">
+            {invite?.show_inviter_name && invite.inviter_name ? (
+              <div className="mb-5 inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/10 text-slate-200 text-sm border border-white/10">
+                You are being Invite by <span className="font-bold text-white ml-1">{invite.inviter_name}</span>
+              </div>
+            ) : null}
             <h1 className="text-4xl font-bold text-white mb-3 tracking-tight">
               {t('apply.title')}
             </h1>

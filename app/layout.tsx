@@ -1,5 +1,6 @@
 import "./globals.css";
 import { LanguageProvider } from "@/components/marketing/LanguageContext";
+import ReferralTracker from "@/components/ReferralTracker";
 import Script from "next/script";
 import { Toaster } from "sonner";
 
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body suppressHydrationWarning>
         <LanguageProvider>
+          <ReferralTracker />
           {children}
           <Toaster />
         </LanguageProvider>

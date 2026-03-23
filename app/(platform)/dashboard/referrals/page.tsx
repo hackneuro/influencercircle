@@ -21,11 +21,22 @@ type Campaign = {
   created_at: string;
 };
 
+type InviteRow = {
+  name: string;
+  campaign: string;
+  role: string;
+  status: string;
+  financial: string;
+  netRevenue: string;
+  withdrawDate: string | null;
+};
+
 export default function ReferralsPage() {
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState("");
   const [summary, setSummary] = useState<Summary | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [invites, setInvites] = useState<InviteRow[]>([]);
   const [creating, setCreating] = useState(false);
   const [newCampaign, setNewCampaign] = useState({ title: "", location: "", show_inviter_name: true });
 
@@ -64,6 +75,10 @@ export default function ReferralsPage() {
       const campJson = await campRes.json();
       if (campRes.ok) setCampaigns(Array.isArray(campJson.campaigns) ? campJson.campaigns : []);
       else toast.error(campJson?.error || "Failed to load referral campaigns");
+
+      const invitesRes = await authedFetch("/api/referrals/invites");
+      const invitesJson = await invitesRes.json();
+      if (invitesRes.ok) setInvites(Array.isArray(invitesJson.invites) ? invitesJson.invites : []);
     } catch (e: any) {
       toast.error(String(e?.message || "Failed to load referrals"));
     } finally {
@@ -168,6 +183,46 @@ export default function ReferralsPage() {
             </div>
           </div>
         </div>
+
+        <div className="overflow-x-auto border border-slate-200 rounded-xl">
+          <table className="min-w-[980px] w-full text-sm">
+            <thead className="bg-slate-50 text-slate-600">
+              <tr>
+                <th className="text-left px-4 py-3 font-bold">Name</th>
+                <th className="text-left px-4 py-3 font-bold">Campagin</th>
+                <th className="text-left px-4 py-3 font-bold">Role</th>
+                <th className="text-left px-4 py-3 font-bold">Status</th>
+                <th className="text-left px-4 py-3 font-bold">Financial</th>
+                <th className="text-left px-4 py-3 font-bold">Your Net Revenue</th>
+                <th className="text-left px-4 py-3 font-bold">Date Withdraw</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {invites.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-5 text-slate-500" colSpan={7}>
+                    No invited users yet.
+                  </td>
+                </tr>
+              ) : (
+                invites.map((r, idx) => (
+                  <tr key={`${r.name}-${idx}`} className="bg-white">
+                    <td className="px-4 py-3 font-semibold text-slate-900">{r.name || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{r.campaign || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{r.role || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{r.status || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{r.financial || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">{r.netRevenue || "-"}</td>
+                    <td className="px-4 py-3 text-slate-700">
+                      {r.withdrawDate ? new Date(r.withdrawDate).toLocaleDateString() : "-"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
         <div className="divide-y divide-slate-100">
           {(summary?.layer1 || []).length === 0 ? (
             <div className="py-4 text-sm text-slate-500">No invites yet.</div>

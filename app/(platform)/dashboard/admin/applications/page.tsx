@@ -20,6 +20,11 @@ interface Application {
   cv_url: string;
   status: string;
   created_at: string;
+  referral_code?: string | null;
+  referral_campaign_code?: string | null;
+  referrer_user_id?: string | null;
+  referrer_name?: string | null;
+  referrer_username?: string | null;
   campaigns?: {
     campaign_name: string;
     opportunity_title: string;
@@ -464,15 +469,25 @@ export default function AdminApplicationsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {app.campaigns ? (
-                        <div className="text-xs">
-                          <div className="font-bold text-purple-600">{app.campaigns.campaign_name}</div>
-                          <div className="text-slate-600">{app.campaigns.opportunity_title}</div>
-                          <div className="text-slate-400">{app.campaigns.location}</div>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 text-xs italic">General</span>
-                      )}
+                      <div className="text-xs space-y-1">
+                        {app.campaigns ? (
+                          <div>
+                            <div className="font-bold text-purple-600">{app.campaigns.campaign_name}</div>
+                            <div className="text-slate-600">{app.campaigns.opportunity_title}</div>
+                            <div className="text-slate-400">{app.campaigns.location}</div>
+                          </div>
+                        ) : null}
+                        {app.referrer_name || app.referrer_username ? (
+                          <div className="text-slate-700">
+                            User: <span className="font-bold">{app.referrer_name || app.referrer_username}</span>
+                          </div>
+                        ) : (
+                          <div className="text-slate-400 italic">User: none</div>
+                        )}
+                        {!app.campaigns ? (
+                          <div className="text-slate-400 text-xs italic">General</div>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

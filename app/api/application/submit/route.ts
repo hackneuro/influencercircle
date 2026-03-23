@@ -1,6 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +21,46 @@ export async function POST(request: Request) {
 
     // Store new applications in Storage only.
       const applicationId = crypto.randomUUID();
+      const cookieStore = await cookies();
+      const referralCode = String(cookieStore.get("ic_ref_code")?.value || "").trim();
+      const referralCampaignCode = String(cookieStore.get("ic_ref_campaign")?.value || "").trim();
+
+      let referrerUserId: string | null = null;
+      let referrerName: string | null = null;
+      let referrerUsername: string | null = null;
+
+      try {
+        if (referralCampaignCode) {
+          const { data: campaign } = await supabaseAdmin
+            .from("referral_campaigns")
+            .select("owner_id")
+            .eq("code", referralCampaignCode)
+            .maybeSingle();
+          if (campaign?.owner_id) referrerUserId = String(campaign.owner_id);
+        } else if (referralCode) {
+          const { data: inviter } = await supabaseAdmin
+            .from("profiles")
+            .select("id,name,username")
+            .eq("referral_code", referralCode)
+            .maybeSingle();
+          if (inviter?.id) {
+            referrerUserId = String(inviter.id);
+            referrerName = inviter?.name ? String(inviter.name) : null;
+            referrerUsername = inviter?.username ? String(inviter.username) : null;
+          }
+        }
+
+        if (referrerUserId && (!referrerName || !referrerUsername)) {
+          const { data: inviterProfile } = await supabaseAdmin
+            .from("profiles")
+            .select("name,username")
+            .eq("id", referrerUserId)
+            .maybeSingle();
+          referrerName = inviterProfile?.name ? String(inviterProfile.name) : referrerName;
+          referrerUsername = inviterProfile?.username ? String(inviterProfile.username) : referrerUsername;
+        }
+      } catch {}
+
       const applicationData = {
         id: applicationId,
         first_name: body.firstName,
@@ -31,6 +72,11 @@ export async function POST(request: Request) {
         objective: body.objective,
         cv_url: body.cvUrl,
         campaign_id: body.campaignId || null,
+        referral_code: referralCode || null,
+        referral_campaign_code: referralCampaignCode || null,
+        referrer_user_id: referrerUserId,
+        referrer_name: referrerName,
+        referrer_username: referrerUsername,
         status: 'pending',
         created_at: new Date().toISOString()
       };

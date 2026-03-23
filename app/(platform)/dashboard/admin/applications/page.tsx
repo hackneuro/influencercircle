@@ -493,7 +493,7 @@ export default function AdminApplicationsPage() {
                         ) : (
                           <div className="text-slate-400 italic">User: none</div>
                         )}
-                        {app.referral_campaign_title ? (
+                        {!app.campaigns && app.referral_campaign_title ? (
                           <div className="text-slate-700">
                             <span className="font-bold">{app.referral_campaign_title}</span>
                             {app.referral_campaign_location ? (

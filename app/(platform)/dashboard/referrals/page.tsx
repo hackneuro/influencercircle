@@ -31,12 +31,21 @@ type InviteRow = {
   withdrawDate: string | null;
 };
 
+type InstitutionalCampaign = {
+  id: string;
+  campaign_name?: string;
+  opportunity_title?: string;
+  location?: string;
+  created_at?: string;
+};
+
 export default function ReferralsPage() {
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState("");
   const [summary, setSummary] = useState<Summary | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [invites, setInvites] = useState<InviteRow[]>([]);
+  const [institutionalCampaigns, setInstitutionalCampaigns] = useState<InstitutionalCampaign[]>([]);
   const [creating, setCreating] = useState(false);
   const [newCampaign, setNewCampaign] = useState({ title: "", location: "", show_inviter_name: true });
 
@@ -79,6 +88,10 @@ export default function ReferralsPage() {
       const invitesRes = await authedFetch("/api/referrals/invites");
       const invitesJson = await invitesRes.json();
       if (invitesRes.ok) setInvites(Array.isArray(invitesJson.invites) ? invitesJson.invites : []);
+
+      const instRes = await fetch("/api/campaigns");
+      const instJson = await instRes.json().catch(() => ({}));
+      if (instRes.ok) setInstitutionalCampaigns(Array.isArray(instJson.campaigns) ? instJson.campaigns : []);
     } catch (e: any) {
       toast.error(String(e?.message || "Failed to load referrals"));
     } finally {
@@ -300,6 +313,40 @@ export default function ReferralsPage() {
                       <div className="text-xs text-slate-500 truncate">{c.location || "No location"}</div>
                     </div>
                     <button className="btn btn-outline flex items-center gap-2" onClick={() => copy(link)}>
+                      <Copy className="h-4 w-4" />
+                      Copy link
+                    </button>
+                  </div>
+                  <input className="input w-full bg-slate-50 border-slate-200 font-mono text-sm" value={link} readOnly />
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <div className="text-lg font-bold text-slate-900">Institutional Campaigns</div>
+        <div className="text-sm text-slate-500">Create your own referral link to an active campaign.</div>
+
+        <div className="divide-y divide-slate-100">
+          {institutionalCampaigns.length === 0 ? (
+            <div className="py-4 text-sm text-slate-500">No campaigns available.</div>
+          ) : (
+            institutionalCampaigns.map((c) => {
+              const title = String(c.opportunity_title || c.campaign_name || "");
+              const location = String(c.location || "");
+              const link = referralCode
+                ? `https://www.influencercircle.net/apply?campaign_id=${encodeURIComponent(c.id)}&ref=${encodeURIComponent(referralCode)}`
+                : "";
+              return (
+                <div key={c.id} className="py-4 space-y-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 truncate">{title || "Campaign"}</div>
+                      <div className="text-xs text-slate-500 truncate">{location || "No location"}</div>
+                    </div>
+                    <button className="btn btn-outline flex items-center gap-2" onClick={() => copy(link)} disabled={!link}>
                       <Copy className="h-4 w-4" />
                       Copy link
                     </button>

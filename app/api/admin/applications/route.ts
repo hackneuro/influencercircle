@@ -153,6 +153,42 @@ export async function GET(request: Request) {
       console.warn("Referrer hydration failed:", e);
     }
 
+    // 5. Hydrate referral campaign details when present
+    try {
+      const codes = Array.from(
+        new Set(
+          applicationsData
+            .map((a) => String(a?.referral_campaign_code || ""))
+            .filter(Boolean)
+        )
+      );
+
+      if (codes.length > 0) {
+        const { data: referralCampaigns } = await supabaseAdmin
+          .from("referral_campaigns")
+          .select("code,title,location")
+          .in("code", codes);
+
+        const rcMap: Record<string, any> = {};
+        for (const c of referralCampaigns || []) rcMap[String((c as any).code)] = c;
+
+        applicationsData = applicationsData.map((app) => {
+          const code = String(app?.referral_campaign_code || "");
+          if (!code) return app;
+          if (app.referral_campaign_title || app.referral_campaign_location) return app;
+          const rc = rcMap[code];
+          if (!rc) return app;
+          return {
+            ...app,
+            referral_campaign_title: rc.title || null,
+            referral_campaign_location: rc.location || null
+          };
+        });
+      }
+    } catch (e) {
+      console.warn("Referral campaign hydration failed:", e);
+    }
+
     return NextResponse.json({ success: true, data: applicationsData });
   } catch (error: any) {
     console.error('Admin API Error:', error);

@@ -22,6 +22,8 @@ interface Application {
   created_at: string;
   referral_code?: string | null;
   referral_campaign_code?: string | null;
+  referral_campaign_title?: string | null;
+  referral_campaign_location?: string | null;
   referrer_user_id?: string | null;
   referrer_name?: string | null;
   referrer_username?: string | null;
@@ -491,6 +493,14 @@ export default function AdminApplicationsPage() {
                         ) : (
                           <div className="text-slate-400 italic">User: none</div>
                         )}
+                        {app.referral_campaign_title ? (
+                          <div className="text-slate-700">
+                            <span className="font-bold">{app.referral_campaign_title}</span>
+                            {app.referral_campaign_location ? (
+                              <span className="text-slate-500"> · {app.referral_campaign_location}</span>
+                            ) : null}
+                          </div>
+                        ) : null}
                         {!app.campaigns ? (
                           <div className="text-slate-400 text-xs italic">General</div>
                         ) : null}

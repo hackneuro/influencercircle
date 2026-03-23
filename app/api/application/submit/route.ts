@@ -28,15 +28,19 @@ export async function POST(request: Request) {
       let referrerUserId: string | null = null;
       let referrerName: string | null = null;
       let referrerUsername: string | null = null;
+      let referralCampaignTitle: string | null = null;
+      let referralCampaignLocation: string | null = null;
 
       try {
         if (referralCampaignCode) {
           const { data: campaign } = await supabaseAdmin
             .from("referral_campaigns")
-            .select("owner_id")
+            .select("owner_id,title,location")
             .eq("code", referralCampaignCode)
             .maybeSingle();
           if (campaign?.owner_id) referrerUserId = String(campaign.owner_id);
+          referralCampaignTitle = campaign?.title ? String(campaign.title) : null;
+          referralCampaignLocation = campaign?.location ? String(campaign.location) : null;
         } else if (referralCode) {
           const { data: inviter } = await supabaseAdmin
             .from("profiles")
@@ -74,6 +78,8 @@ export async function POST(request: Request) {
         campaign_id: body.campaignId || null,
         referral_code: referralCode || null,
         referral_campaign_code: referralCampaignCode || null,
+        referral_campaign_title: referralCampaignTitle,
+        referral_campaign_location: referralCampaignLocation,
         referrer_user_id: referrerUserId,
         referrer_name: referrerName,
         referrer_username: referrerUsername,

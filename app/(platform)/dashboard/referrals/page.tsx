@@ -192,7 +192,7 @@ export default function ReferralsPage() {
           <div>
             <div className="text-lg font-bold text-slate-900">Invited Members</div>
             <div className="text-sm text-slate-500">
-              Layer 1: {summary?.layer1?.length ?? 0} · Layer 2: {summary?.layer2Count ?? 0} · Layer 3: {summary?.layer3Count ?? 0}
+              Direct invited user (status): Layer 1 invitation (Layer 2 and 3 names are not showned).
             </div>
           </div>
         </div>

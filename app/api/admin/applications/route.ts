@@ -118,6 +118,41 @@ export async function GET(request: Request) {
       console.warn('Campaign hydration failed:', hydrateError);
     }
 
+    // 4. Hydrate referrer profile details (username/name) when present
+    try {
+      const referrerIds = Array.from(
+        new Set(
+          applicationsData
+            .map((a) => String(a?.referrer_user_id || ""))
+            .filter(Boolean)
+        )
+      );
+
+      if (referrerIds.length > 0) {
+        const { data: referrers } = await supabaseAdmin
+          .from("profiles")
+          .select("id,name,username")
+          .in("id", referrerIds);
+
+        const refMap: Record<string, any> = {};
+        for (const r of referrers || []) refMap[String((r as any).id)] = r;
+
+        applicationsData = applicationsData.map((app) => {
+          const rid = String(app?.referrer_user_id || "");
+          if (!rid) return app;
+          const r = refMap[rid];
+          if (!r) return app;
+          return {
+            ...app,
+            referrer_name: app.referrer_name || r.name || null,
+            referrer_username: app.referrer_username || r.username || null
+          };
+        });
+      }
+    } catch (e) {
+      console.warn("Referrer hydration failed:", e);
+    }
+
     return NextResponse.json({ success: true, data: applicationsData });
   } catch (error: any) {
     console.error('Admin API Error:', error);

@@ -479,7 +479,14 @@ export default function AdminApplicationsPage() {
                         ) : null}
                         {app.referrer_name || app.referrer_username ? (
                           <div className="text-slate-700">
-                            User: <span className="font-bold">{app.referrer_name || app.referrer_username}</span>
+                            User:{" "}
+                            {app.referrer_username ? (
+                              <Link href={`/${app.referrer_username}`} className="font-bold text-blue-600 hover:underline">
+                                {app.referrer_name || app.referrer_username}
+                              </Link>
+                            ) : (
+                              <span className="font-bold">{app.referrer_name || app.referrer_username}</span>
+                            )}
                           </div>
                         ) : (
                           <div className="text-slate-400 italic">User: none</div>

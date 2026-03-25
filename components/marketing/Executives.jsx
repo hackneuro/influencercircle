@@ -19,7 +19,8 @@ export default function Executives() {
         { name: "Jenifer Mattos", role: "Advogada especialista em Direito Digital e Sócia do Prado & Mattos Advocacia | Tech | I.A | Startups | Creators", link: "https://www.linkedin.com/in/advjenifer-mattos/", specialized: true, badge: "Direito Digital" },
         { name: "Herta Giesbrecht", role: "CEO ExMove", link: "https://www.linkedin.com/in/herta-giesbrecht/", specialized: true, badge: "CEO" },
         { name: "Jerry Coutinho", role: "Instrutor e Consultor de Treinamentos em Projetos de Consultoria e Mentoria", link: "https://www.linkedin.com/in/jerry-coutinho-12188969/", specialized: true, badge: "Consultor" },
-        { name: "Sergio Moura", role: "Desenvolvimento de Lideranças Estratégicas e Cultura de Decisão", link: "https://www.linkedin.com/in/trainersergiomoura/", specialized: true, badge: "Liderança" }
+        { name: "Sergio Moura", role: "Desenvolvimento de Lideranças Estratégicas e Cultura de Decisão", link: "https://www.linkedin.com/in/trainersergiomoura/", specialized: true, badge: "Liderança" },
+        { name: "Renato Ferreira", role: "Professor at Universidade de Minas Gerais", link: "https://www.linkedin.com/in/renatoferreira/", specialized: true, badge: "Professor" }
     ];
 
     const companies = [

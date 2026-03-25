@@ -44,12 +44,12 @@ export default function Header() {
                             >
                                 {t('header.about')}
                             </button>
-                            <button
-                                onClick={() => onNavigate('howitworks')}
+                            <Link
+                                href="/how"
                                 className="text-sm font-medium text-gray-400 hover:text-white transition-colors cursor-pointer"
                             >
                                 {t('header.how')}
-                            </button>
+                            </Link>
                         </div>
 
                         <div className="flex items-center gap-4">
@@ -114,12 +114,13 @@ export default function Header() {
                             >
                                 {t('header.about')}
                             </button>
-                            <button
-                                onClick={() => { onNavigate('howitworks'); setIsMenuOpen(false); }}
-                                className="text-left font-medium text-gray-200 hover:text-white"
+                            <Link
+                                href="/how"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="text-left font-medium text-gray-200 hover:text-white block w-full"
                             >
                                 {t('header.how')}
-                            </button>
+                            </Link>
                         </div>
 
                         <div className="flex flex-col gap-3 pt-4 border-t border-white/5">

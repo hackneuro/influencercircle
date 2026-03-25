@@ -15,7 +15,11 @@ export default function Executives() {
         { name: "Ulisses Melo", role: "Regional President at PUC angels MG", link: "https://www.linkedin.com/in/ulisses-melo/", image: "/ulisses.jpeg", specialized: true, badge: "President" },
         { name: "Diego Feliz", role: "Relationship Manager", link: "https://www.linkedin.com/in/diego-feliz-39487030/", image: "/diego.jpeg", specialized: true, badge: "Manager" },
         { name: "Glades Chuery", role: "Compliance VP", link: "https://www.linkedin.com/in/glades-chuery-inteligencia-artificial-tecnologia-inova%C3%A7%C3%A3o-seguran%C3%A7a-palestrante-mentora-governan%C3%A7a/", image: "/glades.jpeg", specialized: true, badge: "VP" },
-        { name: "Patricia Bassan", role: "HR Manager", link: "https://www.linkedin.com/in/patriciabassan/", image: "/patricia.jpeg", specialized: true, badge: "HR" }
+        { name: "Patricia Bassan", role: "HR Manager", link: "https://www.linkedin.com/in/patriciabassan/", image: "/patricia.jpeg", specialized: true, badge: "HR" },
+        { name: "Jenifer Mattos", role: "Advogada especialista em Direito Digital e Sócia do Prado & Mattos Advocacia | Tech | I.A | Startups | Creators", link: "https://www.linkedin.com/in/advjenifer-mattos/", specialized: true, badge: "Direito Digital" },
+        { name: "Herta Giesbrecht", role: "CEO ExMove", link: "https://www.linkedin.com/in/herta-giesbrecht/", specialized: true, badge: "CEO" },
+        { name: "Jerry Coutinho", role: "Instrutor e Consultor de Treinamentos em Projetos de Consultoria e Mentoria", link: "https://www.linkedin.com/in/jerry-coutinho-12188969/", specialized: true, badge: "Consultor" },
+        { name: "Sergio Moura", role: "Desenvolvimento de Lideranças Estratégicas e Cultura de Decisão", link: "https://www.linkedin.com/in/trainersergiomoura/", specialized: true, badge: "Liderança" }
     ];
 
     const companies = [
@@ -67,7 +71,7 @@ export default function Executives() {
                                 >
                                     {/* Background Image */}
                                     <img
-                                        src={exec.image}
+                                        src={exec.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(exec.name)}&background=111827&color=fff&size=800`}
                                         alt={exec.name}
                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />

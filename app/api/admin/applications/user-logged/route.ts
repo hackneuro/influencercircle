@@ -32,7 +32,7 @@ async function findAuthUserByEmail(email: string) {
 
 export async function POST(request: Request) {
   try {
-    const { applicationId, email, password, firstName, lastName, role } = await request.json();
+    const { applicationId, email, password, firstName, lastName, role, machineName } = await request.json();
 
     if (!applicationId || !email || !password || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -95,8 +95,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: profileError.message }, { status: 500 });
     }
 
+    const machineId = crypto.randomUUID();
+
     try {
-      await supabaseAdmin.from("applications").update({ status: "approved" }).eq("id", applicationId);
+      await supabaseAdmin.from("applications").update({ 
+        status: "approved",
+        user_logged: true,
+        machine_id: machineId,
+        machine_name: machineName || null
+      }).eq("id", applicationId);
     } catch {}
 
     const fileName = `${applicationId}.json`;
@@ -108,6 +115,8 @@ export async function POST(request: Request) {
         applicationData.status = "approved";
         applicationData.user_logged = true;
         applicationData.user_id = userId;
+        applicationData.machine_id = machineId;
+        applicationData.machine_name = machineName || null;
         applicationData.updated_at = new Date().toISOString();
         await supabaseAdmin.storage.from("applications").upload(fileName, JSON.stringify(applicationData), {
           contentType: "application/json",

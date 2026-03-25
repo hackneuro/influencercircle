@@ -27,6 +27,9 @@ interface Application {
   referrer_user_id?: string | null;
   referrer_name?: string | null;
   referrer_username?: string | null;
+  user_logged?: boolean;
+  machine_id?: string | null;
+  machine_name?: string | null;
   campaigns?: {
     campaign_name: string;
     opportunity_title: string;
@@ -60,6 +63,8 @@ export default function AdminApplicationsPage() {
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [promoLink, setPromoLink] = useState("");
   const [promoPayload, setPromoPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
+
+  const [machineNames, setMachineNames] = useState<Record<string, string>>({});
 
   const deleteApplication = async (app: Application) => {
     const deleteAuthUser = app.status === "approved"
@@ -327,7 +332,8 @@ export default function AdminApplicationsPage() {
           password: password,
           firstName: selectedApp.first_name,
           lastName: selectedApp.last_name,
-          role: selectedApp.role
+          role: selectedApp.role,
+          machineName: machineNames[selectedApp.id] || ""
         }),
       });
 
@@ -593,13 +599,48 @@ export default function AdminApplicationsPage() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleUserLoggedClick(app)}
-                          className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
-                          title="User logged (create user in database)"
-                        >
-                          User logged
-                        </button>
+                        {app.user_logged && app.machine_id ? (
+                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-200 text-left mt-2 w-full">
+                            <div className="text-xs text-slate-500 font-semibold">Machine Info</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-200">
+                                {app.machine_id}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(app.machine_id || "");
+                                  toast.success("Machine ID copied");
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500"
+                                title="Copy Machine ID"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                            {app.machine_name && (
+                              <div className="text-xs text-slate-600 mt-1">
+                                <span className="font-semibold">Name:</span> {app.machine_name}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 w-full justify-end mt-2">
+                            <input
+                              type="text"
+                              placeholder="Machine name (optional)"
+                              className="text-xs px-2 py-1.5 rounded border border-slate-200 w-36 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                              value={machineNames[app.id] || ""}
+                              onChange={(e) => setMachineNames(prev => ({ ...prev, [app.id]: e.target.value }))}
+                            />
+                            <button
+                              onClick={() => handleUserLoggedClick(app)}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                              title="User logged (create user in database)"
+                            >
+                              User logged
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

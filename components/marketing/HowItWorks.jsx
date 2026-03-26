@@ -63,7 +63,7 @@ export default function HowItWorks({ onNavigate }) {
                             <div className="hidden md:block w-px h-16 bg-blue-200"></div>
                             <div className="flex-1">
                                 <h4 className="text-lg font-bold text-blue-900 mb-2">The Solution</h4>
-                                <p className="text-blue-800">ViralMind does the heavy lifting for you. We help you interact with strategic accounts that drive traffic back to your profile.</p>
+                                <p className="text-blue-800">Influencer Circle does the heavy lifting for you. We help you interact with strategic accounts that drive traffic back to your profile.</p>
                             </div>
                         </div>
                     </div>
@@ -173,7 +173,7 @@ export default function HowItWorks({ onNavigate }) {
                                 </div>
                                 <div className="bg-slate-50 p-6 rounded-2xl">
                                     <h4 className="font-bold text-slate-900 text-lg mb-2">2. Does Influencer Circle cause a "Shadowban"?</h4>
-                                    <p className="text-slate-600">No. In 2025, "Shadowbanning" is typically caused by banned hashtags, community violations, or low-quality automation. ViralMind avoids this by ensuring all interactions are high-quality and human-led, actually helping prevent shadowbans.</p>
+                                    <p className="text-slate-600">No. In 2025, "Shadowbanning" is typically caused by banned hashtags, community violations, or low-quality automation. Influencer Circle avoids this by ensuring all interactions are high-quality and human-led, actually helping prevent shadowbans.</p>
                                 </div>
                                 <div className="bg-slate-50 p-6 rounded-2xl border-l-4 border-emerald-500">
                                     <h4 className="font-bold text-slate-900 text-lg mb-2">3. Do you need my password?</h4>

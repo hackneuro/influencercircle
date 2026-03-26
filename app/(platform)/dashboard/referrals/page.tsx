@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Loader2, Copy, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/components/marketing/LanguageContext";
 
 type Summary = {
   totals: { level1: number; level2: number; level3: number };
@@ -40,6 +41,9 @@ type InstitutionalCampaign = {
 };
 
 export default function ReferralsPage() {
+  const { t } = useLanguage();
+  const tRef = t('referrals') || {};
+
   const [loading, setLoading] = useState(true);
   const [referralCode, setReferralCode] = useState("");
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -153,36 +157,36 @@ export default function ReferralsPage() {
     <main className="max-w-5xl mx-auto p-6 space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Referral Circle</h1>
-          <p className="text-slate-500 mt-1">Share your link. Earn from 3 layers when referrals pay.</p>
+          <h1 className="text-2xl font-bold text-slate-900">{tRef.title || "My Referral Circle"}</h1>
+          <p className="text-slate-500 mt-1">{tRef.subtitle || "Share your link. Earn from 3 layers when referrals pay."}</p>
         </div>
         <button className="btn btn-outline" onClick={load}>
-          Refresh
+          {tRef.refresh || "Refresh"}
         </button>
       </div>
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-3">
-        <div className="text-sm font-bold text-slate-900">Your referral link</div>
+        <div className="text-sm font-bold text-slate-900">{tRef.yourLink || "Your referral link"}</div>
         <div className="flex gap-2">
           <input className="input flex-1 bg-slate-50 border-slate-200 font-mono text-sm" value={baseLink} readOnly />
           <button className="btn btn-outline flex items-center gap-2" onClick={() => copy(baseLink)} disabled={!baseLink}>
             <Copy className="h-4 w-4" />
-            Copy
+            {tRef.copy || "Copy"}
           </button>
         </div>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="text-xs text-slate-500 font-bold uppercase">Layer 1 earnings</div>
+          <div className="text-xs text-slate-500 font-bold uppercase">{tRef.layer1 || "Layer 1 earnings"}</div>
           <div className="text-2xl font-extrabold text-slate-900 mt-1">{summary?.totals.level1?.toFixed(2) ?? "0.00"}</div>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="text-xs text-slate-500 font-bold uppercase">Layer 2 earnings</div>
+          <div className="text-xs text-slate-500 font-bold uppercase">{tRef.layer2 || "Layer 2 earnings"}</div>
           <div className="text-2xl font-extrabold text-slate-900 mt-1">{summary?.totals.level2?.toFixed(2) ?? "0.00"}</div>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="text-xs text-slate-500 font-bold uppercase">Layer 3 earnings</div>
+          <div className="text-xs text-slate-500 font-bold uppercase">{tRef.layer3 || "Layer 3 earnings"}</div>
           <div className="text-2xl font-extrabold text-slate-900 mt-1">{summary?.totals.level3?.toFixed(2) ?? "0.00"}</div>
         </div>
       </section>
@@ -190,9 +194,9 @@ export default function ReferralsPage() {
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="text-lg font-bold text-slate-900">Invited Members</div>
+            <div className="text-lg font-bold text-slate-900">{tRef.invitedMembers || "Invited Members"}</div>
             <div className="text-sm text-slate-500">
-              Direct invited user (status): Layer 1 invitation (Layer 2 and 3 names are not showned).
+              {tRef.invitedMembersSub || "Direct invited user (status): Layer 1 invitation (Layer 2 and 3 names are not showned)."}
             </div>
           </div>
         </div>
@@ -201,20 +205,20 @@ export default function ReferralsPage() {
           <table className="min-w-[980px] w-full text-sm">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
-                <th className="text-left px-4 py-3 font-bold">Name</th>
-                <th className="text-left px-4 py-3 font-bold">Campagin</th>
-                <th className="text-left px-4 py-3 font-bold">Role</th>
-                <th className="text-left px-4 py-3 font-bold">Status</th>
-                <th className="text-left px-4 py-3 font-bold">Financial</th>
-                <th className="text-left px-4 py-3 font-bold">Your Net Revenue</th>
-                <th className="text-left px-4 py-3 font-bold">Date Withdraw</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colName || "Name"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colCampaign || "Campaign"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colRole || "Role"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colStatus || "Status"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colFinancial || "Financial"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colRevenue || "Your Net Revenue"}</th>
+                <th className="text-left px-4 py-3 font-bold">{tRef.colWithdraw || "Date Withdraw"}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {invites.length === 0 ? (
                 <tr>
                   <td className="px-4 py-5 text-slate-500" colSpan={7}>
-                    No invited users yet.
+                    {tRef.noUsers || "No invited users yet."}
                   </td>
                 </tr>
               ) : (
@@ -238,13 +242,13 @@ export default function ReferralsPage() {
 
         <div className="divide-y divide-slate-100">
           {(summary?.layer1 || []).length === 0 ? (
-            <div className="py-4 text-sm text-slate-500">No invites yet.</div>
+            <div className="py-4 text-sm text-slate-500">{tRef.noInvites || "No invites yet."}</div>
           ) : (
             (summary?.layer1 || []).map((p) => (
               <div key={p.id} className="py-3 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <div className="font-semibold text-slate-900 truncate">{p.name}</div>
-                  <div className="text-xs text-slate-500 truncate">@{p.username || "unknown"}</div>
+                  <div className="text-xs text-slate-500 truncate">@{p.username || tRef.unknown || "unknown"}</div>
                 </div>
                 <div className="text-xs text-slate-500 shrink-0">
                   {new Date(p.created_at).toLocaleDateString()}
@@ -256,36 +260,36 @@ export default function ReferralsPage() {
       </section>
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <div className="text-lg font-bold text-slate-900">Referral Campaign Links</div>
+        <div className="text-lg font-bold text-slate-900">{tRef.campaignLinksTitle || "Referral Campaign Links"}</div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2 md:col-span-1">
-            <div className="text-sm font-bold text-slate-700">Title</div>
+            <div className="text-sm font-bold text-slate-700">{tRef.formTitle || "Title"}</div>
             <input
               className="input w-full bg-slate-50 border-slate-200"
-              placeholder="Financial Executives, Oncologists Doctors, AI Influencers, etc."
+              placeholder={tRef.formTitlePlaceholder || "Financial Executives, Oncologists Doctors, AI Influencers, etc."}
               value={newCampaign.title}
               onChange={(e) => setNewCampaign((p) => ({ ...p, title: e.target.value }))}
             />
           </div>
           <div className="space-y-2 md:col-span-1">
-            <div className="text-sm font-bold text-slate-700">Location</div>
+            <div className="text-sm font-bold text-slate-700">{tRef.formLocation || "Location"}</div>
             <input
               className="input w-full bg-slate-50 border-slate-200"
-              placeholder="New York, NY, USA; Sao Paulo, SP, Brazil; Buenos Aires, Argentina; Munmbai, India; etc."
+              placeholder={tRef.formLocationPlaceholder || "New York, NY, USA; Sao Paulo, SP, Brazil; Buenos Aires, Argentina; Mumbai, India; etc."}
               value={newCampaign.location}
               onChange={(e) => setNewCampaign((p) => ({ ...p, location: e.target.value }))}
             />
           </div>
           <div className="space-y-2 md:col-span-1">
-            <div className="text-sm font-bold text-slate-700">Show inviter name</div>
+            <div className="text-sm font-bold text-slate-700">{tRef.formShowName || "Show inviter name"}</div>
             <select
               className="input w-full bg-slate-50 border-slate-200"
               value={newCampaign.show_inviter_name ? "yes" : "no"}
               onChange={(e) => setNewCampaign((p) => ({ ...p, show_inviter_name: e.target.value === "yes" }))}
             >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
+              <option value="yes">{tRef.formYes || "Yes"}</option>
+              <option value="no">{tRef.formNo || "No"}</option>
             </select>
           </div>
         </div>
@@ -296,12 +300,12 @@ export default function ReferralsPage() {
           disabled={creating}
         >
           {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          Create a Referall Campagin link to increase conversion
+          {tRef.createBtn || "Create a Referral Campaign link to increase conversion"}
         </button>
 
         <div className="divide-y divide-slate-100">
           {campaigns.length === 0 ? (
-            <div className="py-4 text-sm text-slate-500">No campaigns yet.</div>
+            <div className="py-4 text-sm text-slate-500">{tRef.noCampaigns || "No campaigns yet."}</div>
           ) : (
             campaigns.map((c) => {
               const link = `https://www.influencercircle.net/ref/${c.code}`;
@@ -310,11 +314,11 @@ export default function ReferralsPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="font-bold text-slate-900 truncate">{c.title}</div>
-                      <div className="text-xs text-slate-500 truncate">{c.location || "No location"}</div>
+                      <div className="text-xs text-slate-500 truncate">{c.location || tRef.noLocation || "No location"}</div>
                     </div>
                     <button className="btn btn-outline flex items-center gap-2" onClick={() => copy(link)}>
                       <Copy className="h-4 w-4" />
-                      Copy link
+                      {tRef.copyLink || "Copy link"}
                     </button>
                   </div>
                   <input className="input w-full bg-slate-50 border-slate-200 font-mono text-sm" value={link} readOnly />
@@ -326,12 +330,12 @@ export default function ReferralsPage() {
       </section>
 
       <section className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-        <div className="text-lg font-bold text-slate-900">Institutional Campaigns</div>
-        <div className="text-sm text-slate-500">Create your own referral link to an active campaign.</div>
+        <div className="text-lg font-bold text-slate-900">{tRef.instCampaignsTitle || "Institutional Campaigns"}</div>
+        <div className="text-sm text-slate-500">{tRef.instCampaignsSub || "Create your own referral link to an active campaign."}</div>
 
         <div className="divide-y divide-slate-100">
           {institutionalCampaigns.length === 0 ? (
-            <div className="py-4 text-sm text-slate-500">No campaigns available.</div>
+            <div className="py-4 text-sm text-slate-500">{tRef.noInstCampaigns || "No campaigns available."}</div>
           ) : (
             institutionalCampaigns.map((c) => {
               const title = String(c.opportunity_title || c.campaign_name || "");
@@ -344,11 +348,11 @@ export default function ReferralsPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="font-bold text-slate-900 truncate">{title || "Campaign"}</div>
-                      <div className="text-xs text-slate-500 truncate">{location || "No location"}</div>
+                      <div className="text-xs text-slate-500 truncate">{location || tRef.noLocation || "No location"}</div>
                     </div>
                     <button className="btn btn-outline flex items-center gap-2" onClick={() => copy(link)} disabled={!link}>
                       <Copy className="h-4 w-4" />
-                      Copy link
+                      {tRef.copyLink || "Copy link"}
                     </button>
                   </div>
                   <input className="input w-full bg-slate-50 border-slate-200 font-mono text-sm" value={link} readOnly />

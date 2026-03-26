@@ -8,7 +8,7 @@ export default function Hero() {
     const [index2, setIndex2] = useState(0);
 
     const group1 = [
-        { name: "Fernando Dias", role: "CEO & Founder", image: "/fernando.jpeg" },
+        { name: "Fernando Dias", role: "Founder/ CEO PUC angels", image: "/fernando.jpeg" },
         { name: "Elaine Cavalheiro", role: "COO of PUC angels", image: "/elaine.jpeg" },
         { name: "Marina Witzel", role: "Partner at Camim", image: "/marina.jpeg" }
     ];

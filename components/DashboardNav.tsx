@@ -1,5 +1,5 @@
 "use client";
-import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut, ShieldCheck, Lock } from "lucide-react";
+import { Linkedin, Instagram, MessageSquare as WhatsApp, Target, User, ShoppingBag, Crown, LogOut, ShieldCheck, Lock, Users } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
@@ -59,6 +59,10 @@ export default function DashboardNav() {
       <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/profile">
         <User className="h-5 w-5 text-orange-600" />
         <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-orange-700">Profile ID Control</span>
+      </Link>
+      <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/referrals">
+        <Users className="h-5 w-5 text-emerald-600" />
+        <span className="text-[10px] font-bold uppercase tracking-tight text-center leading-tight text-emerald-700">Invite and<br />Earn</span>
       </Link>
       <Link className="btn btn-outline flex flex-col items-center gap-1 p-2 h-auto min-h-0" href="/dashboard/profile#password">
         <Lock className="h-5 w-5 text-slate-700" />

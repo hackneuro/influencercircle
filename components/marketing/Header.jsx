@@ -3,13 +3,21 @@ import { Menu, X } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
 import { useView } from './ViewContext';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const { language, setLanguage, t } = useLanguage();
     const { currentView, setCurrentView } = useView();
+    const pathname = usePathname();
+    const router = useRouter();
 
-    const onNavigate = (view) => setCurrentView(view);
+    const onNavigate = (view) => {
+        setCurrentView(view);
+        if (pathname !== '/') {
+            router.push('/');
+        }
+    };
 
     const languages = [
         { code: 'pt-br', countryCode: 'br', label: 'Português' },
@@ -24,6 +32,7 @@ export default function Header() {
                 {/* Left: Logo */}
                 <Link
                     href="/"
+                    onClick={() => setCurrentView('home')}
                     className="cursor-pointer flex items-center gap-2"
                 >
                     <img

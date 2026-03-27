@@ -300,7 +300,7 @@ export default function ReferralsPage() {
           disabled={creating}
         >
           {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-          {tRef.createBtn || "Create a Referral Campaign link to increase conversion"}
+          <span>{tRef.createBtn || "Create a Referral Campaign link to increase conversion"}</span>
         </button>
 
         <div className="divide-y divide-slate-100">

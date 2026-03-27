@@ -471,7 +471,7 @@ export default function ProfileControlPage() {
               disabled={uploadingResume}
             >
               {uploadingResume ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {formData.resume_url ? t("dashboard.profile.resume.replace") : t("dashboard.profile.resume.upload")}
+              <span>{formData.resume_url ? t("dashboard.profile.resume.replace") : t("dashboard.profile.resume.upload")}</span>
             </button>
             <input 
               type="file" 
@@ -520,7 +520,7 @@ export default function ProfileControlPage() {
                   disabled={uploadingImage}
                 >
                   {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  {t("dashboard.profile.media.uploadBanner")}
+                  <span>{t("dashboard.profile.media.uploadBanner")}</span>
                 </button>
                 <input
                   type="file"
@@ -564,7 +564,7 @@ export default function ProfileControlPage() {
                   disabled={uploadingImage || formData.gallery_urls.length >= 5}
                 >
                   {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                  {t("dashboard.profile.media.uploadGallery")}
+                  <span>{t("dashboard.profile.media.uploadGallery")}</span>
                 </button>
                 <input
                   type="file"
@@ -971,12 +971,12 @@ export default function ProfileControlPage() {
                 {savingPassword ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    {t("dashboard.profile.password.updating")}
+                    <span>{t("dashboard.profile.password.updating")}</span>
                   </>
                 ) : (
                   <>
                     <Lock className="h-5 w-5" />
-                    {t("dashboard.profile.password.update")}
+                    <span>{t("dashboard.profile.password.update")}</span>
                   </>
                 )}
               </button>
@@ -992,12 +992,12 @@ export default function ProfileControlPage() {
               {saving ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  {t("dashboard.profile.save.saving")}
+                  <span>{t("dashboard.profile.save.saving")}</span>
                 </>
               ) : (
                 <>
                   <Save className="h-5 w-5" />
-                  {t("dashboard.profile.save.save")}
+                  <span>{t("dashboard.profile.save.save")}</span>
                 </>
               )}
             </button>

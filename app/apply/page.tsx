@@ -407,11 +407,11 @@ function ApplyContent() {
                 {loading ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Processing...
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
-                    {t('apply.form.submit')}
+                    <span>{t("apply.form.submit")}</span>
                     <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}

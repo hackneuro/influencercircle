@@ -398,7 +398,7 @@ export default function SubmitPostPage() {
                       disabled={freeSubmitting || !freePostUrl}
                       onClick={handleFreeSubmit}
                     >
-                      {freeSubmitting ? t('dashboard.submitPost.daily.submitting') : isElite ? t('dashboard.submitPost.daily.submitEliteBtn') : t('dashboard.submitPost.daily.submitBtn')}
+                      <span>{freeSubmitting ? t('dashboard.submitPost.daily.submitting') : isElite ? t('dashboard.submitPost.daily.submitEliteBtn') : t('dashboard.submitPost.daily.submitBtn')}</span>
                     </button>
                     
                     {freeError && (
@@ -502,7 +502,7 @@ export default function SubmitPostPage() {
               disabled={!canSend || sending}
               onClick={submit}
             >
-              {t('dashboard.submitPost.paid.submitBtn')} <Send className="h-4 w-4" />
+              <span>{t('dashboard.submitPost.paid.submitBtn')}</span> <Send className="h-4 w-4" />
             </button>
             
             {error && (

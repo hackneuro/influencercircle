@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { id, status } = await request.json();
+    const { id, status, reason } = await request.json();
 
     if (!id || !status) {
       return NextResponse.json({ error: 'Missing id or status' }, { status: 400 });
@@ -27,11 +27,23 @@ export async function POST(request: Request) {
     // 1. Update DB
     let dbError = null;
     try {
-      const { error } = await supabaseAdmin
-        .from('applications')
-        .update({ status })
-        .eq('id', id);
-      if (error) dbError = error;
+      const updatePayload: any = { status };
+      // Try to update rejection_reason if provided (will fail if column doesn't exist, which is fine, we catch it)
+      if (reason && status === 'rejected') {
+        try {
+            await supabaseAdmin.from('applications').update({ status, rejection_reason: reason }).eq('id', id);
+        } catch (e) {
+            // fallback to just status if rejection_reason column doesn't exist
+            const { error } = await supabaseAdmin.from('applications').update({ status }).eq('id', id);
+            if (error) dbError = error;
+        }
+      } else {
+        const { error } = await supabaseAdmin
+          .from('applications')
+          .update({ status })
+          .eq('id', id);
+        if (error) dbError = error;
+      }
     } catch (e) {
       dbError = e;
       console.warn('DB Update failed (server), trying storage...', e);
@@ -54,6 +66,9 @@ export async function POST(request: Request) {
         try {
             const applicationData = JSON.parse(text);
             applicationData.status = status;
+            if (reason && status === 'rejected') {
+                applicationData.rejection_reason = reason;
+            }
             applicationData.updated_at = new Date().toISOString();
 
             const { error: uploadError } = await supabaseAdmin

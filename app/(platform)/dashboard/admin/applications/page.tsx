@@ -65,6 +65,9 @@ export default function AdminApplicationsPage() {
   const [promoPayload, setPromoPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
 
   const [machineNames, setMachineNames] = useState<Record<string, string>>({});
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [appToReject, setAppToReject] = useState<Application | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const deleteApplication = async (app: Application) => {
     const deleteAuthUser = app.status === "approved"
@@ -358,12 +361,12 @@ export default function AdminApplicationsPage() {
     }
   };
 
-  const updateStatus = async (id: string, newStatus: string) => {
+  const updateStatus = async (id: string, newStatus: string, reason?: string) => {
     try {
       const response = await fetch('/api/admin/applications/update-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: newStatus }),
+        body: JSON.stringify({ id, status: newStatus, reason }),
       });
 
       if (!response.ok) {
@@ -374,10 +377,22 @@ export default function AdminApplicationsPage() {
         app.id === id ? { ...app, status: newStatus } : app
       ));
       toast.success(`Application ${newStatus}`);
+      
+      if (newStatus === 'rejected') {
+        setRejectModalOpen(false);
+        setAppToReject(null);
+        setRejectReason("");
+      }
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Failed to update status');
     }
+  };
+
+  const handleRejectClick = (app: Application) => {
+    setAppToReject(app);
+    setRejectReason("");
+    setRejectModalOpen(true);
   };
 
   const filteredApplications = applications.filter(app => {
@@ -388,7 +403,7 @@ export default function AdminApplicationsPage() {
       app.email.toLowerCase().includes(search.toLowerCase()) ||
       app.role.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
-  });
+  }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const totalCount = applications.length;
   const filteredCount = filteredApplications.length;
@@ -420,28 +435,54 @@ export default function AdminApplicationsPage() {
           </div>
         </div>
         
-        <div className="flex gap-2">
-          <div className="relative">
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search applications..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex overflow-x-auto gap-2 pb-2 border-b border-slate-200">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+            filter === 'all' ? 'bg-white border border-b-0 border-slate-200 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent'
+          }`}
+        >
+          All Status ({totalCount})
+        </button>
+        <button
+          onClick={() => setFilter('approved')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+            filter === 'approved' ? 'bg-white border border-b-0 border-slate-200 text-green-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent'
+          }`}
+        >
+          Approved ({approvedCount})
+        </button>
+        <button
+          onClick={() => setFilter('rejected')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+            filter === 'rejected' ? 'bg-white border border-b-0 border-slate-200 text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent'
+          }`}
+        >
+          Rejected ({rejectedCount})
+        </button>
+        <button
+          onClick={() => setFilter('pending')}
+          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap ${
+            filter === 'pending' ? 'bg-white border border-b-0 border-slate-200 text-yellow-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent'
+          }`}
+        >
+          Pending ({pendingCount})
+        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

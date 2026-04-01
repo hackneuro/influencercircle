@@ -133,7 +133,7 @@ export default function LinkedinCreateContentPage() {
                             className="btn w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2"
                         >
                             {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                            <span>Generate with AI (Gemini)</span>
+                            <span>Make this content viral with the Super Agent</span>
                         </button>
                     </section>
 

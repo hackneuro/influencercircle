@@ -10,11 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@supabase/auth-helpers-nextjs": "latest",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.91.1",
     "@tailwindcss/postcss": "^4.1.18",
     "autoprefixer": "latest",
+    "cheerio": "^1.2.0",
     "clsx": "latest",
     "framer-motion": "^12.27.5",
     "lucide-react": "latest",

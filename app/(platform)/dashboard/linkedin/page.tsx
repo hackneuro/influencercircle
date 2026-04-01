@@ -35,24 +35,12 @@ function LinkedinDashboardContent() {
       )}
       <div className="flex flex-col md:flex-row gap-4 mb-8">
         <div className="relative flex-1">
-             <button 
-               onClick={() => setActivePopup('create')}
-               className="w-full btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold flex-1 text-center"
+             <Link 
+               href="/dashboard/linkedin/create-content"
+               className="w-full btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold flex-1 text-center inline-block"
              >
               {t("dashboard.linkedin.createContent")}
-            </button>
-            {activePopup === 'create' && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg z-50 text-center shadow-xl animate-in fade-in zoom-in duration-200">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setActivePopup(null); }}
-                  className="absolute -top-2 -right-2 bg-white text-slate-900 rounded-full w-5 h-5 flex items-center justify-center font-bold border border-slate-200 shadow-sm hover:bg-slate-100"
-                >
-                  ×
-                </button>
-                {t("dashboard.linkedin.comingSoon")}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
-              </div>
-            )}
+            </Link>
         </div>
 
         <Link href="/dashboard/submit-post" className="btn bg-blue-600 hover:bg-blue-700 text-white border-transparent font-bold flex-1 text-center">

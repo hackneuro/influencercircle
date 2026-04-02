@@ -1,28 +1,32 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
 
-// Initialize Supabase with Service Role Key to bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
     }
-  }
-);
+  );
+}
 
 export async function POST(request: Request) {
   try {
-    const { applicationId } = await request.json();
+    const { id } = await request.json();
 
-    if (!applicationId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ error: 'Missing application id' }, { status: 400 });
     }
 
-    console.log(`Approving application ${applicationId}`);
+    const supabaseAdmin = getSupabaseAdmin();
+
+    console.log(`Approving application ${id}`);
 
     // Update Application Status to 'approved' (no user creation here)
     let dbError = null;
@@ -30,7 +34,7 @@ export async function POST(request: Request) {
       const { error } = await supabaseAdmin
         .from('applications')
         .update({ status: 'approved' })
-        .eq('id', applicationId);
+        .eq('id', id);
       if (error) dbError = error;
     } catch (e) {
       dbError = e;
@@ -38,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     // 4.2 Update Storage JSON (Backup)
-    const fileName = `${applicationId}.json`;
+    const fileName = `${id}.json`;
     const { data: blob, error: downloadError } = await supabaseAdmin
         .storage
         .from('applications')

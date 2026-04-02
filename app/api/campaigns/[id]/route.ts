@@ -2,15 +2,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Use service role to bypass RLS for public read if needed, 
 // though we set public read policy, so anon key should work too.
 // Using service role for consistency in APIs if anon key environment variable is not passed to this file context easily (it is, but safe side).
 // Actually, let's use the standard client creation if possible, but for simplicity in API routes I often use direct creation.
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export async function GET(
   request: Request,
@@ -23,6 +26,7 @@ export async function GET(
   }
 
   try {
+    const supabase = getSupabase();
     // Try to fetch from Storage (Bucket: 'campaigns')
     // This is the fallback/primary method since table migration failed
     const { data: blob, error: storageError } = await supabase.storage

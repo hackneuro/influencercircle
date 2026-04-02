@@ -2,15 +2,20 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Use service role key to bypass RLS and manage storage buckets
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 const BUCKET = 'campaigns';
 
 async function ensureBucket() {
+  const supabase = getSupabase();
   const { data: buckets } = await supabase.storage.listBuckets();
   if (!buckets?.find(b => b.name === BUCKET)) {
     await supabase.storage.createBucket(BUCKET, { public: true });
@@ -19,6 +24,7 @@ async function ensureBucket() {
 
 export async function GET() {
   try {
+    const supabase = getSupabase();
     await ensureBucket();
     const { data: files, error } = await supabase.storage.from(BUCKET).list();
     
@@ -48,6 +54,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabase();
     const body = await request.json();
     const id = crypto.randomUUID();
     const campaign = {
@@ -74,6 +81,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const supabase = await getSupabase();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

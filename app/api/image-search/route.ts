@@ -10,51 +10,82 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Query parameter "q" is required' }, { status: 400 });
     }
 
-    // Try Google Custom Search if configured
+    const images: string[] = [];
+
+    // Try Google Custom Search if configured officially
     if (process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_CX) {
       const gUrl = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&cx=${process.env.GOOGLE_SEARCH_CX}&key=${process.env.GOOGLE_SEARCH_API_KEY}&searchType=image&num=10`;
       const gRes = await fetch(gUrl);
       if (gRes.ok) {
         const data = await gRes.json();
-        const images = data.items?.map((item: any) => item.link) || [];
-        return NextResponse.json({ images });
+        const gImages = data.items?.map((item: any) => item.link) || [];
+        images.push(...gImages);
       }
     }
 
-    // Fallback 1: Unsplash open source images (using source.unsplash.com pattern via random)
-    // Actually source.unsplash is deprecated, let's use a simple HTML scrape of a public site or Pixabay
-    // Since we need reliable images without an API key, we will search DuckDuckGo HTML version
-    const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&iax=images&ia=images`;
-    const res = await fetch(ddgUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-      }
-    });
-    
-    if (!res.ok) {
-        throw new Error('Search failed');
-    }
-    
-    const html = await res.text();
-    const $ = cheerio.load(html);
-    const images: string[] = [];
-    
-    // In duckduckgo html, images might be in specific classes, or we just grab img src
-    $('img.tile--img__img').each((_, el) => {
-        const src = $(el).attr('src');
-        if (src) {
-            images.push(src.startsWith('//') ? `https:${src}` : src);
+    // Since Google blocks direct scraping, we use Bing Images as our primary robust engine
+    try {
+      const bingUrl = `https://www.bing.com/images/search?q=${encodeURIComponent(query)}`;
+      const bingRes = await fetch(bingUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
         }
-    });
+      });
+      
+      if (bingRes.ok) {
+        const bingHtml = await bingRes.text();
+        const $ = cheerio.load(bingHtml);
+        
+        $('a.iusc').each((_, el) => {
+            const m = $(el).attr('m');
+            if (m) {
+                try {
+                    const data = JSON.parse(m);
+                    if (data.murl) images.push(data.murl);
+                } catch(e) {}
+            }
+        });
+      }
+    } catch (bingErr) {
+      console.error('Bing search error:', bingErr);
+    }
 
-    // If DuckDuckGo fails to yield images, provide some fallback placeholders related to the query
-    if (images.length === 0) {
+    // Add DuckDuckGo as secondary mix
+    try {
+      const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&iax=images&ia=images`;
+      const ddgRes = await fetch(ddgUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
+        }
+      });
+      
+      if (ddgRes.ok) {
+        const ddgHtml = await ddgRes.text();
+        const $ = cheerio.load(ddgHtml);
+        
+        $('img.tile--img__img').each((_, el) => {
+            const src = $(el).attr('src');
+            if (src) {
+                images.push(src.startsWith('//') ? `https:${src}` : src);
+            }
+        });
+      }
+    } catch (ddgErr) {
+      console.error('DuckDuckGo search error:', ddgErr);
+    }
+
+    // Deduplicate and filter out base64/data URLs
+    const finalImages = [...new Set(images)].filter(url => url.startsWith('http'));
+
+    // If all engines fail, provide placeholders
+    if (finalImages.length === 0) {
         for (let i = 0; i < 8; i++) {
-            images.push(`https://picsum.photos/seed/${encodeURIComponent(query)}${i}/800/600`);
+            finalImages.push(`https://picsum.photos/seed/${encodeURIComponent(query)}${i}/800/600`);
         }
     }
 
-    return NextResponse.json({ images: images.slice(0, 12) });
+    // Return a healthy mix of top 12 results
+    return NextResponse.json({ images: finalImages.slice(0, 12) });
   } catch (error: any) {
     console.error('Image Search Error:', error);
     return NextResponse.json({ error: 'Failed to search images' }, { status: 500 });

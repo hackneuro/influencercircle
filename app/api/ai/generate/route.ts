@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const apiKey = "AIzaSyBXXGvnFJtaJzga1uEP2mbc06AmrDNe5Z0";
+    const apiKey = "AIzaSyDNn0G5IUOnWYD5uTqq47zDNv2EI6fTSFA";
     const genAI = new GoogleGenerativeAI(apiKey);
     
     const systemInstruction = `Você é um Social Media Manager altamente experiente da Influencer Circle.

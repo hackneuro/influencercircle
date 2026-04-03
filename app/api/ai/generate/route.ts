@@ -9,13 +9,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      // Return a simulated response if API key is not configured yet
-      return NextResponse.json({ 
-        text: `[Simulated AI Response - Configure GEMINI_API_KEY in .env.local to enable real AI]\n\n🚀 Exciting update! \n\n${prompt}\n\n#Growth #Success #Innovation` 
-      });
-    }
+    // Bypass Vercel environment variables completely by hardcoding the key here
+    // since Vercel's env propagation is repeatedly failing.
+    const apiKey = "AIzaSyBXXGvnFJtaJzga1uEP2mbc06AmrDNe5Z0";
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });

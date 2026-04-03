@@ -15,8 +15,9 @@ export async function POST(request: Request) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // Using the original gemini-1.5-pro model since the version of the SDK doesn't support the newer 2.0 or 1.5 flash string
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    // Using the original gemini-pro which is guaranteed to be universally available 
+    // across all SDK versions
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const fullPrompt = `You are an expert LinkedIn ghostwriter. Turn the following thoughts/draft into a professional, highly engaging LinkedIn post. Include appropriate emojis and 3-5 relevant hashtags at the end. Keep the tone authentic and professional.\n\nDraft:\n${prompt}`;
 

@@ -1,6 +1,41 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+const preferredModels = (process.env.GEMINI_MODELS ?? 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-pro')
+  .split(',')
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+let cachedModelNames: { at: number; names: Set<string> } | null = null;
+
+async function listModelNames(apiKey: string) {
+  const now = Date.now();
+  if (cachedModelNames && now - cachedModelNames.at < 60 * 60 * 1000) return cachedModelNames.names;
+
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, {
+    headers: { accept: 'application/json' },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to list Gemini models (${res.status})`);
+  }
+
+  const json = await res.json();
+  const names = new Set<string>(
+    (json?.models ?? [])
+      .map((m: any) => String(m?.name ?? '').replace(/^models\//, '').trim())
+      .filter(Boolean)
+  );
+
+  cachedModelNames = { at: now, names };
+  return names;
+}
+
+async function pickModel(apiKey: string) {
+  const supported = await listModelNames(apiKey);
+  return preferredModels.find((m) => supported.has(m)) ?? preferredModels[0];
+}
+
 export async function POST(request: Request) {
   try {
     const { prompt } = await request.json();
@@ -9,7 +44,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 });
     }
 
-    const apiKey = "AIzaSyDNn0G5IUOnWYD5uTqq47zDNv2EI6fTSFA";
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing GEMINI_API_KEY' }, { status: 500 });
+    }
+
     const genAI = new GoogleGenerativeAI(apiKey);
     
     const systemInstruction = `Você é um Social Media Manager altamente experiente da Influencer Circle.
@@ -29,8 +68,9 @@ export async function POST(request: Request) {
     
     Não escreva introduções como "Aqui está o seu post:" ou explicações. Apenas retorne o texto final do post pronto para ser copiado e colado pelo usuário.`;
 
+    const modelName = await pickModel(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro",
+      model: modelName,
       systemInstruction: {
         parts: [{ text: systemInstruction }],
         role: "system"
@@ -41,7 +81,7 @@ export async function POST(request: Request) {
     const response = await result.response;
     const text = response.text();
 
-    return NextResponse.json({ text });
+    return NextResponse.json({ text, model: modelName });
   } catch (error: any) {
     console.error('AI Generation Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to generate content' }, { status: 500 });

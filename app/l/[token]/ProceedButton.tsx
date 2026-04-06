@@ -12,8 +12,9 @@ export default function ProceedButton(props: { token: string; proceedUrl?: strin
     setLoading(true);
     setError(null);
     try {
-      // If it's format 2, we go to the framed proceed page
-      if (onboardingFormat === "format2") {
+      // We always go to the framed proceed page if there is a proceedUrl
+      // This allows the top bar with "Login successful" and "Need help" buttons to show.
+      if (proceedUrl && proceedUrl.length > 0) {
         window.location.href = `/l/${token}/proceed`;
         return;
       }

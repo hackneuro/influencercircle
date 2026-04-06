@@ -41,7 +41,7 @@ export default async function LinkPage({ params }: PageProps) {
     payload = null;
   }
 
-  if (!payload?.email || !payload?.name || !payload?.phone) notFound();
+  if (!payload?.email || !payload?.name) notFound();
   const isRevoked = !!payload.revoked_at;
 
   if (isRevoked) {

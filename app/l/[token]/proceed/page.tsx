@@ -1,52 +1,54 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { Loader2, ExternalLink, CheckCircle, HelpCircle, ChevronRight } from "lucide-react";
+import { createClient } from "@supabase/supabase-js";
+import { ExternalLink, CheckCircle, HelpCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { use } from "react";
+import { notFound } from "next/navigation";
 
-export default function ProceedFramedPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = use(params);
-  const [loading, setLoading] = useState(true);
-  const [payload, setPayload] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-  useEffect(() => {
-    async function fetchPayload() {
-      const { data: blob, error: downloadError } = await supabase.storage.from("connect-links").download(`${token}.json`);
-      if (downloadError || !blob) {
-        setError("Link not found or expired");
-        setLoading(false);
-        return;
-      }
+type PageProps = {
+  params: Promise<{ token: string }>;
+};
 
-      try {
-        const text = await blob.text();
-        const json = JSON.parse(text);
-        setPayload(json);
-      } catch {
-        setError("Invalid link data");
-      }
-      setLoading(false);
-    }
-    fetchPayload();
-  }, [token]);
+const BUCKET = "connect-links";
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
+export default async function ProceedFramedPage({ params }: PageProps) {
+  const { token } = await params;
 
-  if (error || !payload?.proceed_url) {
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+  const { data: blob, error: downloadError } = await supabaseAdmin.storage.from(BUCKET).download(`${token}.json`);
+  
+  if (downloadError || !blob) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 text-center">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
            <h1 className="text-xl font-bold text-slate-900 mb-4">Error</h1>
-           <p className="text-slate-500 mb-6">{error || "Missing proceed URL"}</p>
+           <p className="text-slate-500 mb-6">Secure connection link not found or expired.</p>
+           <Link href="/dashboard" className="text-blue-600 font-bold hover:underline">Go to Dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
+  let payload: any = null;
+  try {
+    const text = await blob.text();
+    payload = JSON.parse(text);
+  } catch {
+    return notFound();
+  }
+
+  if (!payload?.proceed_url) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 text-center">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
+           <h1 className="text-xl font-bold text-slate-900 mb-4">Error</h1>
+           <p className="text-slate-500 mb-6">This connection does not have a destination URL configured.</p>
            <Link href="/dashboard" className="text-blue-600 font-bold hover:underline">Go to Dashboard</Link>
         </div>
       </div>
@@ -95,6 +97,7 @@ export default function ProceedFramedPage({ params }: { params: Promise<{ token:
           src={payload.proceed_url} 
           className="w-full h-full border-0"
           title="Remote Platform"
+          allow="camera; microphone; display-capture; autoplay; clipboard-write"
           sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin"
         />
         

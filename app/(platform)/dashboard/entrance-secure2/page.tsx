@@ -45,68 +45,82 @@ export default function EntranceSecure2Page() {
 
       toast.success("Password changed successfully!");
 
-      // After password change, we need to find the connect link for this user
-      // Search for any application with this email or user_id that has a token
-      
-      const emailFilter = user.email;
+      // Force a small delay to ensure DB consistency
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const emailFilter = user.email?.toLowerCase();
       const idFilter = user.id;
 
       console.log("Searching for application with:", { email: emailFilter, id: idFilter });
 
-      const { data: applications, error: appError } = await supabase
+      // Search 1: Try by user_id first (most accurate)
+      const { data: appById, error: errById } = await supabase
         .from("applications")
-        .select("connect_link_token")
-        .or(`email.eq.${emailFilter},user_id.eq.${idFilter}`)
+        .select("connect_link_token, id, email")
+        .eq("user_id", idFilter)
         .not("connect_link_token", "is", null)
         .order("created_at", { ascending: false })
         .limit(1);
 
-      if (appError) {
-        console.error("Error fetching applications:", appError);
-        // Fallback to simple email query if OR fails (maybe user_id column doesn't exist yet)
-        const { data: emailOnlyApps } = await supabase
-          .from("applications")
-          .select("connect_link_token")
-          .eq("email", emailFilter)
-          .not("connect_link_token", "is", null)
-          .order("created_at", { ascending: false })
-          .limit(1);
-        
-        if (emailOnlyApps && emailOnlyApps.length > 0 && emailOnlyApps[0].connect_link_token) {
-          router.push(`/l/${emailOnlyApps[0].connect_link_token}`);
-          return;
-        }
-      }
-
-      if (!applications || applications.length === 0) {
-        console.warn("No application found with token, trying without null filter");
-        // Fallback: try to see if we can get anything at all for this user
-        const { data: allApps } = await supabase
-          .from("applications")
-          .select("connect_link_token")
-          .or(`email.eq.${emailFilter},user_id.eq.${idFilter}`)
-          .order("created_at", { ascending: false })
-          .limit(1);
-          
-        if (allApps && allApps.length > 0 && allApps[0].connect_link_token) {
-          router.push(`/l/${allApps[0].connect_link_token}`);
-          return;
-        }
-
-        // Final fallback: Maybe they are just done and should go to dashboard
-        toast.info("Password changed successfully. Redirecting to your dashboard.");
-        router.push("/dashboard");
+      if (appById && appById.length > 0 && appById[0].connect_link_token) {
+        const token = appById[0].connect_link_token;
+        console.log("Found token by user_id, redirecting to unique link:", token);
+        window.location.href = `/l/${token}`;
         return;
       }
 
-      const token = applications[0].connect_link_token;
-      if (token) {
-        console.log("Found token, redirecting to:", `/l/${token}`);
-        router.push(`/l/${token}`);
-      } else {
-        console.warn("No token found in application record, going to dashboard");
-        router.push("/dashboard");
+      // Search 2: Try by email (case-insensitive search if possible, or multiple variants)
+      const { data: appByEmail, error: errByEmail } = await supabase
+        .from("applications")
+        .select("connect_link_token, id, email")
+        .or(`email.ilike.${emailFilter},email.eq.${user.email}`)
+        .not("connect_link_token", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (appByEmail && appByEmail.length > 0 && appByEmail[0].connect_link_token) {
+        const token = appByEmail[0].connect_link_token;
+        console.log("Found token by email, redirecting to unique link:", token);
+        window.location.href = `/l/${token}`;
+        return;
       }
+
+      // Search 3: Final attempt - just get ANY application for this user and try to find a token in storage
+      const { data: anyApp } = await supabase
+        .from("applications")
+        .select("id, connect_link_token")
+        .or(`email.eq.${user.email},user_id.eq.${idFilter}`)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (anyApp && anyApp.length > 0) {
+        if (anyApp[0].connect_link_token) {
+           window.location.href = `/l/${anyApp[0].connect_link_token}`;
+           return;
+        }
+        
+        // If we found the app but no token in DB, maybe it's in storage?
+        // Let's try to fetch from the API that handles link tokens
+        try {
+          const res = await fetch(`/api/public/connect-link-status?email=${encodeURIComponent(user.email)}`);
+          const data = await res.json();
+          if (data?.token) {
+            window.location.href = `/l/${data.token}`;
+            return;
+          }
+        } catch (e) {}
+      }
+
+      // If we reach here, we REALLY couldn't find the link.
+      console.error("COULD NOT FIND SECURE LINK FOR USER:", user.email);
+      toast.error("Password changed, but we couldn't find your unique secure link. Please contact support.");
+      
+      // Instead of dashboard, let's stay here and show a helpful message
+      // but the user might be stuck, so we provide a link to the dashboard as a last resort
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 5000);
+
     } catch (error: any) {
       console.error("Password change or redirect error:", error);
       toast.error(error.message || "Failed to update password");

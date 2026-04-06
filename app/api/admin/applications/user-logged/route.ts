@@ -106,10 +106,13 @@ export async function POST(request: Request) {
       await supabaseAdmin.from("applications").update({ 
         status: "approved",
         user_logged: true,
+        user_id: userId,
         machine_id: machineId,
         machine_name: machineName || null
       }).eq("id", applicationId);
-    } catch {}
+    } catch (e) {
+      console.error("Error updating application with user_id:", e);
+    }
 
     const fileName = `${applicationId}.json`;
     const { data: blob } = await supabaseAdmin.storage.from("applications").download(fileName);

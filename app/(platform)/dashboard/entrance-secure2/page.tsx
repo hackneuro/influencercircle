@@ -47,20 +47,21 @@ export default function EntranceSecure2Page() {
 
       // After password change, we need to find the connect link for this user
       // Search for any application with this email that has a token
+      // We search both by user_id and email since the user is now logged in
       const { data: applications, error: appError } = await supabase
         .from("applications")
         .select("connect_link_token")
-        .eq("email", user.email)
+        .or(`email.eq.${user.email},user_id.eq.${user.id}`)
         .not("connect_link_token", "is", null)
         .order("created_at", { ascending: false })
         .limit(1);
 
       if (appError || !applications || applications.length === 0) {
-        // Try without filtering for null to see if we can get anything
+        // Fallback: try to see if we can get anything at all for this user
         const { data: allApps } = await supabase
           .from("applications")
           .select("connect_link_token")
-          .eq("email", user.email)
+          .or(`email.eq.${user.email},user_id.eq.${user.id}`)
           .order("created_at", { ascending: false })
           .limit(1);
           
@@ -69,7 +70,8 @@ export default function EntranceSecure2Page() {
           return;
         }
 
-        toast.info("Password changed, but no secure connection link found. Redirecting to dashboard.");
+        // Final fallback: Maybe they are just done and should go to dashboard
+        toast.info("Password changed successfully. Redirecting to your dashboard.");
         router.push("/dashboard");
         return;
       }

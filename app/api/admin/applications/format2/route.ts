@@ -160,6 +160,16 @@ export async function POST(request: Request) {
     // 3. Generate Link Token
     await ensureBucket(supabaseAdmin);
     const linkToken = crypto.randomUUID();
+
+    // 4. Update user metadata with the token for easier retrieval
+    const { error: metaError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+      user_metadata: {
+        ...(authUser.user_metadata || {}),
+        connect_link_token: linkToken,
+      }
+    });
+    if (metaError) console.error("Error updating user metadata with token:", metaError);
+
     const payload = {
       applicationId,
       email,

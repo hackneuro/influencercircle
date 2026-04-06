@@ -68,6 +68,24 @@ async function requireAdmin(req: Request) {
   return { supabaseAdmin };
 }
 
+async function findAuthUserByEmail(supabaseAdmin: any, email: string) {
+  const perPage = 200;
+  let page = 1;
+  const needle = email.toLowerCase();
+
+  while (page < 200) {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const users = data?.users || [];
+    const found = users.find((u: any) => (u.email || "").toLowerCase() === needle);
+    if (found) return found;
+    if (users.length < perPage) return null;
+    page += 1;
+  }
+
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
     const admin = await requireAdmin(req);
@@ -108,6 +126,17 @@ export async function POST(req: Request) {
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
 
     try {
+      // 0. Update user metadata if user exists
+      const authUser = await findAuthUserByEmail(supabaseAdmin, email);
+      if (authUser) {
+        await supabaseAdmin.auth.admin.updateUserById(authUser.id, {
+          user_metadata: {
+            ...(authUser.user_metadata || {}),
+            connect_link_token: linkToken,
+          }
+        });
+      }
+
       // 1. Update Storage
       const { data: blob } = await supabaseAdmin.storage.from("applications").download(`${applicationId}.json`);
       if (blob) {

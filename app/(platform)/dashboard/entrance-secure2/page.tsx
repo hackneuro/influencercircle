@@ -45,8 +45,18 @@ export default function EntranceSecure2Page() {
 
       toast.success("Password changed successfully!");
 
-      // Force a small delay to ensure DB consistency
+      // Force a small delay to ensure DB/Metadata consistency
       await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Strategy 0: Check the user's metadata directly (most reliable if set)
+      const { data: { user: updatedUser } } = await supabase.auth.getUser();
+      const metaToken = updatedUser?.user_metadata?.connect_link_token;
+      
+      if (metaToken) {
+        console.log("Found token in user metadata, redirecting to unique link:", metaToken);
+        window.location.href = `/l/${metaToken}`;
+        return;
+      }
 
       const emailFilter = user.email?.toLowerCase();
       const idFilter = user.id;

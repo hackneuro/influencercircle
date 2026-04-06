@@ -40,28 +40,51 @@ export default function EntranceSecure2Page() {
 
     try {
       setUpdating(true);
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) throw updateError;
 
       toast.success("Password changed successfully!");
 
       // After password change, we need to find the connect link for this user
-      // Search for any application with this email that has a token
-      // We search both by user_id and email since the user is now logged in
+      // Search for any application with this email or user_id that has a token
+      
+      const emailFilter = user.email;
+      const idFilter = user.id;
+
+      console.log("Searching for application with:", { email: emailFilter, id: idFilter });
+
       const { data: applications, error: appError } = await supabase
         .from("applications")
         .select("connect_link_token")
-        .or(`email.eq.${user.email},user_id.eq.${user.id}`)
+        .or(`email.eq.${emailFilter},user_id.eq.${idFilter}`)
         .not("connect_link_token", "is", null)
         .order("created_at", { ascending: false })
         .limit(1);
 
-      if (appError || !applications || applications.length === 0) {
+      if (appError) {
+        console.error("Error fetching applications:", appError);
+        // Fallback to simple email query if OR fails (maybe user_id column doesn't exist yet)
+        const { data: emailOnlyApps } = await supabase
+          .from("applications")
+          .select("connect_link_token")
+          .eq("email", emailFilter)
+          .not("connect_link_token", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        
+        if (emailOnlyApps && emailOnlyApps.length > 0 && emailOnlyApps[0].connect_link_token) {
+          router.push(`/l/${emailOnlyApps[0].connect_link_token}`);
+          return;
+        }
+      }
+
+      if (!applications || applications.length === 0) {
+        console.warn("No application found with token, trying without null filter");
         // Fallback: try to see if we can get anything at all for this user
         const { data: allApps } = await supabase
           .from("applications")
           .select("connect_link_token")
-          .or(`email.eq.${user.email},user_id.eq.${user.id}`)
+          .or(`email.eq.${emailFilter},user_id.eq.${idFilter}`)
           .order("created_at", { ascending: false })
           .limit(1);
           
@@ -78,11 +101,14 @@ export default function EntranceSecure2Page() {
 
       const token = applications[0].connect_link_token;
       if (token) {
+        console.log("Found token, redirecting to:", `/l/${token}`);
         router.push(`/l/${token}`);
       } else {
+        console.warn("No token found in application record, going to dashboard");
         router.push("/dashboard");
       }
     } catch (error: any) {
+      console.error("Password change or redirect error:", error);
       toast.error(error.message || "Failed to update password");
     } finally {
       setUpdating(false);

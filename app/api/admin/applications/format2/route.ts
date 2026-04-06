@@ -37,8 +37,18 @@ async function requireAdmin(req: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (requesterProfileError) return { error: requesterProfileError.message, status: 500 as const };
-  if (requesterProfile?.role !== "admin") return { error: "Forbidden", status: 403 as const };
+  if (requesterProfileError) {
+    console.error("Error fetching admin profile:", requesterProfileError);
+  }
+  
+  const isAdmin = requesterProfile?.role === "admin" || user.user_metadata?.role === "admin";
+  
+  if (!isAdmin) {
+    return { 
+      error: `Forbidden: You do not have admin privileges. (Role in profile: ${requesterProfile?.role}, Role in metadata: ${user.user_metadata?.role})`, 
+      status: 403 as const 
+    };
+  }
 
   return { supabaseAdmin };
 }

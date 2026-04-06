@@ -48,8 +48,18 @@ async function requireAdmin(req: Request) {
     .eq("id", user.id)
     .maybeSingle();
 
-  if (requesterProfileError) return { error: requesterProfileError.message, status: 500 as const };
-  if (requesterProfile?.role !== "admin") return { error: "Forbidden", status: 403 as const };
+  if (requesterProfileError) {
+    console.error("Error fetching admin profile:", requesterProfileError);
+  }
+  
+  const isAdmin = requesterProfile?.role === "admin" || user.user_metadata?.role === "admin";
+  
+  if (!isAdmin) {
+    return { 
+      error: `Forbidden: You do not have admin privileges. (Role in profile: ${requesterProfile?.role}, Role in metadata: ${user.user_metadata?.role})`, 
+      status: 403 as const 
+    };
+  }
 
   return { supabaseAdmin };
 }
@@ -94,6 +104,7 @@ export async function POST(req: Request) {
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
 
     try {
+      // 1. Update Storage
       const { data: blob } = await supabaseAdmin.storage.from("applications").download(`${applicationId}.json`);
       if (blob) {
         const text = await blob.text();
@@ -105,7 +116,14 @@ export async function POST(req: Request) {
           upsert: true
         });
       }
-    } catch {}
+
+      // 2. Update Database Table
+      await supabaseAdmin.from("applications").update({ 
+        connect_link_token: linkToken
+      }).eq("id", applicationId);
+    } catch (e) {
+      console.error("Error updating application with link token:", e);
+    }
 
     return NextResponse.json({ success: true, token: linkToken, path: `/l/${linkToken}` });
   } catch (error: any) {

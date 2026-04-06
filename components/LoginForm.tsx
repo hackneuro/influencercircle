@@ -17,7 +17,7 @@ export default function LoginForm() {
     setLoading(true);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -27,6 +27,12 @@ export default function LoginForm() {
         }
         throw new Error(error.message || "Falha ao fazer login.");
       }
+
+      if (user?.user_metadata?.onboarding_format === "format2") {
+        router.push("/dashboard/entrance-secure2");
+        return;
+      }
+
       router.push("/dashboard");
     } catch (err: any) {
       setMessage(err.message ?? "Falha ao fazer login.");

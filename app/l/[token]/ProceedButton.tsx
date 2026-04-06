@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function ProceedButton(props: { token: string; proceedUrl?: string }) {
-  const { token, proceedUrl } = props;
+export default function ProceedButton(props: { token: string; proceedUrl?: string; onboardingFormat?: string }) {
+  const { token, proceedUrl, onboardingFormat } = props;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,6 +12,12 @@ export default function ProceedButton(props: { token: string; proceedUrl?: strin
     setLoading(true);
     setError(null);
     try {
+      // If it's format 2, we go to the framed proceed page
+      if (onboardingFormat === "format2") {
+        window.location.href = `/l/${token}/proceed`;
+        return;
+      }
+
       try {
         const statusRes = await fetch(`/api/public/connect-link-status?token=${encodeURIComponent(token)}`, {
           method: "GET"

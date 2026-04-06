@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy, Trash2, Link2, Tag } from "lucide-react";
+import { Loader2, FileText, ExternalLink, Check, X, Search, Key, Copy, Trash2, Link2, Tag, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,8 @@ interface Application {
   referrer_name?: string | null;
   referrer_username?: string | null;
   user_logged?: boolean;
+  onboarding_format?: string | null;
+  connect_link_token?: string | null;
   machine_id?: string | null;
   machine_name?: string | null;
   campaigns?: {
@@ -46,6 +48,7 @@ export default function AdminApplicationsPage() {
   const [search, setSearch] = useState("");
 
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+  const [selectedAppFormat2, setSelectedAppFormat2] = useState<Application | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -63,6 +66,12 @@ export default function AdminApplicationsPage() {
   const [promoModalOpen, setPromoModalOpen] = useState(false);
   const [promoLink, setPromoLink] = useState("");
   const [promoPayload, setPromoPayload] = useState<{ email: string; name: string; phone: string } | null>(null);
+
+  const [format2ModalOpen, setFormat2ModalOpen] = useState(false);
+  const [format2Creating, setFormat2Creating] = useState(false);
+  const [format2Link, setFormat2Link] = useState("");
+  const [format2Payload, setFormat2Payload] = useState<{ email: string; name: string; phone: string } | null>(null);
+  const [format2ProceedUrl, setFormat2ProceedUrl] = useState("");
 
   const [machineNames, setMachineNames] = useState<Record<string, string>>({});
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -308,6 +317,85 @@ export default function AdminApplicationsPage() {
     setPassword("");
     setConfirmPassword("");
     setIsModalOpen(true);
+  };
+
+  const handleFormat2Click = (e: React.MouseEvent, app: Application) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedAppFormat2(app);
+    setPassword("");
+    setConfirmPassword("");
+    setFormat2ProceedUrl("");
+    setFormat2ModalOpen(true);
+  };
+
+  const handleFormat2Confirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAppFormat2) return;
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!format2ProceedUrl.trim()) {
+      toast.error("Proceed URL is required");
+      return;
+    }
+
+    try {
+      setFormat2Creating(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) throw new Error("Not authenticated");
+
+      const response = await fetch('/api/admin/applications/format2', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          applicationId: selectedAppFormat2.id,
+          email: selectedAppFormat2.email,
+          password: password,
+          firstName: selectedAppFormat2.first_name,
+          lastName: selectedAppFormat2.last_name,
+          role: selectedAppFormat2.role,
+          proceedUrl: format2ProceedUrl.trim()
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create Format 2 onboarding');
+      }
+
+      setApplications(apps => apps.map(app => 
+        app.id === selectedAppFormat2.id ? { ...app, status: 'approved' } : app
+      ));
+      
+      const url = `${window.location.origin}${result.path}`;
+      setFormat2Link(url);
+      setFormat2Payload({ 
+        email: selectedAppFormat2.email, 
+        name: `${selectedAppFormat2.first_name} ${selectedAppFormat2.last_name}`.trim(), 
+        phone: String(selectedAppFormat2.mobile || "").replace(/\D/g, "")
+      });
+
+      toast.success(`User created for ${selectedAppFormat2.email}`);
+    } catch (error: any) {
+      console.error('Error creating Format 2 onboarding:', error);
+      toast.error(error.message || 'Failed to create Format 2 onboarding');
+    } finally {
+      setFormat2Creating(false);
+    }
   };
 
   const handleUserLoggedConfirm = async (e: React.FormEvent) => {
@@ -613,6 +701,15 @@ export default function AdminApplicationsPage() {
                           LINK
                         </button>
                         <button
+                          onClick={(e) => handleFormat2Click(e, app)}
+                          disabled={format2Creating || linkCreating || promoCreating}
+                          className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                          title="Format 2 Entering"
+                        >
+                          <UserPlus className="h-3.5 w-3.5" />
+                          Format 2 Entering
+                        </button>
+                        <button
                           onClick={() => handleUserLoggedClick(app)}
                           className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
                           title="Create User (User logged)"
@@ -771,6 +868,158 @@ export default function AdminApplicationsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {format2ModalOpen && selectedAppFormat2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-xl p-6 m-4">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Format 2 Entering</h2>
+            
+            {!format2Link ? (
+              <>
+                <p className="text-slate-500 mb-6 text-sm">
+                  Create the user account in Supabase for <strong>{selectedAppFormat2.email}</strong>.
+                  <br/><br/>
+                  <span className="text-amber-600 font-medium">Important:</span> The user will need this password to log in. Please copy and send it to them securely.
+                </p>
+                
+                <form onSubmit={handleFormat2Confirm} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none pr-10 font-mono"
+                          placeholder="Password (min 6 chars)"
+                          required
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(password);
+                            toast.success("Password copied");
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100 transition-colors"
+                          title="Copy Password"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Confirm Password
+                      </label>
+                      <input
+                        type="text"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                        placeholder="Confirm password"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">Proceed URL (user is redirected after clicking Proceed)</label>
+                    <input
+                      value={format2ProceedUrl}
+                      onChange={(e) => setFormat2ProceedUrl(e.target.value)}
+                      placeholder="https://www.influencercircle.net/..."
+                      required
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+                    />
+                    <div className="text-xs text-slate-500">
+                      Allowed: https://*.influencercircle.net/... or a relative path
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormat2ModalOpen(false);
+                        setSelectedAppFormat2(null);
+                      }}
+                      className="px-4 py-2 text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-sm font-medium"
+                      disabled={format2Creating}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2 text-sm font-medium"
+                      disabled={format2Creating}
+                    >
+                      {format2Creating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Format 2 Account'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <div className="space-y-6">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-sm text-emerald-800">
+                  User created successfully! Now copy the generated link below.
+                </div>
+
+                {format2Payload && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm">
+                    <pre className="whitespace-pre-wrap break-words text-slate-800">{JSON.stringify({ ...format2Payload, channel: "linkedin", format: "format2" }, null, 2)}</pre>
+                  </div>
+                )}
+
+                <div className="relative">
+                  <input
+                    value={format2Link}
+                    readOnly
+                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none pr-10 font-mono text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(format2Link);
+                      toast.success("Link copied");
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-blue-600 rounded-md hover:bg-slate-100 transition-colors"
+                    title="Copy Link"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormat2ModalOpen(false);
+                      setSelectedAppFormat2(null);
+                      setFormat2Link("");
+                    }}
+                    className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

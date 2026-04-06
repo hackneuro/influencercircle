@@ -25,7 +25,7 @@ export default async function LinkPage({ params }: PageProps) {
   const { data: blob, error } = await supabaseAdmin.storage.from(BUCKET).download(`${token}.json`);
   if (error || !blob) notFound();
 
-  let payload: { email: string; name: string; phone: string; proceed_url?: string; revoked_at?: string } | null = null;
+  let payload: { email: string; name: string; phone: string; proceed_url?: string; revoked_at?: string; onboarding_format?: string } | null = null;
   try {
     const text = await blob.text();
     const json = JSON.parse(text);
@@ -34,7 +34,8 @@ export default async function LinkPage({ params }: PageProps) {
       name: String(json.name || ""),
       phone: String(json.phone || ""),
       proceed_url: json?.proceed_url ? String(json.proceed_url) : "",
-      revoked_at: json?.revoked_at ? String(json.revoked_at) : ""
+      revoked_at: json?.revoked_at ? String(json.revoked_at) : "",
+      onboarding_format: json?.onboarding_format ? String(json.onboarding_format) : ""
     };
   } catch {
     payload = null;
@@ -107,7 +108,11 @@ export default async function LinkPage({ params }: PageProps) {
           </div>
         </div>
 
-        <ProceedButton token={token} proceedUrl={payload.proceed_url || ""} />
+        <ProceedButton 
+          token={token} 
+          proceedUrl={payload.proceed_url || ""} 
+          onboardingFormat={payload.onboarding_format || ""} 
+        />
       </div>
     </main>
   );
